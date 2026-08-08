@@ -6,9 +6,11 @@ struct CoStartView: View {
     @EnvironmentObject private var loc: LocalizationManager
     @Environment(\.dismiss) private var dismiss
     let step: NextStepModel
+    var initialMode: CoStartRoomType? = nil
 
     @State private var room: CoStartRoomModel?
     @State private var session: TimerSessionModel?
+    @State private var didApplyInitialMode = false
 
     var body: some View {
         NavigationStack {
@@ -29,6 +31,11 @@ struct CoStartView: View {
                     Button(L("common.close")) { dismiss() }
                 }
             }
+        }
+        .task {
+            guard !didApplyInitialMode, let initialMode else { return }
+            didApplyInitialMode = true
+            start(type: initialMode)
         }
     }
 
@@ -213,11 +220,16 @@ struct CoStartRoomView: View {
     private func inviteSection(_ link: URL) -> some View {
         VStack(spacing: Theme.spacing4) {
             Text(verbatim: L("costart.waitingForFriend")).font(.caption).foregroundStyle(.secondary)
-            Button {
-                UIPasteboard.general.string = link.absoluteString
-                copied = true
-            } label: {
-                Label(L("costart.copy"), systemImage: "doc.on.doc").font(.caption)
+            HStack(spacing: Theme.spacing12) {
+                ShareLink(item: link) {
+                    Label(L("costart.share"), systemImage: "square.and.arrow.up").font(.caption)
+                }
+                Button {
+                    UIPasteboard.general.string = link.absoluteString
+                    copied = true
+                } label: {
+                    Label(L("costart.copy"), systemImage: "doc.on.doc").font(.caption)
+                }
             }
             if copied { Text(verbatim: L("costart.copied")).font(.caption2).foregroundStyle(Theme.accent) }
         }

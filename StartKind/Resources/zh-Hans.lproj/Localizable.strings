@@ -189,6 +189,7 @@
 "costart.roomTitle" = "安静房间";
 "costart.yourStep" = "你的步骤";
 "costart.waitingForFriend" = "等待好友加入…";
+"costart.share" = "分享";
 "costart.copy" = "复制";
 "costart.copied" = "链接已复制";
 "costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤,加入。";

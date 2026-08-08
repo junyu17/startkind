@@ -92,7 +92,7 @@ final class AppEnvironment: ObservableObject {
         if !skipStoreKit {
             await entitlement.load()
         }
-        speech.requestAuthorization()
+        speech.refreshAuthorizationState()
         if !skipStoreKit {
             persistence.updateProfile(entitlement: entitlement.state)
         }
@@ -203,7 +203,12 @@ final class AppEnvironment: ObservableObject {
     }
 
     private func publishCoStartRoom(room: CoStartRoomModel, stepText: String) async {
-        guard let supabase, supabase.isAuthenticated,
+        guard let supabase else { return }
+        if !supabase.isAuthenticated {
+            try? await supabase.anonymousSignIn()
+            isSignedIn = supabase.isAuthenticated
+        }
+        guard supabase.isAuthenticated,
               let userIdString = try? await supabase.getCurrentUserId() else { return }
         try? await supabase.upsert(table: "co_start_rooms", rows: [[
             "id": room.id.uuidString,

@@ -46,6 +46,28 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.buttons["start.submit"].waitForExistence(timeout: 15), "Submit button should exist at launch")
     }
 
+    func testVoiceTapDoesNotTerminateApp() throws {
+        let app = launch()
+        let voice = app.buttons["start.voice"]
+        XCTAssertTrue(voice.waitForExistence(timeout: 15), "Voice button should exist")
+        voice.tap()
+        sleep(2)
+        XCTAssertEqual(app.state, .runningForeground, "Voice tap should not crash or terminate the app")
+    }
+
+    func testFriendCoStartEntryVisibleAfterInput() throws {
+        let app = launch()
+        let input = app.textFields["start.input"].exists
+            ? app.textFields["start.input"]
+            : app.textViews["start.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "Capture field should exist")
+        input.tap()
+        input.typeText("I need someone to sit with me while I start my bill")
+        let friendInvite = app.buttons["start.costart.friend"]
+        XCTAssertTrue(friendInvite.waitForExistence(timeout: 5), "Friend co-start should be visible from Start")
+        XCTAssertTrue(friendInvite.isEnabled, "Friend co-start should enable after entering a step")
+    }
+
     func testCoreLoopCaptureToTimerToDone() throws {
         let app = launch()
 

@@ -18,6 +18,7 @@ struct StartView: View {
 
     @State private var timerSession: TimerSessionModel?
     @State private var showCoStart = false
+    @State private var coStartInitialMode: CoStartRoomType?
 
     var body: some View {
         NavigationStack {
@@ -37,7 +38,11 @@ struct StartView: View {
                             onStart: { startTimer(for: step) },
                             onShrink: { shrink(step) },
                             onSkip: { skip(step) },
-                            onCoStart: { currentStep = step; showCoStart = true }
+                            onCoStart: {
+                                currentStep = step
+                                coStartInitialMode = nil
+                                showCoStart = true
+                            }
                         )
                     } else {
                         emptyHint
@@ -75,7 +80,7 @@ struct StartView: View {
         }
         .sheet(isPresented: $showCoStart) {
             if let step = currentStep {
-                CoStartView(step: step)
+                CoStartView(step: step, initialMode: coStartInitialMode)
                     .environmentObject(env)
             }
         }
@@ -120,6 +125,7 @@ struct StartView: View {
         VStack(spacing: Theme.spacing12) {
             voiceButton
             captureField
+            quickFriendCoStartButton
         }
         .startKindCard()
     }
@@ -178,6 +184,37 @@ struct StartView: View {
             .accessibilityLabel(Text(verbatim: L("start.text.submit")))
             .accessibilityIdentifier("start.submit")
         }
+    }
+
+    private var quickFriendCoStartButton: some View {
+        Button {
+            Task { await startFriendCoStart() }
+        } label: {
+            HStack(spacing: Theme.spacing12) {
+                Image(systemName: "link")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 38, height: 38)
+                    .foregroundStyle(canCoStart ? Theme.accent : Color.secondary)
+                    .background(canCoStart ? Theme.softAccent : Color.secondary.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                Text(verbatim: L("costart.friend"))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(canCoStart ? Theme.ink : Color.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, Theme.spacing12)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+            .background(Theme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(Theme.line, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(!canCoStart || isLoading)
+        .accessibilityIdentifier("start.costart.friend")
     }
 
     private var categoryChips: some View {
@@ -253,18 +290,59 @@ struct StartView: View {
         !inputText.trimmingCharacters(in: .whitespaces).isEmpty || selectedCategory != nil
     }
 
+    private var canCoStart: Bool {
+        currentStep != nil || canSubmit
+    }
+
     // MARK: - Actions
 
     private func toggleVoice() {
         if env.speech.isListening {
             env.speech.stop()
         } else {
-            do {
-                try env.speech.start()
-            } catch {
-                errorMessage = error.localizedDescription
+            Task {
+                do {
+                    try await env.speech.start()
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
+    }
+
+    private func startFriendCoStart() async {
+        if let step = currentStep {
+            coStartInitialMode = .friendLink
+            currentStep = step
+            showCoStart = true
+            return
+        }
+        let raw = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty || selectedCategory != nil else { return }
+        guard env.canGenerateStep else {
+            paywallReason = .stepLimit
+            showPaywall = true
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        do {
+            let step = try await env.generateNextStep(input: captureInput(raw: raw))
+            currentStep = step
+            rescheduleMessage = nil
+            showPlan = false
+            coStartInitialMode = .friendLink
+            showCoStart = true
+        } catch let usageError as UsageError {
+            switch usageError {
+            case .stepLimitReached: paywallReason = .stepLimit
+            case .adminLimitReached: paywallReason = .adminLimit
+            }
+            showPaywall = true
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
+        }
+        isLoading = false
     }
 
     private func generate() async {
@@ -277,16 +355,8 @@ struct StartView: View {
         }
         isLoading = true
         errorMessage = nil
-        let text = raw.isEmpty ? (selectedCategory?.displayName ?? "") : raw
-        let source: CaptureSource = raw.isEmpty ? .manual : lastSource
-        let input = CaptureInput(
-            rawText: text,
-            source: source,
-            preferredCategory: selectedCategory,
-            language: env.currentLanguage
-        )
         do {
-            currentStep = try await env.generateNextStep(input: input)
+            currentStep = try await env.generateNextStep(input: captureInput(raw: raw))
             rescheduleMessage = nil
             showPlan = false
         } catch let usageError as UsageError {
@@ -299,6 +369,17 @@ struct StartView: View {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
         }
         isLoading = false
+    }
+
+    private func captureInput(raw: String) -> CaptureInput {
+        let text = raw.isEmpty ? (selectedCategory?.displayName ?? "") : raw
+        let source: CaptureSource = raw.isEmpty ? .manual : lastSource
+        return CaptureInput(
+            rawText: text,
+            source: source,
+            preferredCategory: selectedCategory,
+            language: env.currentLanguage
+        )
     }
 
     private func startTimer(for step: NextStepModel) {

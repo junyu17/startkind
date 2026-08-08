@@ -189,6 +189,7 @@
 "costart.roomTitle" = "Quiet room";
 "costart.yourStep" = "Your step";
 "costart.waitingForFriend" = "Waiting for your friend…";
+"costart.share" = "Share";
 "costart.copy" = "Copy";
 "costart.copied" = "Link copied";
 "costart.guestSubtitle" = "A friend invited you to co-start. State one small step and join.";
