@@ -17,10 +17,8 @@ final class StoreKitTests: XCTestCase {
 
     @discardableResult
     private func makeEnv() async throws -> AppEnvironment {
-        let configURL = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent("Products.storekit")
-        let s = try SKTestSession(contentsOf: configURL)
+        XCTAssertNotNil(Bundle.main.url(forResource: "Products", withExtension: "storekit"))
+        let s = try SKTestSession(configurationFileNamed: "Products")
         s.disableDialogs = true
         s.clearTransactions()
         session = s

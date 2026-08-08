@@ -33,6 +33,13 @@ Launch iOS first and validate market demand before starting Android development.
 - Trial: 7 days free trial for Plus
 - No lifetime plan
 
+## App Store Connect Subscription Products
+
+| Plan | Apple ID | Product ID | Price |
+|---|---:|---|---:|
+| StartKind Plus monthly | 6799376244 | `StartKind_plus_monthly` | $9.99/month |
+| StartKind Plus annual | 6799377026 | `StartKind_plus_yearly` | $89.99/year |
+
 ## Apple Developer Details
 
 - Apple App ID: 6799113108

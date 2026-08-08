@@ -1,6 +1,6 @@
 # App Store Metadata Draft
 
-Last updated: 2026-08-07
+Last updated: 2026-08-08
 
 ## App Name
 
@@ -32,8 +32,10 @@ Jun Yu
 
 ## Subscription Products
 
-- StartKind Plus Monthly: $9.99/month
-- StartKind Plus Annual: $89.99/year
+| Plan | Apple ID | Product ID | Price |
+|---|---:|---|---:|
+| StartKind Plus Monthly | 6799376244 | `StartKind_plus_monthly` | $9.99/month |
+| StartKind Plus Annual | 6799377026 | `StartKind_plus_yearly` | $89.99/year |
 
 ## Medical Disclaimer
 
@@ -42,4 +44,3 @@ StartKind is not a medical device and does not diagnose, treat, or cure ADHD or 
 ## Privacy Summary
 
 StartKind stores basic Free activity locally. Plus features may sync task data and process user-provided text, screenshots, photos, calendar, or email content to generate next steps. Users should be able to delete their account and data.
-

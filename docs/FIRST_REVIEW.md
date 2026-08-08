@@ -66,16 +66,24 @@ Fixed in:
 ## Remaining App Store Blockers
 
 1. Confirm App Store Connect bundle ID matches `com.startkind.app` for Apple App ID `6799113108`.
-2. Create real App Store subscription products:
-   - `StartKind_plus_monthly` at `$9.99/month`
-   - `StartKind_plus_yearly` at `$89.99/year`
-3. Sandbox-test StoreKit purchases, restore, expiry, grace period, and trial eligibility.
-4. Build privacy/support homepage with contact email `billy.yu@me.com`.
-5. Complete app icon and App Store screenshots.
-6. Run a real-device pass for microphone/speech permission and small-screen layout.
-7. Decide whether Supabase/AI features stay stubbed for v1 or are implemented before submission.
+2. Sandbox-test StoreKit purchases, restore, expiry, grace period, and trial eligibility.
+3. Complete App Store screenshots.
+4. Run a real-device pass for microphone/speech permission and small-screen layout.
+5. Decide whether Supabase/AI features stay stubbed for v1 or are implemented before submission.
+
+Subscription products now recorded:
+
+| Plan | Apple ID | Product ID | Price |
+|---|---:|---|---:|
+| StartKind Plus Monthly | 6799376244 | `StartKind_plus_monthly` | $9.99/month |
+| StartKind Plus Annual | 6799377026 | `StartKind_plus_yearly` | $89.99/year |
 
 ## Verification
+
+Current addendum, 2026-08-08:
+
+- Non-StoreKit suite: 80 unit tests + 8 UI tests passed.
+- StoreKit local suite: 5 tests executed; 1 free-state test passed; 4 product/purchase/restore test methods failed because `SKTestSession` could not activate `Products.storekit` (`SKInternalErrorDomain Code=3`).
 
 Command:
 
@@ -93,4 +101,3 @@ Result:
 ## Notes
 
 The project directory is on a case-insensitive filesystem, so `/Users/jun/Documents/project/startkind` and `/Users/jun/Documents/Project/startkind` resolve to the same location. The canonical path in docs should be lowercase `project`.
-

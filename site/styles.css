@@ -176,12 +176,23 @@ article p, .icons p, .policy p {
   align-items: center;
 }
 
+.icon-gallery {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
 .icons img {
   width: 100%;
   height: auto;
   border-radius: 8px;
   border: 1px solid var(--line);
   background: white;
+}
+
+.icons .selected-icon {
+  box-shadow: 0 16px 36px rgba(32, 39, 44, 0.12);
 }
 
 footer {
@@ -222,6 +233,10 @@ footer {
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .icon-gallery {
     grid-template-columns: 1fr;
   }
 }

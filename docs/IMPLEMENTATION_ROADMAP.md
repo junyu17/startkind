@@ -45,8 +45,8 @@ Deliverables:
 
 - StoreKit 2 subscriptions
 - Product IDs:
-  - `StartKind_plus_monthly`
-  - `StartKind_plus_yearly`
+  - Monthly: Apple ID `6799376244`, Product ID `StartKind_plus_monthly`
+  - Annual: Apple ID `6799377026`, Product ID `StartKind_plus_yearly`
 - Paywall
 - Restore purchases
 - Entitlement state

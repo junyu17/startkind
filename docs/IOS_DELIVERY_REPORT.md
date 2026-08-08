@@ -1,9 +1,9 @@
 # StartKind iOS — Delivery & QA Report
 
-**Date:** 2026-08-07
+**Date:** 2026-08-08
 **Platform:** iOS (native), Swift 6, SwiftUI, SwiftData, StoreKit 2, Speech
 **Toolchain:** Xcode 26.6, Swift 6.3.3, iPhone 17 Pro Simulator (iOS 26.5)
-**Status:** Core execution loop complete, builds clean, 71 tests pass
+**Status:** Core execution loop complete; non-StoreKit suite passes; StoreKit local product resolution still blocking
 
 ---
 
@@ -22,7 +22,7 @@ is deployed (Milestones 3/6 in `docs/IMPLEMENTATION_ROADMAP.md`).
 
 ## 2. Deliverables
 
-**37 Swift files, ~4,340 lines**, plus localized strings, assets, StoreKit config.
+**37 Swift files, ~4,340 lines**, plus localized strings, App Icon asset, StoreKit config, and GitHub Pages site.
 
 | Layer | Files |
 |---|---|
@@ -32,7 +32,7 @@ is deployed (Milestones 3/6 in `docs/IMPLEMENTATION_ROADMAP.md`).
 | Services | `PersistenceService`, `EntitlementService` (StoreKit 2), `SpeechService`, `AIClient` (local+cloud), `SyncService` (local+cloud), `UsageTracker` |
 | UI | `RootView` (4 tabs), `StartView` + `NextStepCard`, `TimerView`, `RecoverView`, `PatternsView`, `SettingsView`, `PaywallView`, `SharedUI`, `Theme`, `Localization` |
 | Resources | `en.lproj/Localizable.strings`, `zh-Hans.lproj/Localizable.strings`, `Assets.xcassets`, `Products.storekit` |
-| Tests | 8 unit-test files (65 tests) + 1 UI-test file (5 tests) |
+| Tests | unit tests (85 tests, including 5 StoreKit tests) + UI tests (8 tests) |
 | Project | `project.yml` (xcodegen), regenerates `StartKind.xcodeproj` |
 
 ## 3. Requirement Match
@@ -62,24 +62,26 @@ is deployed (Milestones 3/6 in `docs/IMPLEMENTATION_ROADMAP.md`).
 
 **Build (Debug, iPhone 17 Pro simulator):** `** BUILD SUCCEEDED **` — 0 errors, 1 irrelevant warning (AppIntents metadata, framework not used).
 
-**Tests (full suite):** `** TEST SUCCEEDED **`
+**Tests:** non-StoreKit suite succeeds; StoreKit local product tests fail and must be resolved before App Store submission.
 
 | Suite | Tests | Failures |
 |---|---|---|
-| `StartKindTests` (unit) | 84 (4 skipped¹) | 0 |
+| `StartKindTests` excluding `StoreKitTests` | 80 | 0 |
 | `StartKindUITests` (UI) | 8 | 0 |
-| **Total** | **92 (4 skipped)** | **0** |
+| `StartKindTests/StoreKitTests` | 5 | 4 failing test methods |
 
-¹ StoreKit purchase/restore tests skip locally because the hand-written
-`Products.storekit` config's products don't surface via `Product.products`
-(regenerate the file in Xcode's StoreKit Configuration editor, or verify via
-App Store sandbox). The entitlement logic + free-state test still run.
+Current StoreKit failure: `SKTestSession` logs `SKInternalErrorDomain Code=3`
+when trying to activate the local `Products.storekit` configuration. As a result,
+`Product.products(for:)` returns no local products and purchase/restore tests cannot
+exercise the Plus flow in simulator. This is no longer skipped; it is tracked as a
+real blocker for local QA or sandbox verification.
 
 Commands used:
 ```bash
 xcodegen generate
 xcodebuild build  -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build
-xcodebuild test   -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build
+xcodebuild test   -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build -skip-testing:StartKindTests/StoreKitTests
+xcodebuild test   -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build -only-testing:StartKindTests/StoreKitTests
 ```
 
 Unit coverage: AI behavior spec (8 scenarios), NextStepEngine, TaskShrinker, Rescheduler,
@@ -155,9 +157,11 @@ All core-loop, Free, Plus, data-model, UI, and localization requirements met.
    `startkind://join?room=<id>`. Near-real-time participant status via 3s polling.
    `coStartMode` feeds Time Calibration. Follow-up: true websocket realtime (vs
    polling) and automated tests for the network guest path (currently review-tested).
-6. **StoreKit tested locally only.** `Products.storekit` config validated product IDs and
-   flow; sandbox/App Review subscription verification not performed (requires App Store
-   Connect setup + explicit user confirmation per safety boundaries).
+6. **StoreKit local QA is still blocked.** `Products.storekit` now records the App
+   Store Connect subscription Apple IDs and product IDs, but local StoreKitTest cannot
+   activate the configuration in the iOS 26.5 simulator (`SKInternalErrorDomain Code=3`).
+   Sandbox/App Review subscription verification is still required with the App Store
+   Connect products and a signed build.
 7. **App Store submission, paid API activation, and production DB migration were NOT done**
    (prohibited without explicit user confirmation per `AGENTS.md`).
 
@@ -171,18 +175,19 @@ All P1/P2 findings from the first review are verified present in the current
 - P2 UI tests isolated (forced `-AppleLanguages (en)` + inMemory store for test launches).
 - P2 Docs are iOS-first (Android described as deferred, not parallel).
 
-Remaining-blocker status: bundle ID `com.startkind.app` ✅; subscription product IDs
-`StartKind_plus_monthly`/`StartKind_plus_yearly` ✅; Supabase/AI implemented (not
-stubbed) ✅; privacy/support page ✅. Still user-gated: StoreKit sandbox test on a
-real device, app icon image, App Store screenshots, real-device mic/speech +
-small-screen pass, and the actual submission.
+Remaining-blocker status: bundle ID `com.startkind.app` ✅; subscription products
+recorded ✅ (`6799376244` / `StartKind_plus_monthly`, `6799377026` /
+`StartKind_plus_yearly`); Supabase/AI implemented (not stubbed) ✅; privacy/support
+page ✅; selected App Icon asset ✅. Still required: StoreKit local/sandbox purchase
+verification, App Store screenshots, real-device mic/speech + small-screen pass, and
+the actual submission.
 
 ## 7. What Was Not Tested & Why
 
 - **Real device / TestFlight:** no provisioned device in this environment; simulator only.
-- **StoreKit sandbox purchases:** require App Store Connect + signed build; used local
-  `.storekit` config instead. Restore/expired-entitlement UI is implemented but not
-  sandbox-verified.
+- **StoreKit purchases:** local StoreKitTest currently fails to surface the configured
+  products; sandbox purchase/restore verification also remains pending and requires a
+  signed build against App Store Connect.
 - **Co-Start flows:** AI quiet + friend-link host flow + timer/check-in are unit-tested
   (co-start timer mode, calibration impact). Guest join (anonymous auth) + participant
   polling are implemented and review-tested; the live network guest path has no
@@ -200,12 +205,12 @@ small-screen pass, and the actual submission.
 |---|---|
 | 0 Project setup | ✅ Done |
 | 1 Free core loop | ✅ Done & tested |
-| 2 Plus subscription (StoreKit 2) | ✅ Done (local config); sandbox verification pending |
+| 2 Plus subscription (StoreKit 2) | ⚠️ Wired; product IDs recorded; local/sandbox purchase verification pending |
 | 3 Supabase sync + AI proxy | ⏳ Protocol + local fallback only |
 | 4 Admin Task Reader | ✅ Local parser; cloud deep-parse pending (M3) |
 | 5 Personal Execution Model | ✅ Local calibration + insights; cloud sync of calibration profiles (LWW) |
 | 6 Co-Start | ✅ AI quiet + friend invite + guest join (anonymous) + 25-min room + end check-in + 3s polling; websocket realtime follow-up |
-| 7 Release readiness | ⚠️ Privacy/support page done; app icon, screenshots, real-device pass, submission pending (user-gated) |
+| 7 Release readiness | ⚠️ Privacy/support page and app icon done; screenshots, StoreKit verification, real-device pass, submission pending |
 
 ## 9. How to Regenerate & Run
 

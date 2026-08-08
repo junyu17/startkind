@@ -1,6 +1,6 @@
 # Subscription Strategy
 
-Last updated: 2026-08-07
+Last updated: 2026-08-08
 
 ## Final Pricing
 
@@ -90,5 +90,7 @@ StartKind is an execution assistant for adults who know what needs to be done bu
 
 Use these for App Store Connect. Future Play Console product IDs should mirror them unless Google Play constraints require changes:
 
-- `StartKind_plus_monthly`
-- `StartKind_plus_yearly`
+| Plan | Apple ID | Product ID | Price | Billing Period |
+|---|---:|---|---:|---|
+| StartKind Plus Monthly | 6799376244 | `StartKind_plus_monthly` | $9.99 | Monthly |
+| StartKind Plus Annual | 6799377026 | `StartKind_plus_yearly` | $89.99 | Annual |
