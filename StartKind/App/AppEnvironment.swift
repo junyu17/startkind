@@ -70,8 +70,7 @@ final class AppEnvironment: ObservableObject {
         self.rescheduler = Rescheduler()
         self.calibrator = TimeCalibrator()
         let launchArgs = ProcessInfo.processInfo.arguments
-        self.hasStarted = launchArgs.contains("-UITEST")
-            || (!launchArgs.contains("-UITEST_AUTH") && UserDefaults.standard.bool(forKey: "sk_has_started"))
+        self.hasStarted = !launchArgs.contains("-UITEST_AUTH")
 
         // Keep the persisted profile entitlement in sync with StoreKit.
         entitlement.$state
