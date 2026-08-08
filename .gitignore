@@ -9,6 +9,7 @@ supabase/.temp/
 build/
 StartKind.xcodeproj/
 *.xcuserdata
+.DS_Store
 
 # Local agent scratch
 .pi-subagents/

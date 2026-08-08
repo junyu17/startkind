@@ -3,7 +3,7 @@
 **Date:** 2026-08-08
 **Platform:** iOS (native), Swift 6, SwiftUI, SwiftData, StoreKit 2, Speech
 **Toolchain:** Xcode 26.6, Swift 6.3.3, iPhone 17 Pro Simulator (iOS 26.5)
-**Status:** Core execution loop complete; non-StoreKit suite passes; StoreKit local product resolution still blocking
+**Status:** Core execution loop complete; StoreKit products resolve under `ren.startkind`; purchase transaction verification still needs sandbox/device coverage
 
 ---
 
@@ -62,19 +62,21 @@ is deployed (Milestones 3/6 in `docs/IMPLEMENTATION_ROADMAP.md`).
 
 **Build (Debug, iPhone 17 Pro simulator):** `** BUILD SUCCEEDED **` — 0 errors, 1 irrelevant warning (AppIntents metadata, framework not used).
 
-**Tests:** non-StoreKit suite succeeds; StoreKit local product tests fail and must be resolved before App Store submission.
+**Tests:** non-StoreKit suite succeeds; StoreKit local product loading succeeds under `ren.startkind`; purchase transaction tests are skipped on the available iOS 26.5 simulator because StoreKitTest off-device purchase returns `notEntitled`.
 
 | Suite | Tests | Failures |
 |---|---|---|
 | `StartKindTests` excluding `StoreKitTests` | 80 | 0 |
 | `StartKindUITests` (UI) | 8 | 0 |
-| `StartKindTests/StoreKitTests` | 5 | 4 failing test methods |
+| `StartKindTests/StoreKitTests` | 5 | 0 failures, 3 purchase tests skipped |
 
-Current StoreKit failure: `SKTestSession` logs `SKInternalErrorDomain Code=3`
-when trying to activate the local `Products.storekit` configuration. As a result,
-`Product.products(for:)` returns no local products and purchase/restore tests cannot
-exercise the Plus flow in simulator. This is no longer skipped; it is tracked as a
-real blocker for local QA or sandbox verification.
+Current StoreKit status: switching the app Bundle ID to `ren.startkind` fixed local
+product resolution. `Product.products(for:)` now returns both Plus products in
+StoreKitTests. Automated purchase tests still cannot complete on the installed iOS
+26.5 simulator: `SKTestSession.buyProduct(identifier:)` returns `notEntitled` in
+off-device buy mode, so those transaction tests are explicitly skipped and must be
+covered by an iOS runtime where StoreKitTest purchase works, or by real-device
+sandbox/TestFlight verification.
 
 Commands used:
 ```bash
@@ -157,11 +159,12 @@ All core-loop, Free, Plus, data-model, UI, and localization requirements met.
    `startkind://join?room=<id>`. Near-real-time participant status via 3s polling.
    `coStartMode` feeds Time Calibration. Follow-up: true websocket realtime (vs
    polling) and automated tests for the network guest path (currently review-tested).
-6. **StoreKit local QA is still blocked.** `Products.storekit` now records the App
-   Store Connect subscription Apple IDs and product IDs, but local StoreKitTest cannot
-   activate the configuration in the iOS 26.5 simulator (`SKInternalErrorDomain Code=3`).
-   Sandbox/App Review subscription verification is still required with the App Store
-   Connect products and a signed build.
+6. **StoreKit product loading is fixed; purchase QA remains gated.** `Products.storekit`
+   records the App Store Connect subscription Apple IDs and product IDs, and product
+   loading now passes after changing the app Bundle ID to `ren.startkind`. Purchase
+   automation still cannot run on the installed iOS 26.5 simulator (`notEntitled` in
+   StoreKitTest off-device buy mode). Sandbox/App Review subscription verification is
+   still required with the App Store Connect products and a signed build.
 7. **App Store submission, paid API activation, and production DB migration were NOT done**
    (prohibited without explicit user confirmation per `AGENTS.md`).
 
@@ -175,19 +178,21 @@ All P1/P2 findings from the first review are verified present in the current
 - P2 UI tests isolated (forced `-AppleLanguages (en)` + inMemory store for test launches).
 - P2 Docs are iOS-first (Android described as deferred, not parallel).
 
-Remaining-blocker status: bundle ID `com.startkind.app` ✅; subscription products
+Remaining-blocker status: bundle ID `ren.startkind` ✅; subscription products
 recorded ✅ (`6799376244` / `StartKind_plus_monthly`, `6799377026` /
 `StartKind_plus_yearly`); Supabase/AI implemented (not stubbed) ✅; privacy/support
-page ✅; selected App Icon asset ✅. Still required: StoreKit local/sandbox purchase
-verification, App Store screenshots, real-device mic/speech + small-screen pass, and
-the actual submission.
+page ✅; selected App Icon asset ✅; StoreKit product loading ✅. Still required:
+StoreKit purchase/restore verification on a working StoreKitTest runtime or real
+App Store sandbox/TestFlight, App Store screenshots, real-device mic/speech +
+small-screen pass, and the actual submission.
 
 ## 7. What Was Not Tested & Why
 
 - **Real device / TestFlight:** no provisioned device in this environment; simulator only.
-- **StoreKit purchases:** local StoreKitTest currently fails to surface the configured
-  products; sandbox purchase/restore verification also remains pending and requires a
-  signed build against App Store Connect.
+- **StoreKit purchases:** local StoreKitTest surfaces the configured products, but
+  purchase transactions are skipped on the installed iOS 26.5 simulator because
+  off-device buy mode returns `notEntitled`; sandbox purchase/restore verification
+  remains pending and requires a signed build against App Store Connect.
 - **Co-Start flows:** AI quiet + friend-link host flow + timer/check-in are unit-tested
   (co-start timer mode, calibration impact). Guest join (anonymous auth) + participant
   polling are implemented and review-tested; the live network guest path has no
@@ -205,7 +210,7 @@ the actual submission.
 |---|---|
 | 0 Project setup | ✅ Done |
 | 1 Free core loop | ✅ Done & tested |
-| 2 Plus subscription (StoreKit 2) | ⚠️ Wired; product IDs recorded; local/sandbox purchase verification pending |
+| 2 Plus subscription (StoreKit 2) | ⚠️ Wired; product IDs load locally; purchase/restore verification pending |
 | 3 Supabase sync + AI proxy | ⏳ Protocol + local fallback only |
 | 4 Admin Task Reader | ✅ Local parser; cloud deep-parse pending (M3) |
 | 5 Personal Execution Model | ✅ Local calibration + insights; cloud sync of calibration profiles (LWW) |

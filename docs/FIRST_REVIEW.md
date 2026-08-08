@@ -65,7 +65,7 @@ Fixed in:
 
 ## Remaining App Store Blockers
 
-1. Confirm App Store Connect bundle ID matches `com.startkind.app` for Apple App ID `6799113108`.
+1. Confirm App Store Connect bundle ID matches `ren.startkind` for Apple App ID `6799113108`.
 2. Sandbox-test StoreKit purchases, restore, expiry, grace period, and trial eligibility.
 3. Complete App Store screenshots.
 4. Run a real-device pass for microphone/speech permission and small-screen layout.
@@ -83,7 +83,7 @@ Subscription products now recorded:
 Current addendum, 2026-08-08:
 
 - Non-StoreKit suite: 80 unit tests + 8 UI tests passed.
-- StoreKit local suite: 5 tests executed; 1 free-state test passed; 4 product/purchase/restore test methods failed because `SKTestSession` could not activate `Products.storekit` (`SKInternalErrorDomain Code=3`).
+- StoreKit local suite after switching Bundle ID to `ren.startkind`: 5 tests executed; 2 passed (free state + product IDs); 3 purchase/entitlement transaction tests skipped because iOS 26.5 simulator returns `notEntitled` for StoreKitTest off-device purchases.
 
 Command:
 

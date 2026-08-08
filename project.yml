@@ -54,14 +54,14 @@ targets:
         NSSpeechRecognitionUsageDescription: "StartKind uses speech recognition to turn your spoken thoughts into one small next step."
         ITSAppUsesNonExemptEncryption: false
         CFBundleURLTypes:
-          - CFBundleURLName: com.startkind.app
+          - CFBundleURLName: ren.startkind
             CFBundleURLSchemes:
               - startkind
         UIRequiredDeviceCapabilities:
           - arm64
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -81,7 +81,7 @@ targets:
       - target: StartKind
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app.tests
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind.tests
         GENERATE_INFOPLIST_FILE: YES
   StartKindUITests:
     type: bundle.ui-testing
@@ -93,7 +93,7 @@ targets:
       - target: StartKind
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind.uitests
         GENERATE_INFOPLIST_FILE: YES
 schemes:
   StartKind:
