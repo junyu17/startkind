@@ -12,7 +12,7 @@ struct NextStepCard: View {
     private var proposal: NextStepProposal { step.proposal }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.spacing12) {
+        VStack(alignment: .leading, spacing: Theme.spacing16) {
             headerRow
 
             Text(verbatim: proposal.title)
@@ -22,6 +22,7 @@ struct NextStepCard: View {
 
             Text(verbatim: proposal.step)
                 .font(.body)
+                .fontWeight(.medium)
                 .fixedSize(horizontal: false, vertical: true)
 
             stopRow
@@ -52,7 +53,9 @@ struct NextStepCard: View {
                 } label: {
                     Text(verbatim: L(showPlan ? "nextstep.hidePlan" : "nextstep.showPlan"))
                         .font(.footnote)
-                        .frame(minHeight: Theme.minTapTarget)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Theme.accent)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
                 }
                 .buttonStyle(.plain)
                 .disabled(proposal.whyThisStep == nil)
@@ -80,6 +83,7 @@ struct NextStepCard: View {
             Label {
                 Text(verbatim: L(proposal.category.localizationKey))
                     .font(.caption)
+                    .fontWeight(.semibold)
             } icon: {
                 Image(systemName: proposal.category.systemImage)
             }
@@ -90,24 +94,30 @@ struct NextStepCard: View {
             if proposal.shrinkLevel != .zero {
                 Text(verbatim: L("nextstep.shrink.level"))
                     .font(.caption2)
+                    .fontWeight(.semibold)
                     .padding(.horizontal, Theme.spacing8)
                     .padding(.vertical, Theme.spacing4)
-                    .background(Theme.accent.opacity(0.15))
-                    .clipShape(Capsule())
+                    .background(Theme.softAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                     .foregroundStyle(Theme.accent)
             }
         }
     }
 
     private var stopRow: some View {
-        HStack(alignment: .top, spacing: Theme.spacing4) {
+        HStack(alignment: .top, spacing: Theme.spacing8) {
             Image(systemName: "flag.checkered")
                 .foregroundStyle(.secondary)
                 .font(.caption)
+                .frame(width: 18)
             Text(verbatim: proposal.stopCondition)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(Theme.spacing12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.warmWash.opacity(0.65))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
     }
 }

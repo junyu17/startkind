@@ -72,6 +72,7 @@ struct PaywallView: View {
             featureRow("paywall.feature.sync")
             featureRow("paywall.feature.model")
         }
+        .startKindCard()
     }
 
     private func featureRow(_ key: String) -> some View {
@@ -119,11 +120,11 @@ struct PaywallView: View {
                     .foregroundStyle(Theme.accent)
             }
             .padding()
-            .background(isSelected ? Theme.accent.opacity(0.12) : Color(.secondarySystemBackground))
+            .background(isSelected ? Theme.softAccent : Theme.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous)
-                    .stroke(isSelected ? Theme.accent : .clear, lineWidth: 2)
+                    .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.line, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

@@ -136,6 +136,17 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.buttons["auth.skip"].exists)
     }
 
+    func testAuthEmailAtButtonInsertsAt() throws {
+        let app = launch(skipAuth: false)
+        let emailField = app.textFields["auth.email"]
+        XCTAssertTrue(emailField.waitForExistence(timeout: 15), "Email field should show on auth screen")
+        emailField.tap()
+        let atButton = app.buttons["auth.emailAt"]
+        XCTAssertTrue(atButton.waitForExistence(timeout: 5), "Email helper button should be visible")
+        atButton.tap()
+        XCTAssertTrue(((emailField.value as? String) ?? "").contains("@"), "At-sign helper should insert @")
+    }
+
     func testSkipAuthEntersAppLocally() throws {
         let app = launch(skipAuth: false)
         XCTAssertTrue(app.buttons["auth.skip"].waitForExistence(timeout: 15))

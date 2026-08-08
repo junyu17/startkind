@@ -30,11 +30,15 @@ struct PrimaryButton: View {
                 if let systemImage { Image(systemName: systemImage) }
                 label.fontWeight(.semibold)
             }
-            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+            .font(.subheadline)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+            .padding(.horizontal, Theme.spacing12)
+            .foregroundStyle(.white)
+            .background(enabled ? Theme.accent : Color.secondary.opacity(0.45))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .shadow(color: enabled ? Theme.accent.opacity(0.18) : .clear, radius: 8, x: 0, y: 4)
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .tint(Theme.accent)
+        .buttonStyle(.plain)
         .disabled(!enabled)
         .accessibilityIdentifier(accessibilityId ?? "")
     }
@@ -60,10 +64,19 @@ struct QuietButton: View {
                 if let systemImage { Image(systemName: systemImage) }
                 Text(verbatim: label)
             }
+            .font(.subheadline)
+            .fontWeight(.medium)
             .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+            .padding(.horizontal, Theme.spacing12)
+            .foregroundStyle(Theme.ink)
+            .background(Theme.surfaceRaised)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(Theme.line, lineWidth: 1)
+            )
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
+        .buttonStyle(.plain)
         .accessibilityIdentifier(accessibilityId ?? "")
     }
 }
@@ -78,9 +91,63 @@ struct KindBanner: View {
             .foregroundStyle(Theme.accent)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.spacing12)
-            .background(Theme.accent.opacity(0.12))
+            .background(Theme.softAccent)
             .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(Theme.accent.opacity(0.12), lineWidth: 1)
+            )
             .accessibilityLabel(Text(verbatim: text))
+    }
+}
+
+struct FieldShell<Content: View>: View {
+    let systemImage: String?
+    @ViewBuilder let content: Content
+
+    init(systemImage: String? = nil, @ViewBuilder content: () -> Content) {
+        self.systemImage = systemImage
+        self.content = content()
+    }
+
+    var body: some View {
+        HStack(spacing: Theme.spacing10) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 20)
+            }
+            content
+        }
+        .padding(.horizontal, Theme.spacing12)
+        .frame(minHeight: Theme.minTapTarget + 8)
+        .background(Theme.surfaceRaised)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(Theme.line, lineWidth: 1)
+        )
+    }
+}
+
+struct SectionLabel: View {
+    let text: String
+
+    init(_ key: String) {
+        text = L(key)
+    }
+
+    init(verbatim text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(verbatim: text)
+            .font(.caption)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .textCase(.uppercase)
     }
 }
 

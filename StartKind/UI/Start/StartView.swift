@@ -22,22 +22,14 @@ struct StartView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Theme.spacing20) {
-                    Text(verbatim: L("start.subtitle"))
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    voiceButton
-                    captureField
+                VStack(spacing: Theme.spacing16) {
+                    headerBand
+                    composerPanel
                     categoryChips
                     usageLine
 
                     if isLoading {
-                        ProgressView()
-                            .padding(.vertical, Theme.spacing24)
-                        Text(verbatim: L("capture.generating"))
-                            .foregroundStyle(.secondary)
+                        loadingState
                     } else if let step = currentStep {
                         NextStepCard(
                             step: step,
@@ -61,11 +53,12 @@ struct StartView: View {
                             .foregroundStyle(.red)
                     }
                 }
-                .padding()
+                .padding(.horizontal, Theme.spacing16)
+                .padding(.vertical, Theme.spacing16)
                 .animation(.easeInOut, value: rescheduleMessage)
             }
             .navigationTitle(L("start.title"))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .background(Theme.background.ignoresSafeArea())
             .scrollDismissesKeyboard(.immediately)
         }
@@ -96,48 +89,103 @@ struct StartView: View {
 
     // MARK: - Subviews
 
+    private var headerBand: some View {
+        HStack(alignment: .center, spacing: Theme.spacing12) {
+            VStack(alignment: .leading, spacing: Theme.spacing4) {
+                SectionLabel("start.title")
+                Text(verbatim: L("start.subtitle"))
+                    .font(.system(.title2, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundStyle(Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: Theme.spacing12)
+            Image(systemName: "arrow.up.forward")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 44, height: 44)
+                .background(Theme.softAccent)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        }
+        .padding(Theme.spacing16)
+        .background(Theme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(Theme.line, lineWidth: 1)
+        )
+    }
+
+    private var composerPanel: some View {
+        VStack(spacing: Theme.spacing12) {
+            voiceButton
+            captureField
+        }
+        .startKindCard()
+    }
+
     private var voiceButton: some View {
         Button {
             toggleVoice()
         } label: {
-            VStack(spacing: Theme.spacing8) {
+            HStack(spacing: Theme.spacing12) {
                 Image(systemName: env.speech.isListening ? "waveform" : "mic.fill")
-                    .font(.system(size: 30, weight: .semibold))
-                    .frame(width: 72, height: 72)
-                    .foregroundStyle(.white)
-                    .background(env.speech.isListening ? Color.red.opacity(0.8) : Theme.accent)
-                    .clipShape(Circle())
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 40, height: 40)
+                    .foregroundStyle(env.speech.isListening ? .white : Theme.accent)
+                    .background(env.speech.isListening ? Color.red.opacity(0.82) : Theme.softAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 Text(verbatim: L(env.speech.isListening ? "start.voice.listening" : "start.voice.tap"))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Theme.ink)
+                Spacer()
             }
+            .padding(.trailing, Theme.spacing12)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+            .background(env.speech.isListening ? Color.red.opacity(0.08) : Theme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(env.speech.isListening ? Color.red.opacity(0.2) : Theme.line, lineWidth: 1)
+            )
         }
-        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
         .accessibilityLabel(Text(verbatim: L(env.speech.isListening ? "start.voice.listening" : "start.voice.tap")))
         .accessibilityIdentifier("start.voice")
     }
 
     private var captureField: some View {
-        HStack(spacing: Theme.spacing8) {
+        FieldShell(systemImage: "text.alignleft") {
             TextField(L("start.text.placeholder"), text: $inputText, axis: .vertical)
-                .textFieldStyle(.roundedBorder)
                 .lineLimit(1...4)
+                .submitLabel(.done)
                 .accessibilityIdentifier("start.input")
                 .onChange(of: inputText) { _, _ in lastSource = .text }
-            PrimaryButton("start.text.submit", systemImage: "arrow.up.circle.fill", enabled: !inputText.trimmingCharacters(in: .whitespaces).isEmpty || selectedCategory != nil, accessibilityId: "start.submit") {
+
+            Button {
                 Task { await generate() }
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 38, height: 38)
+                    .background(canSubmit ? Theme.accent : Color.secondary.opacity(0.45))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
             }
-            .frame(width: 120)
+            .buttonStyle(.plain)
+            .disabled(!canSubmit)
+            .accessibilityLabel(Text(verbatim: L("start.text.submit")))
+            .accessibilityIdentifier("start.submit")
         }
     }
 
     private var categoryChips: some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
-            Text(verbatim: L("start.category.section"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            SectionLabel("start.category.section")
             FlowChips(items: quickCategories, selected: $selectedCategory)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var quickCategories: [TaskCategory] {
@@ -147,19 +195,62 @@ struct StartView: View {
     private var usageLine: some View {
         Group {
             if !env.isPlus {
-                Text(verbatim: L("usage.stepsLeft", env.usageState.stepsRemaining, env.usageState.stepsLimit))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: Theme.spacing8) {
+                    Image(systemName: "bolt.heart")
+                        .foregroundStyle(Theme.accent)
+                    Text(verbatim: L("usage.stepsLeft", env.usageState.stepsRemaining, env.usageState.stepsLimit))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, Theme.spacing12)
+                .padding(.vertical, Theme.spacing8)
+                .background(Theme.softAccent.opacity(0.7))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
             }
         }
     }
 
     private var emptyHint: some View {
-        Text(verbatim: L("start.empty.hint"))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, Theme.spacing24)
+        HStack(alignment: .top, spacing: Theme.spacing12) {
+            Image(systemName: "sparkle.magnifyingglass")
+                .foregroundStyle(Theme.accent)
+                .frame(width: 28)
+            Text(verbatim: L("start.empty.hint"))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Theme.spacing16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.warmWash.opacity(0.75))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(Theme.line.opacity(0.7), lineWidth: 1)
+        )
+    }
+
+    private var loadingState: some View {
+        HStack(spacing: Theme.spacing12) {
+            ProgressView()
+                .tint(Theme.accent)
+            Text(verbatim: L("capture.generating"))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(Theme.spacing16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surfaceRaised)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(Theme.line, lineWidth: 1)
+        )
+    }
+
+    private var canSubmit: Bool {
+        !inputText.trimmingCharacters(in: .whitespaces).isEmpty || selectedCategory != nil
     }
 
     // MARK: - Actions
@@ -273,9 +364,13 @@ struct FlowChips: View {
                     .padding(.horizontal, Theme.spacing12)
                     .padding(.vertical, Theme.spacing8)
                     .frame(minHeight: Theme.minTapTarget)
-                    .background(selected == item ? Theme.accent.opacity(0.18) : Color(.tertiarySystemBackground))
+                    .background(selected == item ? Theme.softAccent : Theme.surfaceRaised)
                     .foregroundStyle(selected == item ? Theme.accent : .primary)
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                            .stroke(selected == item ? Theme.accent.opacity(0.35) : Theme.line, lineWidth: 1)
+                    )
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text(verbatim: L(item.localizationKey)))
