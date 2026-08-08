@@ -1,0 +1,112 @@
+name: StartKind
+options:
+  bundleIdPrefix: com.startkind
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: true
+  developmentLanguage: en
+  knownRegions:
+    - en
+    - zh-Hans
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    DEVELOPMENT_TEAM: "255R6QQR97"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    CODE_SIGN_STYLE: Automatic
+targets:
+  StartKind:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StartKind
+        excludes:
+          - "Info.plist"
+          - "Resources/Assets.xcassets"
+          - "Resources/Products.storekit"
+      - path: StartKind/Resources/Assets.xcassets
+        buildPhase: resources
+      - path: StartKind/Resources/Products.storekit
+        buildPhase: resources
+    info:
+      path: StartKind/Info.plist
+      properties:
+        CFBundleDisplayName: StartKind
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations:
+          - en
+          - zh-Hans
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        NSMicrophoneUsageDescription: "StartKind uses the microphone to capture your spoken thoughts and turn them into one small next step."
+        NSSpeechRecognitionUsageDescription: "StartKind uses speech recognition to turn your spoken thoughts into one small next step."
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.startkind.app
+            CFBundleURLSchemes:
+              - startkind
+        UIRequiredDeviceCapabilities:
+          - arm64
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        SUPPORTS_MACCATALYST: NO
+  StartKindTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StartKindTests
+        excludes:
+          - "Products.storekit"
+      - path: StartKindTests/Products.storekit
+        buildPhase: resources
+    dependencies:
+      - target: StartKind
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+  StartKindUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StartKindUITests
+    dependencies:
+      - target: StartKind
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.startkind.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  StartKind:
+    build:
+      targets:
+        StartKind: all
+        StartKindTests: [test]
+        StartKindUITests: [test]
+    run:
+      config: Debug
+      storeKitConfiguration: StartKind/Resources/Products.storekit
+    test:
+      config: Debug
+      targets:
+        - StartKindTests
+        - StartKindUITests

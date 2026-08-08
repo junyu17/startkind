@@ -1,0 +1,216 @@
+/* StartKind Localizable Strings - US English */
+
+/* MARK: - Tabs */
+"tab.start" = "Start";
+"tab.recover" = "Recover";
+"tab.patterns" = "Patterns";
+"tab.settings" = "Settings";
+
+/* MARK: - Start Screen */
+"start.title" = "Start";
+"start.subtitle" = "One kind step to start.";
+"start.voice.button" = "Hold to speak";
+"start.voice.listening" = "Listening…";
+"start.voice.tap" = "Tap to speak";
+"start.text.placeholder" = "What's on your mind? Just type it messy.";
+"start.text.submit" = "Get one step";
+"start.category.section" = "Or pick a category";
+"start.empty.hint" = "Say or type what's overwhelming you. You'll get one small step.";
+
+/* Categories */
+"category.bills" = "Bills";
+"category.email" = "Email";
+"category.appointments" = "Appointment";
+"category.returns" = "Returns";
+"category.insurance" = "Insurance";
+"category.banking" = "Banking";
+"category.taxes" = "Taxes";
+"category.household" = "Household";
+"category.family_admin" = "Family admin";
+"category.medical" = "Medical";
+"category.work_admin" = "Work admin";
+"category.school" = "School";
+"category.cleaning" = "Cleaning";
+"category.errands" = "Errands";
+"category.other" = "Other";
+
+/* MARK: - Next Step Card */
+"nextstep.title" = "One next step";
+"nextstep.timer.label" = "Start";
+"nextstep.timer.minutes" = "%d minutes";
+"nextstep.makeSmaller" = "Make it smaller";
+"nextstep.showPlan" = "Show a plan";
+"nextstep.hidePlan" = "Hide plan";
+"nextstep.why" = "Why this step";
+"nextstep.stop" = "Stop";
+"nextstep.estimated" = "About %d min";
+"nextstep.shrink.level" = "Smaller version";
+"nextstep.tryVersion" = "Try this version";
+
+/* MARK: - Timer */
+"timer.title" = "Focus on this step";
+"timer.remaining" = "Time left";
+"timer.paused" = "Paused";
+"timer.done" = "Done";
+"timer.pause" = "Pause";
+"timer.resume" = "Resume";
+"timer.makeSmaller" = "Make it smaller";
+"timer.continueFive" = "Continue 5 minutes";
+"timer.step" = "Your step";
+"timer.stopHint" = "Stop when: %@";
+"timer.finished.title" = "Nice — you started.";
+"timer.finished.subtitle" = "How did it go?";
+"timer.outcome.completed" = "Done";
+"timer.outcome.partial" = "Partly done";
+"timer.outcome.paused" = "Paused for now";
+"timer.outcome.skipped" = "Move on";
+"timer.afterPartial" = "Want a smaller version to keep going?";
+"timer.afterDone" = "Good. Want to start another?";
+"timer.afterSkipped" = "No problem. Try a smaller version later.";
+
+/* MARK: - Recover */
+"recover.title" = "Recover";
+"recover.empty" = "Nothing to recover right now.\nWhen you pause a step, it waits here — gently.";
+"recover.lastStep" = "Pick up where you left";
+"recover.resume" = "Continue from here";
+"recover.startTimer" = "Start timer";
+"recover.related" = "Note";
+"recover.clear" = "Clear this capsule";
+
+/* MARK: - Patterns */
+"patterns.title" = "Patterns";
+"patterns.empty" = "After a few steps, gentle patterns appear here.";
+"patterns.noShame" = "These are observations, not scores.";
+"patterns.sample.count" = "%d steps";
+"window.morning" = "morning";
+"window.afternoon" = "afternoon";
+"window.evening" = "evening";
+"patterns.insight.longer" = "%@ steps usually take a little longer than you expect.";
+"patterns.insight.window" = "You start %@ tasks more often before noon.";
+"patterns.insight.costart" = "Co-start helped you finish %d of your recent admin steps.";
+"patterns.medianActual" = "Typical time: %@";
+"patterns.completion" = "Started %d of %d steps in this category.";
+"patterns.unlock.title" = "Personal Execution Model";
+"patterns.unlock.body" = "StartKind Plus learns your best start windows, avoidance patterns, and co-start impact.";
+
+/* MARK: - Settings */
+"settings.title" = "Settings";
+"settings.language" = "Language";
+"settings.language.en" = "English";
+"settings.language.zh" = "简体中文";
+"settings.subscription" = "Subscription";
+"settings.subscription.free" = "Free";
+"settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.manage" = "Manage subscription";
+"settings.subscription.restore" = "Restore purchases";
+"settings.privacy" = "Privacy";
+"settings.dataExport" = "Export my data";
+"settings.deleteAccount" = "Delete account & data";
+"settings.deleteConfirm.body" = "This removes your local history, capsules, and calibration data. This cannot be undone.";
+"settings.contact" = "Contact";
+"settings.contactEmail" = "billy.yu@me.com";
+"settings.about" = "About";
+"settings.version" = "Version %@";
+"settings.medical" = "Medical notice";
+"settings.medical.body" = "StartKind can help you organize and start tasks, but it does not diagnose or treat ADHD. For diagnosis, medication, or treatment decisions, talk with a qualified clinician.";
+
+/* MARK: - Paywall */
+"paywall.title" = "StartKind Plus";
+"paywall.subtitle" = "The complete execution system.";
+"paywall.monthly" = "Monthly";
+"paywall.annual" = "Annual";
+"paywall.monthly.price" = "$9.99 / month";
+"paywall.annual.price" = "$89.99 / year";
+"paywall.annual.save" = "Save about 25%";
+"paywall.trial" = "7-day free trial";
+"paywall.cta" = "Start free trial";
+"paywall.cta.buy" = "Subscribe";
+"paywall.restore" = "Restore purchases";
+"paywall.dismiss" = "Maybe later";
+"paywall.feature.unlimited" = "Unlimited one next step";
+"paywall.feature.admin" = "Admin Task Reader for bills & emails";
+"paywall.feature.calibration" = "Personal time calibration";
+"paywall.feature.recovery" = "Unlimited recovery capsules";
+"paywall.feature.costart" = "Friend co-start links";
+"paywall.feature.sync" = "Cross-device sync";
+"paywall.feature.model" = "Personal execution model";
+"paywall.limit.title" = "You've used today's free steps";
+"paywall.limit.body" = "You can still use timers and the recovery capsule. Or unlock unlimited steps with Plus.";
+"paywall.limit.keepFree" = "Keep using free";
+
+/* MARK: - Usage */
+"usage.stepsLeft" = "%d of %d free steps left today";
+"usage.stepsReset" = "Free steps reset overnight.";
+
+/* MARK: - Common */
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.continue" = "Continue";
+"common.gotIt" = "Got it";
+"common.close" = "Close";
+"common.loading" = "One moment…";
+"common.error" = "Something went sideways. You can try again.";
+
+/* MARK: - Onboarding */
+"onboard.title" = "One kind step to start.";
+"onboard.body" = "StartKind turns overwhelm into one small action. No lists. No streaks. No shame.";
+"onboard.cta" = "Begin";
+
+/* MARK: - Capture feedback */
+"capture.generating" = "Shaping one small step…";
+"capture.fallback" = "Here's a gentle first move:";
+
+/* MARK: - Auth */
+"auth.title" = "StartKind";
+"auth.subtitle" = "Sign in to sync and use cloud-powered steps.";
+"auth.email" = "Email";
+"auth.password" = "Password";
+"auth.signIn" = "Sign in";
+"auth.signUp" = "Sign up";
+"auth.switchToSignUp" = "No account? Sign up";
+"auth.switchToSignIn" = "Already have an account? Sign in";
+"auth.error" = "Sign-in failed. Check your email and password.";
+"auth.continueLocal" = "Continue without account";
+"settings.account" = "Account";
+"settings.signedIn" = "Signed in";
+"settings.signedOutLocal" = "Using locally (no account)";
+"settings.signOut" = "Sign out";
+"settings.signIn" = "Sign in to sync";
+
+/* MARK: - Co-Start */
+"costart.title" = "Co-start";
+"costart.subtitle" = "Start together when alone is too hard.";
+"costart.cta" = "Co-start";
+"costart.aiQuiet" = "AI quiet co-start";
+"costart.friend" = "Invite a friend (25 min)";
+"costart.you" = "You";
+"costart.ai" = "AI";
+"costart.aiQuietPresence" = "Quiet co-start";
+"costart.roomTitle" = "Quiet room";
+"costart.yourStep" = "Your step";
+"costart.waitingForFriend" = "Waiting for your friend…";
+"costart.copy" = "Copy";
+"costart.copied" = "Link copied";
+"costart.guestSubtitle" = "A friend invited you to co-start. State one small step and join.";
+"costart.yourName" = "Your name (optional)";
+"costart.join" = "Join";
+"costart.roomNotFound" = "Couldn't find that room. It may have ended.";
+
+/* MARK: - Privacy */
+"privacy.title" = "Privacy";
+"privacy.principlesTitle" = "Principles";
+"privacy.principle1" = "StartKind collects the minimum data needed to help you start one small step.";
+"privacy.principle2" = "Free mode works without an account; your history stays on your device.";
+"privacy.principle3" = "Cloud features (Plus) only sync or process data after you sign in.";
+"privacy.dataTitle" = "What may be stored";
+"privacy.data1" = "Task text you type or speak, and timer history.";
+"privacy.data2" = "Subscription entitlement (from Apple) and device diagnostics.";
+"privacy.data3" = "With Plus: calendar, email, or photo content you choose to parse.";
+"privacy.controlsTitle" = "Your controls";
+"privacy.control1" = "Delete local data anytime from Settings.";
+"privacy.control2" = "Delete your cloud account and data.";
+"privacy.control3" = "Export your data.";
+"privacy.sensitiveTitle" = "Sensitive content";
+"privacy.sensitive1" = "Admin tasks may contain financial, medical, or family information; it is not logged in production.";
+"privacy.sensitive2" = "Service-role keys stay server-side; the app only holds your publishable key.";
+"privacy.contactTitle" = "Contact";

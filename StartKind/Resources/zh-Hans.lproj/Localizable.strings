@@ -1,0 +1,216 @@
+/* StartKind 本地化字符串 - 简体中文 */
+
+/* MARK: - 标签栏 */
+"tab.start" = "开始";
+"tab.recover" = "恢复";
+"tab.patterns" = "规律";
+"tab.settings" = "设置";
+
+/* MARK: - 开始页 */
+"start.title" = "开始";
+"start.subtitle" = "迈出温和的一小步。";
+"start.voice.button" = "按住说话";
+"start.voice.listening" = "正在聆听…";
+"start.voice.tap" = "点按说话";
+"start.text.placeholder" = "脑子里一团乱?随便打几个字就好。";
+"start.text.submit" = "给我一步";
+"start.category.section" = "或选一个分类";
+"start.empty.hint" = "说出或写下让你发愁的事,你会得到一个小步骤。";
+
+/* 分类 */
+"category.bills" = "账单";
+"category.email" = "邮件";
+"category.appointments" = "预约";
+"category.returns" = "退货";
+"category.insurance" = "保险";
+"category.banking" = "银行";
+"category.taxes" = "税务";
+"category.household" = "家务";
+"category.family_admin" = "家庭事务";
+"category.medical" = "医疗";
+"category.work_admin" = "工作事务";
+"category.school" = "学校";
+"category.cleaning" = "清洁";
+"category.errands" = "跑腿";
+"category.other" = "其他";
+
+/* MARK: - 下一步卡片 */
+"nextstep.title" = "下一步";
+"nextstep.timer.label" = "开始";
+"nextstep.timer.minutes" = "%d 分钟";
+"nextstep.makeSmaller" = "缩小一步";
+"nextstep.showPlan" = "看看计划";
+"nextstep.hidePlan" = "收起计划";
+"nextstep.why" = "为什么是这一步";
+"nextstep.stop" = "停止点";
+"nextstep.estimated" = "约 %d 分钟";
+"nextstep.shrink.level" = "更小的版本";
+"nextstep.tryVersion" = "试试这版";
+
+/* MARK: - 计时器 */
+"timer.title" = "只专注这一步";
+"timer.remaining" = "剩余时间";
+"timer.paused" = "已暂停";
+"timer.done" = "完成了";
+"timer.pause" = "暂停";
+"timer.resume" = "继续";
+"timer.makeSmaller" = "缩小一步";
+"timer.continueFive" = "再加 5 分钟";
+"timer.step" = "你的步骤";
+"timer.stopHint" = "停在这里:%@";
+"timer.finished.title" = "很好,你已经开始了。";
+"timer.finished.subtitle" = "感觉怎么样?";
+"timer.outcome.completed" = "完成了";
+"timer.outcome.partial" = "做了一部分";
+"timer.outcome.paused" = "先暂停";
+"timer.outcome.skipped" = "换一个";
+"timer.afterPartial" = "要不要来个更小的版本接着做?";
+"timer.afterDone" = "真棒。要不要再开始一个?";
+"timer.afterSkipped" = "没关系。稍后可以试更小的版本。";
+
+/* MARK: - 恢复 */
+"recover.title" = "恢复";
+"recover.empty" = "现在没有需要恢复的步骤。\n暂停的步骤会安静地在这里等你。";
+"recover.lastStep" = "从上次的地方继续";
+"recover.resume" = "从这里继续";
+"recover.startTimer" = "开始计时";
+"recover.related" = "备注";
+"recover.clear" = "清掉这个胶囊";
+
+/* MARK: - 规律 */
+"patterns.title" = "规律";
+"patterns.empty" = "做过几个步骤后,温和的规律会出现在这里。";
+"patterns.noShame" = "这只是观察,不是打分。";
+"patterns.sample.count" = "%d 个步骤";
+"window.morning" = "上午";
+"window.afternoon" = "下午";
+"window.evening" = "晚上";
+"patterns.insight.longer" = "%@ 类步骤通常比你预估的稍久一点。";
+"patterns.insight.window" = "你在中午前更容易开始 %@ 类事务。";
+"patterns.insight.costart" = "陪伴启动帮你完成了最近 %d 个事务步骤。";
+"patterns.medianActual" = "实际用时约 %@";
+"patterns.completion" = "这个分类你开始了 %d / %d 个步骤。";
+"patterns.unlock.title" = "个人执行模型";
+"patterns.unlock.body" = "StartKind Plus 会学习你的最佳启动时段、回避规律和陪伴启动的效果。";
+
+/* MARK: - 设置 */
+"settings.title" = "设置";
+"settings.language" = "语言";
+"settings.language.en" = "English";
+"settings.language.zh" = "简体中文";
+"settings.subscription" = "订阅";
+"settings.subscription.free" = "免费版";
+"settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.manage" = "管理订阅";
+"settings.subscription.restore" = "恢复购买";
+"settings.privacy" = "隐私";
+"settings.dataExport" = "导出我的数据";
+"settings.deleteAccount" = "删除账号和数据";
+"settings.deleteConfirm.body" = "这将清除你的本地历史、恢复胶囊和校准数据,且无法撤销。";
+"settings.contact" = "联系";
+"settings.contactEmail" = "billy.yu@me.com";
+"settings.about" = "关于";
+"settings.version" = "版本 %@";
+"settings.medical" = "医疗提示";
+"settings.medical.body" = "StartKind 可以帮你整理和开始任务,但不能诊断或治疗注意缺陷多动障碍(ADHD)。如需诊断、用药或治疗决定,请咨询合格的临床医生。";
+
+/* MARK: - 付费墙 */
+"paywall.title" = "StartKind Plus";
+"paywall.subtitle" = "完整的执行系统。";
+"paywall.monthly" = "按月";
+"paywall.annual" = "按年";
+"paywall.monthly.price" = "$9.99 / 月";
+"paywall.annual.price" = "$89.99 / 年";
+"paywall.annual.save" = "省约 25%";
+"paywall.trial" = "7 天免费试用";
+"paywall.cta" = "开始免费试用";
+"paywall.cta.buy" = "订阅";
+"paywall.restore" = "恢复购买";
+"paywall.dismiss" = "以后再说";
+"paywall.feature.unlimited" = "无限「下一步」";
+"paywall.feature.admin" = "账单邮件事务解析";
+"paywall.feature.calibration" = "个人时间校准";
+"paywall.feature.recovery" = "无限恢复胶囊";
+"paywall.feature.costart" = "好友陪伴启动";
+"paywall.feature.sync" = "多设备同步";
+"paywall.feature.model" = "个人执行模型";
+"paywall.limit.title" = "今天的免费步骤已用完";
+"paywall.limit.body" = "计时器和恢复胶囊仍可使用。升级 Plus 可解锁无限步骤。";
+"paywall.limit.keepFree" = "继续用免费版";
+
+/* MARK: - 用量 */
+"usage.stepsLeft" = "今天剩余 %d / %d 个免费步骤";
+"usage.stepsReset" = "免费步骤次日重置。";
+
+/* MARK: - 通用 */
+"common.ok" = "好";
+"common.cancel" = "取消";
+"common.continue" = "继续";
+"common.gotIt" = "知道了";
+"common.close" = "关闭";
+"common.loading" = "稍等一下…";
+"common.error" = "出了点小状况。可以再试一次。";
+
+/* MARK: - 引导 */
+"onboard.title" = "迈出温和的一小步。";
+"onboard.body" = "StartKind 把一团乱变成一个小动作。没有清单,没有连续打卡,没有羞耻。";
+"onboard.cta" = "开始";
+
+/* MARK: - 捕获反馈 */
+"capture.generating" = "正在整理一个小步骤…";
+"capture.fallback" = "这是一个温和的开头:";
+
+/* MARK: - 登录 */
+"auth.title" = "StartKind";
+"auth.subtitle" = "登录以同步并使用云端步骤。";
+"auth.email" = "邮箱";
+"auth.password" = "密码";
+"auth.signIn" = "登录";
+"auth.signUp" = "注册";
+"auth.switchToSignUp" = "没有账号?注册";
+"auth.switchToSignIn" = "已有账号?登录";
+"auth.error" = "登录失败,请检查邮箱和密码。";
+"auth.continueLocal" = "不登录,继续使用";
+"settings.account" = "账号";
+"settings.signedIn" = "已登录";
+"settings.signedOutLocal" = "本地使用(未登录)";
+"settings.signOut" = "退出登录";
+"settings.signIn" = "登录以同步";
+
+/* MARK: - 陪伴启动 */
+"costart.title" = "陪伴启动";
+"costart.subtitle" = "一个人太难时,一起开始。";
+"costart.cta" = "陪伴启动";
+"costart.aiQuiet" = "AI 静默陪伴";
+"costart.friend" = "邀请好友(25 分钟)";
+"costart.you" = "你";
+"costart.ai" = "AI";
+"costart.aiQuietPresence" = "静默陪伴中";
+"costart.roomTitle" = "安静房间";
+"costart.yourStep" = "你的步骤";
+"costart.waitingForFriend" = "等待好友加入…";
+"costart.copy" = "复制";
+"costart.copied" = "链接已复制";
+"costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤,加入。";
+"costart.yourName" = "你的名字(可选)";
+"costart.join" = "加入";
+"costart.roomNotFound" = "找不到那个房间,可能已结束。";
+
+/* MARK: - 隐私 */
+"privacy.title" = "隐私";
+"privacy.principlesTitle" = "原则";
+"privacy.principle1" = "StartKind 只收集帮你迈出一小步所需的最少数据。";
+"privacy.principle2" = "免费模式无需账号,历史记录保存在你的设备上。";
+"privacy.principle3" = "云端功能(Plus)仅在登录后同步或处理数据。";
+"privacy.dataTitle" = "可能存储的数据";
+"privacy.data1" = "你输入或说出的任务文本,以及计时历史。";
+"privacy.data2" = "订阅权益(来自 Apple)和设备诊断。";
+"privacy.data3" = "Plus:你选择解析的日历、邮件或照片内容。";
+"privacy.controlsTitle" = "你的控制";
+"privacy.control1" = "随时在设置中删除本地数据。";
+"privacy.control2" = "删除你的云账号和数据。";
+"privacy.control3" = "导出你的数据。";
+"privacy.sensitiveTitle" = "敏感内容";
+"privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息;生产环境不记录。";
+"privacy.sensitive2" = "服务端密钥仅存服务器;app 只持有你的公开密钥。";
+"privacy.contactTitle" = "联系";

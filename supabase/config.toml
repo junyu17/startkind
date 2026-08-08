@@ -1,0 +1,19 @@
+project_id = "startkind"
+
+# Edge Functions require a valid user JWT (Authorization header) before invocation.
+[functions.one_next_step]
+verify_jwt = true
+
+[functions.admin_task_reader]
+verify_jwt = true
+
+[functions.verify_receipt]
+verify_jwt = true
+
+# Disable email OTP confirmation so sign-up returns a session immediately.
+# NOTE: re-enable for production (Authentication > Providers > Email in Dashboard).
+[auth]
+enable_anonymous_sign_ins = true
+
+[auth.email]
+enable_confirmations = false

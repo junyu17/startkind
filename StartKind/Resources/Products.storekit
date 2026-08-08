@@ -1,0 +1,91 @@
+{
+  "identifier" : "B1C2D3E4-StartKind-Products",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6799113108",
+    "_developerTeamID" : "255R6QQR97",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 744600000,
+    "_locale" : "en_US",
+    "_storefront" : "USA"
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D",
+      "localizations" : [
+        {
+          "description" : "The complete StartKind execution system.",
+          "displayName" : "StartKind Plus",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "StartKind Plus",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "11111111-1111-1111-1111-111111111111",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited steps and the full execution system, monthly.",
+              "displayName" : "StartKind Plus Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "StartKind_plus_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Plus Monthly",
+          "subscriptionGroupID" : "8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "89.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "22222222-2222-2222-2222-222222222222",
+          "introductoryOffer" : {
+            "displayPrice" : "0",
+            "internalID" : "33333333-3333-3333-3333-333333333333",
+            "paymentMode" : "freeTrial",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Unlimited steps and the full execution system, annual with 7-day free trial.",
+              "displayName" : "StartKind Plus Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "StartKind_plus_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Plus Annual",
+          "subscriptionGroupID" : "8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

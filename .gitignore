@@ -1,0 +1,14 @@
+# Secrets - never commit. Contains Supabase URL + publishable (anon) key.
+StartKind/Resources/Secrets.plist
+
+# Local Supabase artifacts
+supabase/.branches/
+supabase/.temp/
+
+# Build output
+build/
+StartKind.xcodeproj/
+*.xcuserdata
+
+# Local agent scratch
+.pi-subagents/
