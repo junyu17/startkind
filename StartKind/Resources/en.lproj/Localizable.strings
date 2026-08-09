@@ -17,6 +17,11 @@
 "start.category.section" = "And choose a category";
 "start.category.selected" = "Category added: %@";
 "start.empty.hint" = "Say or type what's overwhelming you. You'll get one small step.";
+"start.kindStart.title" = "Today's Kind Start";
+"start.kindStart.admin" = "Paste a bill, email, or appointment";
+"start.kindStart.photo" = "Photo to one step";
+"start.kindStart.resume" = "Pick up where you left";
+"start.kindStart.adminLeft" = "%d admin left";
 
 /* Categories */
 "category.bills" = "Bills";
@@ -83,6 +88,20 @@
 "patterns.empty" = "After a few steps, gentle patterns appear here.";
 "patterns.noShame" = "These are observations, not scores.";
 "patterns.sample.count" = "%d steps";
+"patterns.model.title" = "Personal Execution Model";
+"patterns.model.samples" = "%d samples";
+"patterns.model.empty" = "Start a few timers and StartKind will learn your best start windows, estimate bias, step size, and co-start impact.";
+"patterns.model.stepSize" = "Step size";
+"patterns.model.stepSize.default" = "5-10 min";
+"patterns.model.stepSize.tiny" = "2-5 min first";
+"patterns.model.stepSize.small" = "5 min first";
+"patterns.model.stepSize.steady" = "10 min works";
+"patterns.model.bestWindow" = "Best window";
+"patterns.model.bestWindow.pending" = "Learning";
+"patterns.model.summary.longer" = "%@ usually needs about %@ of your estimate, so StartKind will begin smaller.";
+"patterns.model.summary.tiny" = "%@ looks easier to start when the first step is very small.";
+"patterns.model.summary.window" = "%@ starts best in the %@ window.";
+"patterns.model.summary.steady" = "%@ is becoming predictable enough for normal 10-minute starts.";
 "window.morning" = "morning";
 "window.afternoon" = "afternoon";
 "window.evening" = "evening";
@@ -90,9 +109,49 @@
 "patterns.insight.window" = "You start %@ tasks more often before noon.";
 "patterns.insight.costart" = "Co-start helped you finish %d of your recent admin steps.";
 "patterns.medianActual" = "Typical time: %@";
+"patterns.estimateMultiplier" = "Estimate correction: %@";
+"patterns.bestWindow" = "Best start window: %@";
 "patterns.completion" = "Started %d of %d steps in this category.";
+"patterns.recommendation.buffer" = "Next time, StartKind will budget around %@ and offer a smaller first move.";
+"patterns.recommendation.tiny" = "Next time, start with the 2-5 minute version.";
+"patterns.recommendation.window" = "This category is a good candidate for %@.";
+"patterns.recommendation.keep" = "Keep using timers so calibration gets sharper.";
 "patterns.unlock.title" = "Personal Execution Model";
 "patterns.unlock.body" = "StartKind Plus learns your best start windows, avoidance patterns, and co-start impact.";
+
+/* MARK: - Admin Reader */
+"admin.title" = "Admin Reader";
+"admin.kicker" = "Bill, email, appointment, form";
+"admin.subtitle" = "Paste text or choose a screenshot. StartKind extracts the useful facts and gives exactly one startable step.";
+"admin.freeAllowance" = "%d of %d free Admin Quick Starts left today";
+"admin.input.placeholder" = "Paste the messy message here, or choose a screenshot/photo.";
+"admin.paste" = "Paste";
+"admin.photo" = "Photo";
+"admin.parse" = "Find one step";
+"admin.ocr.loading" = "Reading the image...";
+"admin.parse.loading" = "Finding the next step...";
+"admin.ocr.empty" = "No readable text found. You can type a few words instead.";
+"admin.ocr.error" = "Couldn't read that image. Try a clearer screenshot or paste the text.";
+"admin.result.title" = "What matters";
+"admin.confidence" = "%d%% confidence";
+"admin.fact.type" = "Type";
+"admin.fact.due" = "Due";
+"admin.fact.amount" = "Amount";
+"admin.fact.contact" = "Contact";
+"admin.fact.link" = "Link or phone";
+"admin.documents" = "Have nearby";
+"admin.missing" = "Missing";
+"admin.nextStep" = "One next step";
+"admin.artifact.bill" = "Bill";
+"admin.artifact.email" = "Email";
+"admin.artifact.appointment" = "Appointment";
+"admin.artifact.return" = "Return";
+"admin.artifact.insurance" = "Insurance";
+"admin.artifact.banking" = "Banking";
+"admin.artifact.school" = "School";
+"admin.artifact.household" = "Household";
+"admin.artifact.medical" = "Medical";
+"admin.artifact.other" = "Other";
 
 /* MARK: - Settings */
 "settings.title" = "Settings";

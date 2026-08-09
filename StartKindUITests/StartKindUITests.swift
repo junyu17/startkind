@@ -1,6 +1,7 @@
 import XCTest
 
 /// UI smoke tests for the core execution loop, per `docs/TESTING_AND_DELIVERY.md`.
+@MainActor
 final class StartKindUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -104,6 +105,35 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(billsChip.waitForExistence(timeout: 15), "Bills chip should exist")
         billsChip.tap()
         XCTAssertTrue(app.descendants(matching: .any)["start.category.selected"].waitForExistence(timeout: 5), "Category selection should show visible feedback")
+    }
+
+    func testKindStartAdminReaderParsesBillText() throws {
+        let app = launch()
+        let adminButton = app.descendants(matching: .any)["start.kind.admin"]
+        XCTAssertTrue(adminButton.waitForExistence(timeout: 15), "Kind Start admin entry should exist")
+        adminButton.tap()
+
+        let adminInput = app.textViews["admin.input"]
+        XCTAssertTrue(adminInput.waitForExistence(timeout: 10), "Admin Reader input should exist")
+        adminInput.tap()
+        adminInput.typeText("Invoice bill $42 due 12/15/2026 pay at https://example.com")
+        dismissKeyboard(app)
+
+        let parse = app.buttons["admin.parse"]
+        XCTAssertTrue(parse.waitForExistence(timeout: 5), "Admin parse button should exist")
+        parse.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["admin.result"].waitForExistence(timeout: 10), "Admin result should appear")
+        XCTAssertTrue(app.buttons["admin.startTimer"].exists, "Admin Reader should produce a startable timer step")
+    }
+
+    func testPhotoToStepAndExecutionModelEntriesVisible() throws {
+        let app = launch()
+        XCTAssertTrue(app.descendants(matching: .any)["start.kindStart"].waitForExistence(timeout: 15), "Kind Start panel should exist")
+        XCTAssertTrue(app.descendants(matching: .any)["start.kind.photo"].exists, "Photo-to-step entry should exist")
+
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
+        app.tabBars.firstMatch.buttons.element(boundBy: 2).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["patterns.model.summary"].waitForExistence(timeout: 10), "Personal Execution Model should be visible")
     }
 
     func testPaywallShowsFreePlusComparison() throws {

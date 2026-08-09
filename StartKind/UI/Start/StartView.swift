@@ -15,6 +15,7 @@ struct StartView: View {
     @State private var errorMessage: String?
     @State private var rescheduleMessage: String?
     @State private var showPlan = false
+    @State private var showAdminReader = false
 
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
@@ -36,6 +37,7 @@ struct StartView: View {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
                     headerBand
+                    todayKindStartPanel
                     composerPanel
                     categoryChips
                     usageLine
@@ -96,6 +98,10 @@ struct StartView: View {
             PaywallView(trigger: paywallReason)
                 .environmentObject(env)
         }
+        .sheet(isPresented: $showAdminReader) {
+            AdminQuickReaderView()
+                .environmentObject(env)
+        }
         .sheet(isPresented: $showCoStart) {
             if let step = currentStep {
                 CoStartView(step: step, initialMode: coStartInitialMode)
@@ -146,6 +152,92 @@ struct StartView: View {
             RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
                 .stroke(Theme.line, lineWidth: 1)
         )
+    }
+
+    private var todayKindStartPanel: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            HStack {
+                SectionLabel("start.kindStart.title")
+                    .accessibilityIdentifier("start.kindStart")
+                Spacer()
+                if !env.isPlus {
+                    Text(verbatim: L("start.kindStart.adminLeft", env.usageState.adminQuickStartsRemaining))
+                        .font(.caption2)
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+
+            HStack(spacing: Theme.spacing8) {
+                kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
+                    showAdminReader = true
+                }
+                kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
+                    showAdminReader = true
+                }
+            }
+
+            if let capsule = env.activeCapsule() {
+                Button {
+                    resume(capsule)
+                } label: {
+                    HStack(spacing: Theme.spacing10) {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .foregroundStyle(Theme.accent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(verbatim: L("start.kindStart.resume"))
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Theme.ink)
+                            Text(verbatim: capsule.resumeTitle)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        Spacer()
+                        Image(systemName: "play.fill")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Theme.spacing12)
+                    .background(Theme.softAccent.opacity(0.72))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("start.kind.resume")
+            }
+        }
+        .startKindCard()
+    }
+
+    private func kindStartButton(_ key: String, systemImage: String, id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: Theme.spacing8) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 34, height: 34)
+                    .background(Theme.softAccent)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                Text(verbatim: L(key))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
+            .padding(Theme.spacing12)
+            .background(Theme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(Theme.line, lineWidth: 1)
+            )
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier(id)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: L(key)))
+        .accessibilityIdentifier(id)
     }
 
     private var composerPanel: some View {
@@ -490,6 +582,13 @@ struct StartView: View {
     private func startTimer(for step: NextStepModel) {
         let minutes = min(step.proposal.timerMinutes, 25)
         timerSession = env.startTimer(step: step, minutes: minutes)
+    }
+
+    private func resume(_ capsule: RecoveryCapsuleModel) {
+        let proposal = capsule.resumeProposal
+        let step = env.persistence.saveNextStep(proposal: proposal, capture: nil, taskTitle: proposal.title)
+        currentStep = step
+        timerSession = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
     }
 
     private func shrink(_ step: NextStepModel) {

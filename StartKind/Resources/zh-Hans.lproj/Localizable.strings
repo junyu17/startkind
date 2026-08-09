@@ -17,6 +17,11 @@
 "start.category.section" = "再选一个分类";
 "start.category.selected" = "已加入分类:%@";
 "start.empty.hint" = "说出或写下让你发愁的事,你会得到一个小步骤。";
+"start.kindStart.title" = "今天先这样开始";
+"start.kindStart.admin" = "粘贴账单、邮件或预约";
+"start.kindStart.photo" = "照片变成一步";
+"start.kindStart.resume" = "从上次继续";
+"start.kindStart.adminLeft" = "剩 %d 次事务";
 
 /* 分类 */
 "category.bills" = "账单";
@@ -83,6 +88,20 @@
 "patterns.empty" = "做过几个步骤后,温和的规律会出现在这里。";
 "patterns.noShame" = "这只是观察,不是打分。";
 "patterns.sample.count" = "%d 个步骤";
+"patterns.model.title" = "个人执行模型";
+"patterns.model.samples" = "%d 个样本";
+"patterns.model.empty" = "开始几个计时器后,StartKind 会学习你的最佳启动时段、预估偏差、步长和陪伴启动效果。";
+"patterns.model.stepSize" = "建议步长";
+"patterns.model.stepSize.default" = "5-10 分钟";
+"patterns.model.stepSize.tiny" = "先做 2-5 分钟";
+"patterns.model.stepSize.small" = "先做 5 分钟";
+"patterns.model.stepSize.steady" = "10 分钟可行";
+"patterns.model.bestWindow" = "最佳时段";
+"patterns.model.bestWindow.pending" = "学习中";
+"patterns.model.summary.longer" = "%@ 通常需要你预估的 %@ 左右,所以 StartKind 会先给更小一步。";
+"patterns.model.summary.tiny" = "%@ 先切得很小时更容易开始。";
+"patterns.model.summary.window" = "%@ 在 %@ 更容易启动。";
+"patterns.model.summary.steady" = "%@ 已逐渐稳定,适合普通 10 分钟启动。";
 "window.morning" = "上午";
 "window.afternoon" = "下午";
 "window.evening" = "晚上";
@@ -90,9 +109,49 @@
 "patterns.insight.window" = "你在中午前更容易开始 %@ 类事务。";
 "patterns.insight.costart" = "陪伴启动帮你完成了最近 %d 个事务步骤。";
 "patterns.medianActual" = "实际用时约 %@";
+"patterns.estimateMultiplier" = "预估校正:%@";
+"patterns.bestWindow" = "最佳启动时段:%@";
 "patterns.completion" = "这个分类你开始了 %d / %d 个步骤。";
+"patterns.recommendation.buffer" = "下次 StartKind 会按 %@ 左右留时间,并先给更小动作。";
+"patterns.recommendation.tiny" = "下次先从 2-5 分钟版本开始。";
+"patterns.recommendation.window" = "这个分类适合放在%@。";
+"patterns.recommendation.keep" = "继续用计时器,校准会更准。";
 "patterns.unlock.title" = "个人执行模型";
 "patterns.unlock.body" = "StartKind Plus 会学习你的最佳启动时段、回避规律和陪伴启动的效果。";
+
+/* MARK: - 事务阅读器 */
+"admin.title" = "事务阅读器";
+"admin.kicker" = "账单、邮件、预约、表格";
+"admin.subtitle" = "粘贴文字或选择截图。StartKind 提取关键事实,只给一个能开始的小步骤。";
+"admin.freeAllowance" = "今天剩余 %d / %d 次免费事务快速启动";
+"admin.input.placeholder" = "把凌乱信息粘贴到这里,或选择截图/照片。";
+"admin.paste" = "粘贴";
+"admin.photo" = "照片";
+"admin.parse" = "找出一步";
+"admin.ocr.loading" = "正在读取图片...";
+"admin.parse.loading" = "正在找下一步...";
+"admin.ocr.empty" = "没有识别到可读文字。可以手动输入几个字。";
+"admin.ocr.error" = "无法读取这张图片。请换清晰截图或粘贴文字。";
+"admin.result.title" = "关键信息";
+"admin.confidence" = "%d%% 可信度";
+"admin.fact.type" = "类型";
+"admin.fact.due" = "截止";
+"admin.fact.amount" = "金额";
+"admin.fact.contact" = "联系人";
+"admin.fact.link" = "链接或电话";
+"admin.documents" = "放在手边";
+"admin.missing" = "缺失信息";
+"admin.nextStep" = "下一步";
+"admin.artifact.bill" = "账单";
+"admin.artifact.email" = "邮件";
+"admin.artifact.appointment" = "预约";
+"admin.artifact.return" = "退货";
+"admin.artifact.insurance" = "保险";
+"admin.artifact.banking" = "银行";
+"admin.artifact.school" = "学校";
+"admin.artifact.household" = "家务";
+"admin.artifact.medical" = "医疗";
+"admin.artifact.other" = "其他";
 
 /* MARK: - 设置 */
 "settings.title" = "设置";
