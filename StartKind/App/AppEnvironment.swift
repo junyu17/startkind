@@ -162,7 +162,8 @@ final class AppEnvironment: ObservableObject {
     @discardableResult
     private func createCoStartRoom(type: CoStartRoomType, stepText: String) -> CoStartRoomModel {
         let hostId = persistence.userId
-        let room = CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .active, startsAt: .now)
+        let roomCode = type == .friendLink ? Self.makeRoomCode() : nil
+        let room = CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .active, roomCode: roomCode, startsAt: .now)
         persistence.context.insert(room)
         let me = CoStartParticipantModel(roomId: room.id, userId: hostId, displayName: L("costart.you"), statedStep: stepText)
         persistence.context.insert(me)
@@ -192,12 +193,16 @@ final class AppEnvironment: ObservableObject {
         let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
         persistence.recordTimerOutcome(session: session, actualSeconds: elapsed, outcome: outcome, step: step, isPlus: isPlus)
         try? persistence.context.save()
+        if room.roomType == .friendLink {
+            Task { await endRemoteCoStartRoom(room: room) }
+        }
     }
 
-    /// Invite link for a friend co-start room (deep link with room id).
+    /// Invite link for a friend co-start room (deep link with a human-enterable code).
     func inviteLink(for room: CoStartRoomModel) -> URL? {
+        guard let code = room.roomCode else { return nil }
         var components = URLComponents(string: "startkind://join")
-        components?.queryItems = [URLQueryItem(name: "room", value: room.id.uuidString)]
+        components?.queryItems = [URLQueryItem(name: "code", value: code)]
         return components?.url
     }
 
@@ -215,7 +220,8 @@ final class AppEnvironment: ObservableObject {
             "room_type": room.roomType.rawValue,
             "duration_minutes": room.durationMinutes,
             "status": room.status.rawValue,
-            "invite_token_hash": SyncCoding.encode(room.inviteTokenHash) as Any,
+            "invite_token_hash": room.inviteTokenHash ?? NSNull(),
+            "room_code": room.roomCode ?? NSNull(),
             "created_at": SyncCoding.encode(room.createdAt) as Any,
             "starts_at": SyncCoding.encode(room.startsAt) as Any,
             "ended_at": SyncCoding.encode(room.endedAt) as Any
@@ -230,14 +236,32 @@ final class AppEnvironment: ObservableObject {
         ]])
     }
 
+    private func endRemoteCoStartRoom(room: CoStartRoomModel) async {
+        guard let supabase, supabase.isAuthenticated else { return }
+        try? await supabase.patch(
+            table: "co_start_rooms",
+            query: ["id": "eq.\(room.id.uuidString)"],
+            values: [
+                "status": CoStartRoomStatus.ended.rawValue,
+                "ended_at": SyncCoding.encode(Date()) as Any
+            ]
+        )
+    }
+
     // MARK: - Co-Start guest join
 
     /// Set by an incoming join deep link; the UI presents the guest join flow.
     @Published var pendingJoinRoomId: UUID?
+    @Published var pendingJoinRoomCode: String?
 
     func handleJoinURL(_ url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let roomIdString = components.queryItems?.first(where: { $0.name == "room" })?.value,
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
+        if let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
+           Self.isValidRoomCode(code) {
+            pendingJoinRoomCode = code
+            return
+        }
+        guard let roomIdString = components.queryItems?.first(where: { $0.name == "room" })?.value,
               let roomId = UUID(uuidString: roomIdString) else { return }
         pendingJoinRoomId = roomId
     }
@@ -266,6 +290,37 @@ final class AppEnvironment: ObservableObject {
             roomType: CoStartRoomType(rawValue: SyncCoding.str(row, "room_type") ?? "quiet_room") ?? .quietRoom,
             durationMinutes: SyncCoding.int(row, "duration_minutes") ?? 25,
             status: CoStartRoomStatus(rawValue: SyncCoding.str(row, "status") ?? "active") ?? .active,
+            roomCode: SyncCoding.str(row, "room_code"),
+            startsAt: SyncCoding.date(row, "starts_at")
+        )
+        persistence.context.insert(room)
+        try? persistence.context.save()
+        return room
+    }
+
+    /// Join a co-start room with the 6-digit code a friend reads or shares.
+    func joinCoStartRoom(code: String, stepText: String, displayName: String) async throws -> CoStartRoomModel? {
+        guard let supabase else { return nil }
+        let normalizedCode = Self.normalizedRoomCode(code)
+        guard Self.isValidRoomCode(normalizedCode) else { return nil }
+        if !supabase.isAuthenticated {
+            try await supabase.anonymousSignIn()
+            isSignedIn = supabase.isAuthenticated
+        }
+        let response = try await supabase.invokeFunction("join_co_start_by_code", body: [
+            "room_code": normalizedCode,
+            "step_text": stepText,
+            "display_name": displayName
+        ])
+        guard let row = response["room"] as? [String: Any],
+              let id = SyncCoding.uuid(row, "id") else { return nil }
+        let room = CoStartRoomModel(
+            id: id,
+            hostUserId: SyncCoding.uuid(row, "host_user_id") ?? UUID(),
+            roomType: CoStartRoomType(rawValue: SyncCoding.str(row, "room_type") ?? "quiet_room") ?? .quietRoom,
+            durationMinutes: SyncCoding.int(row, "duration_minutes") ?? 25,
+            status: CoStartRoomStatus(rawValue: SyncCoding.str(row, "status") ?? "active") ?? .active,
+            roomCode: SyncCoding.str(row, "room_code") ?? normalizedCode,
             startsAt: SyncCoding.date(row, "starts_at")
         )
         persistence.context.insert(room)
@@ -436,4 +491,16 @@ final class AppEnvironment: ObservableObject {
 
     func deleteAllData() { persistence.deleteAllData() }
     func exportJSON() -> String { persistence.exportJSON() }
+
+    private static func makeRoomCode() -> String {
+        String(format: "%06d", Int.random(in: 0...999_999))
+    }
+
+    static func normalizedRoomCode(_ value: String) -> String {
+        String(value.filter(\.isNumber).prefix(6))
+    }
+
+    static func isValidRoomCode(_ value: String) -> Bool {
+        normalizedRoomCode(value).count == 6
+    }
 }

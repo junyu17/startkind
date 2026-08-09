@@ -137,6 +137,99 @@ struct CoStartGuestJoinView: View {
     }
 }
 
+/// Guest join entry for the 6-digit room code flow.
+struct CoStartCodeGuestJoinView: View {
+    @EnvironmentObject var env: AppEnvironment
+    @EnvironmentObject private var loc: LocalizationManager
+    @Environment(\.dismiss) private var dismiss
+    let roomCode: String
+
+    @State private var name = ""
+    @State private var stepText = ""
+    @State private var joining = false
+    @State private var errorMessage: String?
+    @State private var room: CoStartRoomModel?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let room {
+                    CoStartRoomView(room: room, stepText: resolvedStepText, isGuest: true) { outcome in
+                        Task { await env.endCoStartGuest(roomId: room.id, outcome: outcome) }
+                        dismiss()
+                    }
+                } else {
+                    joinForm
+                }
+            }
+            .navigationTitle(L("costart.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } }
+            }
+        }
+    }
+
+    private var joinForm: some View {
+        ScrollView {
+            VStack(spacing: Theme.spacing16) {
+                VStack(spacing: Theme.spacing8) {
+                    Text(verbatim: L("costart.enterCode"))
+                        .font(.headline)
+                    Text(verbatim: roomCode)
+                        .font(.system(size: 34, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.accent)
+                        .accessibilityIdentifier("costart.code")
+                    Text(verbatim: L("costart.guestSubtitle"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, Theme.spacing24)
+
+                TextField(L("costart.yourName"), text: $name)
+                    .textFieldStyle(.roundedBorder)
+                    .accessibilityIdentifier("costart.guestname")
+                TextField(L("costart.yourStep.optional"), text: $stepText, axis: .vertical)
+                    .textFieldStyle(.roundedBorder)
+                    .lineLimit(1...3)
+                    .accessibilityIdentifier("costart.gueststep")
+                if let errorMessage {
+                    Text(verbatim: errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+                PrimaryButton("costart.join", systemImage: "arrow.right.circle.fill", enabled: !joining) {
+                    Task { await join() }
+                }
+            }
+            .padding()
+        }
+    }
+
+    private var resolvedStepText: String {
+        let trimmed = stepText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? L("costart.defaultGuestStep") : trimmed
+    }
+
+    private func join() async {
+        joining = true
+        errorMessage = nil
+        do {
+            room = try await env.joinCoStartRoom(
+                code: roomCode,
+                stepText: resolvedStepText,
+                displayName: name.isEmpty ? L("costart.friend") : name
+            )
+            if room == nil { errorMessage = L("costart.roomNotFound") }
+        } catch {
+            errorMessage = L("common.error")
+        }
+        joining = false
+    }
+}
+
 /// The quiet room: 25-min countdown, your step, participants (polled), end check-in.
 struct CoStartRoomView: View {
     @EnvironmentObject var env: AppEnvironment
@@ -171,8 +264,8 @@ struct CoStartRoomView: View {
                 .monospacedDigit()
                 .foregroundStyle(remaining <= 0 ? Theme.accent : .primary)
 
-            if room.roomType == .friendLink, let link = inviteLink {
-                inviteSection(link)
+            if room.roomType == .friendLink {
+                inviteSection(inviteLink)
             }
 
             Spacer()
@@ -212,20 +305,35 @@ struct CoStartRoomView: View {
 
     private var inviteLink: URL? {
         var c = URLComponents(string: "startkind://join")
-        c?.queryItems = [URLQueryItem(name: "room", value: room.id.uuidString)]
+        c?.queryItems = [URLQueryItem(name: "code", value: room.roomCode)]
         return c?.url
     }
 
     @ViewBuilder
-    private func inviteSection(_ link: URL) -> some View {
-        VStack(spacing: Theme.spacing4) {
-            Text(verbatim: L("costart.waitingForFriend")).font(.caption).foregroundStyle(.secondary)
+    private func inviteSection(_ link: URL?) -> some View {
+        VStack(spacing: Theme.spacing8) {
+            Text(verbatim: L("costart.waitingForFriend"))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if let code = room.roomCode {
+                Text(verbatim: code)
+                    .font(.system(size: 36, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.accent)
+                    .padding(.vertical, Theme.spacing4)
+                    .accessibilityIdentifier("costart.roomcode")
+                Text(verbatim: L("costart.roomCodeHint"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             HStack(spacing: Theme.spacing12) {
-                ShareLink(item: link) {
-                    Label(L("costart.share"), systemImage: "square.and.arrow.up").font(.caption)
+                if let link {
+                    ShareLink(item: link) {
+                        Label(L("costart.share"), systemImage: "square.and.arrow.up").font(.caption)
+                    }
                 }
                 Button {
-                    UIPasteboard.general.string = link.absoluteString
+                    UIPasteboard.general.string = room.roomCode ?? link?.absoluteString
                     copied = true
                 } label: {
                     Label(L("costart.copy"), systemImage: "doc.on.doc").font(.caption)

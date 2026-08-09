@@ -14,7 +14,8 @@
 "start.voice.tap" = "点按说话";
 "start.text.placeholder" = "脑子里一团乱?随便打几个字就好。";
 "start.text.submit" = "给我一步";
-"start.category.section" = "或选一个分类";
+"start.category.section" = "再选一个分类";
+"start.category.selected" = "已加入分类:%@";
 "start.empty.hint" = "说出或写下让你发愁的事,你会得到一个小步骤。";
 
 /* 分类 */
@@ -127,6 +128,19 @@
 "paywall.cta.buy" = "订阅";
 "paywall.restore" = "恢复购买";
 "paywall.dismiss" = "以后再说";
+"paywall.compare.title" = "免费版 / Plus";
+"paywall.free.title" = "免费版";
+"paywall.free.price" = "$0";
+"paywall.free.stepLimit" = "每天有足够的「下一步」次数,先建立使用习惯。";
+"paywall.free.adminLimit" = "每天少量事务快速启动额度。";
+"paywall.free.recovery" = "恢复胶囊和计时器可继续使用。";
+"paywall.free.costart" = "需要陪伴时可加入或试用安静陪做。";
+"paywall.plus.title" = "Plus";
+"paywall.plus.price" = "$9.99 / 月或 $89.99 / 年";
+"paywall.plus.unlimited" = "无限生成「下一步」。";
+"paywall.plus.admin" = "无限解析账单、邮件、预约和事务。";
+"paywall.plus.calibration" = "个人时间校准和执行规律。";
+"paywall.plus.sync" = "多设备同步和完整个人执行模型。";
 "paywall.feature.unlimited" = "无限「下一步」";
 "paywall.feature.admin" = "账单邮件事务解析";
 "paywall.feature.calibration" = "个人时间校准";
@@ -148,6 +162,7 @@
 "common.continue" = "继续";
 "common.gotIt" = "知道了";
 "common.close" = "关闭";
+"common.done" = "完成";
 "common.loading" = "稍等一下…";
 "common.error" = "出了点小状况。可以再试一次。";
 
@@ -189,11 +204,18 @@
 "costart.roomTitle" = "安静房间";
 "costart.yourStep" = "你的步骤";
 "costart.waitingForFriend" = "等待好友加入…";
+"costart.joinByCode" = "输入房间码加入";
+"costart.enterCode" = "输入房间码";
+"costart.code.placeholder" = "6 位数字";
+"costart.code.hint" = "朋友可以从 TA 的安静房间读出这 6 位数字。";
+"costart.roomCodeHint" = "好友输入这个号码即可加入。";
 "costart.share" = "分享";
 "costart.copy" = "复制";
-"costart.copied" = "链接已复制";
+"costart.copied" = "已复制";
 "costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤,加入。";
 "costart.yourName" = "你的名字(可选)";
+"costart.yourStep.optional" = "你的步骤(可选)";
+"costart.defaultGuestStep" = "现在开始";
 "costart.join" = "加入";
 "costart.roomNotFound" = "找不到那个房间,可能已结束。";
 

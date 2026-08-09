@@ -21,10 +21,19 @@ struct RootView: View {
                 CoStartGuestJoinView(roomId: id).environmentObject(env)
             }
         }
+        .sheet(isPresented: codeJoinBinding) {
+            if let code = env.pendingJoinRoomCode {
+                CoStartCodeGuestJoinView(roomCode: code).environmentObject(env)
+            }
+        }
     }
 
     private var joinBinding: Binding<Bool> {
         Binding(get: { env.pendingJoinRoomId != nil }, set: { if !$0 { env.pendingJoinRoomId = nil } })
+    }
+
+    private var codeJoinBinding: Binding<Bool> {
+        Binding(get: { env.pendingJoinRoomCode != nil }, set: { if !$0 { env.pendingJoinRoomCode = nil } })
     }
 
     private var mainTabs: some View {

@@ -27,6 +27,11 @@ final class StartKindUITests: XCTestCase {
 
     private func dismissKeyboard(_ app: XCUIApplication) {
         guard app.keyboards.firstMatch.exists else { return }
+        let done = app.buttons["keyboard.done"]
+        if done.waitForExistence(timeout: 2) {
+            done.tap()
+            if app.keyboards.firstMatch.waitForNonExistence(timeout: 5) { return }
+        }
         if app.scrollViews.firstMatch.exists {
             app.scrollViews.firstMatch.swipeDown()
         } else {
@@ -68,6 +73,50 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(friendInvite.isEnabled, "Friend co-start should enable after entering a step")
     }
 
+    func testStartKeyboardDoneDismissesWhenVisible() throws {
+        let app = launch()
+        let input = app.textFields["start.input"].exists
+            ? app.textFields["start.input"]
+            : app.textViews["start.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "Capture field should exist")
+        input.tap()
+        input.typeText("pay the bill")
+        guard app.keyboards.firstMatch.exists else { return }
+        let done = app.buttons["keyboard.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 5), "Keyboard Done button should exist")
+        done.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "Keyboard should dismiss")
+    }
+
+    func testRoomCodeFieldLimitsToSixDigits() throws {
+        let app = launch()
+        let codeField = app.textFields["start.join.code"]
+        XCTAssertTrue(codeField.waitForExistence(timeout: 15), "Room code field should exist")
+        codeField.tap()
+        codeField.typeText("12345678")
+        XCTAssertEqual((codeField.value as? String) ?? "", "123456")
+        XCTAssertTrue(app.buttons["start.join.submit"].exists, "Join button should exist")
+    }
+
+    func testCategorySelectionShowsFeedback() throws {
+        let app = launch()
+        let billsChip = app.buttons["Bills"]
+        XCTAssertTrue(billsChip.waitForExistence(timeout: 15), "Bills chip should exist")
+        billsChip.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["start.category.selected"].waitForExistence(timeout: 5), "Category selection should show visible feedback")
+    }
+
+    func testPaywallShowsFreePlusComparison() throws {
+        let app = launch()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
+        app.tabBars.firstMatch.buttons.element(boundBy: 3).tap()
+        let plusButton = app.buttons["StartKind Plus"]
+        XCTAssertTrue(plusButton.waitForExistence(timeout: 10), "Plus button should exist in Settings")
+        plusButton.tap()
+        XCTAssertTrue(app.staticTexts["Free vs Plus"].waitForExistence(timeout: 10), "Paywall should compare Free and Plus")
+        XCTAssertTrue(app.staticTexts["$9.99/month or $89.99/year"].exists, "Paywall should show Plus prices")
+    }
+
     func testCoreLoopCaptureToTimerToDone() throws {
         let app = launch()
 
@@ -77,6 +126,7 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(input.waitForExistence(timeout: 15), "Capture field should exist")
         input.tap()
         input.typeText("I'm a mess today and need to deal with bills")
+        dismissKeyboard(app)
 
         // Tap a category chip to guarantee generation is enabled (robust to
         // simulator hardware-keyboard state affecting the text binding).
@@ -114,8 +164,10 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(input.waitForExistence(timeout: 15))
         input.tap()
         input.typeText("I need to deal with my insurance bill")
+        dismissKeyboard(app)
         let insuranceChip = app.buttons["Insurance"]
         if insuranceChip.waitForExistence(timeout: 5) { insuranceChip.tap() }
+        dismissKeyboard(app)
         app.buttons["start.submit"].tap()
 
         let startButton = app.buttons["nextstep.start"]
@@ -215,6 +267,7 @@ final class StartKindUITests: XCTestCase {
         dismissKeyboard(app)
         input.tap()
         input.typeText("I am a mess today and I have an insurance bill I have been avoiding")
+        dismissKeyboard(app)
         let billsChip = app.buttons["Bills"]
         if billsChip.waitForExistence(timeout: 5) { billsChip.tap() }
         dismissKeyboard(app)

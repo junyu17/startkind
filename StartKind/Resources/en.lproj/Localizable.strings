@@ -14,7 +14,8 @@
 "start.voice.tap" = "Tap to speak";
 "start.text.placeholder" = "What's on your mind? Just type it messy.";
 "start.text.submit" = "Get one step";
-"start.category.section" = "Or pick a category";
+"start.category.section" = "And choose a category";
+"start.category.selected" = "Category added: %@";
 "start.empty.hint" = "Say or type what's overwhelming you. You'll get one small step.";
 
 /* Categories */
@@ -127,6 +128,19 @@
 "paywall.cta.buy" = "Subscribe";
 "paywall.restore" = "Restore purchases";
 "paywall.dismiss" = "Maybe later";
+"paywall.compare.title" = "Free vs Plus";
+"paywall.free.title" = "Free";
+"paywall.free.price" = "$0";
+"paywall.free.stepLimit" = "Enough daily one-step help to build the habit.";
+"paywall.free.adminLimit" = "A small daily Admin Quick Start allowance.";
+"paywall.free.recovery" = "Recovery capsule and timers stay usable.";
+"paywall.free.costart" = "Join or try quiet co-start when you need company.";
+"paywall.plus.title" = "Plus";
+"paywall.plus.price" = "$9.99/month or $89.99/year";
+"paywall.plus.unlimited" = "Unlimited one-step starts.";
+"paywall.plus.admin" = "Unlimited bill, email, appointment, and admin parsing.";
+"paywall.plus.calibration" = "Personal time calibration and execution patterns.";
+"paywall.plus.sync" = "Cross-device sync and the full execution model.";
 "paywall.feature.unlimited" = "Unlimited one next step";
 "paywall.feature.admin" = "Admin Task Reader for bills & emails";
 "paywall.feature.calibration" = "Personal time calibration";
@@ -148,6 +162,7 @@
 "common.continue" = "Continue";
 "common.gotIt" = "Got it";
 "common.close" = "Close";
+"common.done" = "Done";
 "common.loading" = "One moment…";
 "common.error" = "Something went sideways. You can try again.";
 
@@ -189,11 +204,18 @@
 "costart.roomTitle" = "Quiet room";
 "costart.yourStep" = "Your step";
 "costart.waitingForFriend" = "Waiting for your friend…";
+"costart.joinByCode" = "Join with room code";
+"costart.enterCode" = "Enter room code";
+"costart.code.placeholder" = "6-digit code";
+"costart.code.hint" = "Your friend can read the 6 digits from their quiet room.";
+"costart.roomCodeHint" = "Friend enters this code to join.";
 "costart.share" = "Share";
 "costart.copy" = "Copy";
-"costart.copied" = "Link copied";
+"costart.copied" = "Copied";
 "costart.guestSubtitle" = "A friend invited you to co-start. State one small step and join.";
 "costart.yourName" = "Your name (optional)";
+"costart.yourStep.optional" = "Your step (optional)";
+"costart.defaultGuestStep" = "Starting now";
 "costart.join" = "Join";
 "costart.roomNotFound" = "Couldn't find that room. It may have ended.";
 

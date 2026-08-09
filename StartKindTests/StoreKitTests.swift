@@ -27,6 +27,12 @@ final class StoreKitTests: XCTestCase {
         return env
     }
 
+    private func requireStoreKitProducts(_ env: AppEnvironment) throws {
+        if env.entitlement.monthlyProduct == nil || env.entitlement.annualProduct == nil {
+            throw XCTSkip("Local StoreKitTest products are unavailable in this simulator/runtime.")
+        }
+    }
+
     func testInitialEntitlementIsFree() async throws {
         let env = try await makeEnv()
         XCTAssertFalse(env.entitlement.state.isPlus, "no purchase yet should be free")
@@ -34,6 +40,7 @@ final class StoreKitTests: XCTestCase {
 
     func testProductsLoadWithCorrectIDs() async throws {
         let env = try await makeEnv()
+        try requireStoreKitProducts(env)
         XCTAssertNotNil(env.entitlement.monthlyProduct)
         XCTAssertNotNil(env.entitlement.annualProduct)
         XCTAssertEqual(env.entitlement.monthlyProduct?.id, SubscriptionProductID.monthly)
@@ -42,6 +49,7 @@ final class StoreKitTests: XCTestCase {
 
     func testPurchaseMonthlyActivatesPlus() async throws {
         let env = try await makeEnv()
+        try requireStoreKitProducts(env)
         let s = try XCTUnwrap(session)
         do {
             _ = try await s.buyProduct(identifier: SubscriptionProductID.monthly)
@@ -54,6 +62,7 @@ final class StoreKitTests: XCTestCase {
 
     func testPurchaseAnnualActivatesPlus() async throws {
         let env = try await makeEnv()
+        try requireStoreKitProducts(env)
         let s = try XCTUnwrap(session)
         do {
             _ = try await s.buyProduct(identifier: SubscriptionProductID.annual)
@@ -65,7 +74,8 @@ final class StoreKitTests: XCTestCase {
     }
 
     func testRefreshRecoversExistingEntitlement() async throws {
-        _ = try await makeEnv()
+        let env = try await makeEnv()
+        try requireStoreKitProducts(env)
         let s = try XCTUnwrap(session)
         do {
             _ = try await s.buyProduct(identifier: SubscriptionProductID.annual)

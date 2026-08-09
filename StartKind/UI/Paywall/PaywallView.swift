@@ -19,6 +19,7 @@ struct PaywallView: View {
                         limitMessage
                     }
 
+                    planComparison
                     featuresList
                     planPicker
 
@@ -73,6 +74,72 @@ struct PaywallView: View {
             featureRow("paywall.feature.model")
         }
         .startKindCard()
+    }
+
+    private var planComparison: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            SectionLabel("paywall.compare.title")
+            comparisonCard(
+                title: L("paywall.free.title"),
+                price: L("paywall.free.price"),
+                points: [
+                    L("paywall.free.stepLimit"),
+                    L("paywall.free.adminLimit"),
+                    L("paywall.free.recovery"),
+                    L("paywall.free.costart")
+                ],
+                highlighted: false
+            )
+            comparisonCard(
+                title: L("paywall.plus.title"),
+                price: L("paywall.plus.price"),
+                points: [
+                    L("paywall.plus.unlimited"),
+                    L("paywall.plus.admin"),
+                    L("paywall.plus.calibration"),
+                    L("paywall.plus.sync")
+                ],
+                highlighted: true
+            )
+        }
+        .startKindCard()
+    }
+
+    private func comparisonCard(title: String, price: String, points: [String], highlighted: Bool) -> some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: title)
+                        .font(.headline)
+                    Text(verbatim: price)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(highlighted ? Theme.accent : .secondary)
+                }
+                Spacer()
+                Image(systemName: highlighted ? "sparkles" : "checkmark.circle")
+                    .foregroundStyle(highlighted ? Theme.accent : .secondary)
+            }
+            ForEach(points, id: \.self) { point in
+                HStack(alignment: .top, spacing: Theme.spacing8) {
+                    Image(systemName: "checkmark")
+                        .font(.caption)
+                        .foregroundStyle(highlighted ? Theme.accent : .secondary)
+                        .frame(width: 16)
+                    Text(verbatim: point)
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(Theme.spacing12)
+        .background(highlighted ? Theme.softAccent : Theme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(highlighted ? Theme.accent.opacity(0.28) : Theme.line, lineWidth: 1)
+        )
     }
 
     private func featureRow(_ key: String) -> some View {

@@ -5,10 +5,13 @@ struct StartView: View {
     @EnvironmentObject private var loc: LocalizationManager
 
     @State private var inputText = ""
+    @State private var joinRoomCode = ""
+    @FocusState private var focusedField: FocusedField?
     @State private var lastSource: CaptureSource = .text
     @State private var selectedCategory: TaskCategory?
     @State private var currentStep: NextStepModel?
     @State private var isLoading = false
+    @State private var isJoiningRoom = false
     @State private var errorMessage: String?
     @State private var rescheduleMessage: String?
     @State private var showPlan = false
@@ -19,6 +22,14 @@ struct StartView: View {
     @State private var timerSession: TimerSessionModel?
     @State private var showCoStart = false
     @State private var coStartInitialMode: CoStartRoomType?
+    @State private var joinedCoStartRoom: CoStartRoomModel?
+    @State private var joinedCoStartStepText = ""
+    @State private var showJoinedCoStart = false
+
+    private enum FocusedField: Hashable {
+        case taskInput
+        case roomCode
+    }
 
     var body: some View {
         NavigationStack {
@@ -66,6 +77,13 @@ struct StartView: View {
             .navigationBarTitleDisplayMode(.inline)
             .background(Theme.background.ignoresSafeArea())
             .scrollDismissesKeyboard(.immediately)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button(L("common.done")) { focusedField = nil }
+                        .accessibilityIdentifier("keyboard.done")
+                }
+            }
         }
         .sheet(item: $timerSession) { session in
             if let step = currentStep {
@@ -82,6 +100,15 @@ struct StartView: View {
             if let step = currentStep {
                 CoStartView(step: step, initialMode: coStartInitialMode)
                     .environmentObject(env)
+            }
+        }
+        .sheet(isPresented: $showJoinedCoStart) {
+            if let room = joinedCoStartRoom {
+                CoStartRoomView(room: room, stepText: joinedCoStartStepText, isGuest: true) { outcome in
+                    Task { await env.endCoStartGuest(roomId: room.id, outcome: outcome) }
+                    showJoinedCoStart = false
+                }
+                .environmentObject(env)
             }
         }
         .onChange(of: env.speech.transcript) { _, new in
@@ -126,6 +153,7 @@ struct StartView: View {
             voiceButton
             captureField
             quickFriendCoStartButton
+            roomCodeJoinField
         }
         .startKindCard()
     }
@@ -166,8 +194,10 @@ struct StartView: View {
             TextField(L("start.text.placeholder"), text: $inputText, axis: .vertical)
                 .lineLimit(1...4)
                 .submitLabel(.done)
+                .focused($focusedField, equals: .taskInput)
                 .accessibilityIdentifier("start.input")
                 .onChange(of: inputText) { _, _ in lastSource = .text }
+                .onSubmit { focusedField = nil }
 
             Button {
                 Task { await generate() }
@@ -217,10 +247,52 @@ struct StartView: View {
         .accessibilityIdentifier("start.costart.friend")
     }
 
+    private var roomCodeJoinField: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            SectionLabel("costart.joinByCode")
+            FieldShell(systemImage: "number") {
+                TextField(L("costart.code.placeholder"), text: $joinRoomCode)
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .focused($focusedField, equals: .roomCode)
+                    .accessibilityIdentifier("start.join.code")
+                    .onChange(of: joinRoomCode) { _, newValue in
+                        let normalized = AppEnvironment.normalizedRoomCode(newValue)
+                        if normalized != newValue { joinRoomCode = normalized }
+                    }
+
+                Button {
+                    Task { await joinRoomByCode() }
+                } label: {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(canJoinRoom ? Theme.accent : Color.secondary.opacity(0.45))
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canJoinRoom)
+                .accessibilityLabel(Text(verbatim: L("costart.join")))
+                .accessibilityIdentifier("start.join.submit")
+            }
+            Text(verbatim: L("costart.code.hint"))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     private var categoryChips: some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
             SectionLabel("start.category.section")
             FlowChips(items: quickCategories, selected: $selectedCategory)
+            if let selectedCategory {
+                Label(L("start.category.selected", L(selectedCategory.localizationKey)), systemImage: "checkmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+                    .accessibilityIdentifier("start.category.selected")
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -294,6 +366,10 @@ struct StartView: View {
         currentStep != nil || canSubmit
     }
 
+    private var canJoinRoom: Bool {
+        !isJoiningRoom && AppEnvironment.isValidRoomCode(joinRoomCode)
+    }
+
     // MARK: - Actions
 
     private func toggleVoice() {
@@ -311,6 +387,7 @@ struct StartView: View {
     }
 
     private func startFriendCoStart() async {
+        focusedField = nil
         if let step = currentStep {
             coStartInitialMode = .friendLink
             currentStep = step
@@ -346,6 +423,7 @@ struct StartView: View {
     }
 
     private func generate() async {
+        focusedField = nil
         let raw = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty || selectedCategory != nil else { return }
         guard env.canGenerateStep else {
@@ -369,6 +447,33 @@ struct StartView: View {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
         }
         isLoading = false
+    }
+
+    private func joinRoomByCode() async {
+        focusedField = nil
+        let code = AppEnvironment.normalizedRoomCode(joinRoomCode)
+        guard AppEnvironment.isValidRoomCode(code) else { return }
+        isJoiningRoom = true
+        errorMessage = nil
+        let guestStep = L("costart.defaultGuestStep")
+        do {
+            let room = try await env.joinCoStartRoom(
+                code: code,
+                stepText: guestStep,
+                displayName: L("costart.friend")
+            )
+            if let room {
+                joinedCoStartRoom = room
+                joinedCoStartStepText = guestStep
+                showJoinedCoStart = true
+                joinRoomCode = ""
+            } else {
+                errorMessage = L("costart.roomNotFound")
+            }
+        } catch {
+            errorMessage = L("common.error")
+        }
+        isJoiningRoom = false
     }
 
     private func captureInput(raw: String) -> CaptureInput {
@@ -439,7 +544,7 @@ struct FlowChips: View {
                     Label {
                         Text(verbatim: L(item.localizationKey))
                     } icon: {
-                        Image(systemName: item.systemImage)
+                        Image(systemName: selected == item ? "checkmark.circle.fill" : item.systemImage)
                     }
                     .font(.subheadline)
                     .padding(.horizontal, Theme.spacing12)

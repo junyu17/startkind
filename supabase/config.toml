@@ -7,6 +7,9 @@ verify_jwt = true
 [functions.admin_task_reader]
 verify_jwt = true
 
+[functions.join_co_start_by_code]
+verify_jwt = true
+
 [functions.verify_receipt]
 verify_jwt = true
 

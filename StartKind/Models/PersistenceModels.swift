@@ -486,6 +486,7 @@ final class CoStartRoomModel {
     var durationMinutes: Int
     var statusValue: String
     var inviteTokenHash: String?
+    var roomCode: String?
     var createdAt: Date
     var startsAt: Date?
     var endedAt: Date?
@@ -497,6 +498,7 @@ final class CoStartRoomModel {
         durationMinutes: Int = 25,
         status: CoStartRoomStatus = .scheduled,
         inviteTokenHash: String? = nil,
+        roomCode: String? = nil,
         createdAt: Date = .now,
         startsAt: Date? = nil,
         endedAt: Date? = nil
@@ -507,6 +509,7 @@ final class CoStartRoomModel {
         self.durationMinutes = durationMinutes
         self.statusValue = status.rawValue
         self.inviteTokenHash = inviteTokenHash
+        self.roomCode = roomCode
         self.createdAt = createdAt
         self.startsAt = startsAt
         self.endedAt = endedAt
