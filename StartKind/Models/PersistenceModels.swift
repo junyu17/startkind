@@ -408,6 +408,19 @@ final class RecoveryCapsuleModel {
             generatedBy: .user
         )
     }
+
+    var blockerReason: BlockerReason? {
+        Self.decodeBlocker(from: relatedDraft)
+    }
+
+    static func blockerDraft(_ reason: BlockerReason) -> String {
+        "blocker:\(reason.rawValue)"
+    }
+
+    static func decodeBlocker(from value: String?) -> BlockerReason? {
+        guard let value, value.hasPrefix("blocker:") else { return nil }
+        return BlockerReason(rawValue: String(value.dropFirst("blocker:".count)))
+    }
 }
 
 // MARK: - AdminArtifact

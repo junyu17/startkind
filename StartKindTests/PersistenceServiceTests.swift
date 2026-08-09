@@ -94,6 +94,30 @@ final class PersistenceServiceTests: XCTestCase {
         XCTAssertEqual(capsule.resumeProposal.step, result.proposal.step)
     }
 
+    func testPausedTimerStoresBlockerInRecoveryCapsule() throws {
+        let svc = try makeService()
+        let step = svc.saveNextStep(proposal: sampleProposal(.insurance), capture: nil, taskTitle: "T")
+        let session = svc.startTimer(for: step, plannedMinutes: 10)
+
+        svc.recordTimerOutcome(session: session, actualSeconds: 120, outcome: .paused, step: step, isPlus: false, blocker: .needDocument)
+
+        let capsule = try XCTUnwrap(svc.activeRecoveryCapsule())
+        XCTAssertEqual(capsule.blockerReason, .needDocument)
+        XCTAssertEqual(capsule.relatedDraft, RecoveryCapsuleModel.blockerDraft(.needDocument))
+    }
+
+    func testAbandonedTimerStoresBlockerInRecoveryCapsule() throws {
+        let svc = try makeService()
+        let step = svc.saveNextStep(proposal: sampleProposal(.household), capture: nil, taskTitle: "T")
+        let session = svc.startTimer(for: step, plannedMinutes: 10)
+
+        svc.recordTimerOutcome(session: session, actualSeconds: 30, outcome: .abandoned, step: step, isPlus: false, blocker: .tooBig)
+
+        let capsule = try XCTUnwrap(svc.activeRecoveryCapsule())
+        XCTAssertEqual(step.status, .skipped)
+        XCTAssertEqual(capsule.blockerReason, .tooBig)
+    }
+
     func testDeleteAllDataClearsHistory() throws {
         let svc = try makeService()
         let step = svc.saveNextStep(proposal: sampleProposal(), capture: nil, taskTitle: "T")

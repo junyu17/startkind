@@ -23,6 +23,31 @@
 "start.kindStart.resume" = "Pick up where you left";
 "start.kindStart.adminLeft" = "%d admin left";
 
+/* MARK: - Micro Templates + Vault */
+"template.open" = "Tiny templates";
+"template.title" = "Tiny templates";
+"template.applied" = "Template loaded. Start the timer when ready.";
+"template.bill.title" = "Bill starter";
+"template.bill.subtitle" = "Find amount, due date, or pay button.";
+"template.email.title" = "Reply starter";
+"template.email.subtitle" = "Write one sentence, not the whole reply.";
+"template.appointment.title" = "Appointment starter";
+"template.appointment.subtitle" = "Find one booking route.";
+"template.document.title" = "Document starter";
+"template.document.subtitle" = "Search one place only.";
+"template.home.title" = "Home reset";
+"template.home.subtitle" = "Move three things from one spot.";
+"template.badDay.title" = "Bad day reset";
+"template.badDay.subtitle" = "A 5-minute nervous-system start.";
+"vault.open" = "Personal vault";
+"vault.title" = "Personal vault";
+"vault.saved" = "Saved to your local vault.";
+"vault.applied" = "Vault step loaded. Start small.";
+"vault.stop" = "Stop when this saved step has been touched once.";
+"vault.why" = "Saved starts remove the decision work from beginning again.";
+"vault.empty.title" = "No saved starts yet";
+"vault.empty.body" = "Save a useful next step from a card and it will appear here.";
+
 /* Categories */
 "category.bills" = "Bills";
 "category.email" = "Email";
@@ -52,6 +77,8 @@
 "nextstep.estimated" = "About %d min";
 "nextstep.shrink.level" = "Smaller version";
 "nextstep.tryVersion" = "Try this version";
+"nextstep.share" = "Share";
+"nextstep.saveVault" = "Save";
 
 /* MARK: - Timer */
 "timer.title" = "Focus on this step";
@@ -61,6 +88,7 @@
 "timer.pause" = "Pause";
 "timer.resume" = "Resume";
 "timer.makeSmaller" = "Make it smaller";
+"timer.interrupted" = "I got interrupted";
 "timer.continueFive" = "Continue 5 minutes";
 "timer.step" = "Your step";
 "timer.stopHint" = "Stop when: %@";
@@ -81,7 +109,20 @@
 "recover.resume" = "Continue from here";
 "recover.startTimer" = "Start timer";
 "recover.related" = "Note";
+"recover.blocker" = "Blocker: %@";
 "recover.clear" = "Clear this capsule";
+
+/* MARK: - Blockers */
+"blocker.title.pause" = "What got in the way?";
+"blocker.title.skip" = "What blocked this?";
+"blocker.subtitle" = "This is not a score. It helps StartKind make the restart smaller next time.";
+"blocker.skip" = "Not sure";
+"blocker.need_login" = "Need login";
+"blocker.need_document" = "Need document";
+"blocker.too_vague" = "Too vague";
+"blocker.too_big" = "Too big";
+"blocker.emotionally_hard" = "Emotionally hard";
+"blocker.need_another_person" = "Need another person";
 
 /* MARK: - Patterns */
 "patterns.title" = "Patterns";
@@ -102,6 +143,7 @@
 "patterns.model.summary.tiny" = "%@ looks easier to start when the first step is very small.";
 "patterns.model.summary.window" = "%@ starts best in the %@ window.";
 "patterns.model.summary.steady" = "%@ is becoming predictable enough for normal 10-minute starts.";
+"patterns.model.blocker" = "Current restart blocker: %@";
 "window.morning" = "morning";
 "window.afternoon" = "afternoon";
 "window.evening" = "evening";
@@ -221,6 +263,7 @@
 "common.continue" = "Continue";
 "common.gotIt" = "Got it";
 "common.close" = "Close";
+"common.delete" = "Delete";
 "common.done" = "Done";
 "common.loading" = "One moment…";
 "common.error" = "Something went sideways. You can try again.";

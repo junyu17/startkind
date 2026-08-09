@@ -34,6 +34,11 @@ targets:
         buildPhase: resources
       - path: StartKind/Resources/Products.storekit
         buildPhase: resources
+    dependencies:
+      - target: StartKindShareExtension
+        embed: true
+      - target: StartKindWidgetExtension
+        embed: true
     info:
       path: StartKind/Info.plist
       properties:
@@ -68,6 +73,55 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
         SUPPORTS_MACCATALYST: NO
+  StartKindShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StartKindShareExtension
+        excludes:
+          - "Info.plist"
+    info:
+      path: StartKindShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: StartKind
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind.share
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+        SUPPORTS_MACCATALYST: NO
+  StartKindWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StartKindWidgetExtension
+        excludes:
+          - "Info.plist"
+    info:
+      path: StartKindWidgetExtension/Info.plist
+      properties:
+        CFBundleDisplayName: StartKind
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind.widget
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+        SUPPORTS_MACCATALYST: NO
   StartKindTests:
     type: bundle.unit-test
     platform: iOS
@@ -101,6 +155,8 @@ schemes:
     build:
       targets:
         StartKind: all
+        StartKindShareExtension: all
+        StartKindWidgetExtension: all
         StartKindTests: [test]
         StartKindUITests: [test]
     run:

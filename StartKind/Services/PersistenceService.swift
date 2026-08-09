@@ -139,6 +139,17 @@ final class PersistenceService: ObservableObject {
         step: NextStepModel?,
         isPlus: Bool
     ) {
+        recordTimerOutcome(session: session, actualSeconds: actualSeconds, outcome: outcome, step: step, isPlus: isPlus, blocker: nil)
+    }
+
+    func recordTimerOutcome(
+        session: TimerSessionModel,
+        actualSeconds: Int,
+        outcome: TimerOutcome,
+        step: NextStepModel?,
+        isPlus: Bool,
+        blocker: BlockerReason?
+    ) {
         session.actualSeconds = actualSeconds
         session.outcome = outcome
         session.endedAt = .now
@@ -149,9 +160,10 @@ final class PersistenceService: ObservableObject {
             clearActiveRecoveryCapsule()
         case .partial, .paused:
             step?.status = .paused
-            if let step { upsertRecoveryCapsule(for: step, isPlus: isPlus) }
+            if let step { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker) }
         case .abandoned:
             step?.status = .skipped
+            if let step, let blocker { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker) }
         }
         step?.updatedAt = .now
         try? context.save()
@@ -159,7 +171,7 @@ final class PersistenceService: ObservableObject {
 
     // MARK: - Recovery Capsule
 
-    func upsertRecoveryCapsule(for step: NextStepModel, isPlus: Bool) {
+    func upsertRecoveryCapsule(for step: NextStepModel, isPlus: Bool, blocker: BlockerReason? = nil) {
         let id = userId
         // Free: keep at most one active capsule.
         if !isPlus {
@@ -181,7 +193,8 @@ final class PersistenceService: ObservableObject {
             resumeStopCondition: proposal.stopCondition,
             resumeTimerMinutes: proposal.timerMinutes,
             resumeCategory: proposal.category,
-            resumeShrinkLevel: proposal.shrinkLevel
+            resumeShrinkLevel: proposal.shrinkLevel,
+            relatedDraft: blocker.map(RecoveryCapsuleModel.blockerDraft)
         )
         context.insert(capsule)
         try? context.save()

@@ -1,6 +1,6 @@
 # Testing and Delivery Rules
 
-Last updated: 2026-08-07
+Last updated: 2026-08-09
 
 Every code change must be self-reviewed and tested before delivery.
 
@@ -25,8 +25,10 @@ Minimum:
 
 ```bash
 xcodebuild -list
-xcodebuild -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 16' build
-xcodebuild -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 16' test
+xcodegen generate
+xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' build
+xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindTests
+xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindUITests
 ```
 
 For subscription work:
@@ -42,6 +44,14 @@ For UI work:
 - Test large iPhone.
 - Test Dynamic Type.
 - Check VoiceOver labels for primary buttons.
+
+For extension work:
+
+- Run `xcodegen generate` before building.
+- Confirm extension `Info.plist` files contain `NSExtension`.
+- Build the main app scheme so embedded extensions are installed.
+- Test the share extension from at least Safari or Mail on a signed device before submission.
+- Confirm the widget opens `startkind://start`.
 
 ## Future Android Required Checks
 

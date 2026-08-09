@@ -16,6 +16,9 @@ struct StartView: View {
     @State private var rescheduleMessage: String?
     @State private var showPlan = false
     @State private var showAdminReader = false
+    @State private var showTemplates = false
+    @State private var showVault = false
+    @State private var vaultMessage: String?
 
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
@@ -55,6 +58,10 @@ struct StartView: View {
                                 currentStep = step
                                 coStartInitialMode = nil
                                 showCoStart = true
+                            },
+                            onSaveToVault: {
+                                env.vault.add(title: step.proposal.title, body: step.proposal.step, category: step.category)
+                                vaultMessage = L("vault.saved")
                             }
                         )
                     } else {
@@ -63,6 +70,10 @@ struct StartView: View {
 
                     if let rescheduleMessage {
                         KindBanner(text: rescheduleMessage)
+                            .transition(.opacity)
+                    }
+                    if let vaultMessage {
+                        KindBanner(text: vaultMessage)
                             .transition(.opacity)
                     }
                     if let errorMessage {
@@ -89,8 +100,8 @@ struct StartView: View {
         }
         .sheet(item: $timerSession) { session in
             if let step = currentStep {
-                TimerView(session: session, step: step) { outcome in
-                    handleTimerOutcome(outcome, session: session, step: step)
+                TimerView(session: session, step: step) { outcome, blocker in
+                    handleTimerOutcome(outcome, session: session, step: step, blocker: blocker)
                 }
             }
         }
@@ -101,6 +112,16 @@ struct StartView: View {
         .sheet(isPresented: $showAdminReader) {
             AdminQuickReaderView()
                 .environmentObject(env)
+        }
+        .sheet(isPresented: $showTemplates) {
+            MicroTemplatePickerView(templates: MicroTemplateLibrary.templates(language: env.currentLanguage)) { template in
+                apply(template)
+            }
+        }
+        .sheet(isPresented: $showVault) {
+            VaultPickerView(vault: env.vault) { item in
+                useVaultItem(item)
+            }
         }
         .sheet(isPresented: $showCoStart) {
             if let step = currentStep {
@@ -122,6 +143,14 @@ struct StartView: View {
                 inputText = new
                 lastSource = .voice
             }
+        }
+        .onChange(of: env.pendingCaptureText) { _, newValue in
+            guard let newValue, !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+            inputText = newValue
+            lastSource = .manual
+            currentStep = nil
+            focusedField = .taskInput
+            env.pendingCaptureText = nil
         }
     }
 
@@ -173,6 +202,14 @@ struct StartView: View {
                 }
                 kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
                     showAdminReader = true
+                }
+            }
+            HStack(spacing: Theme.spacing8) {
+                kindStartButton("template.open", systemImage: "square.grid.2x2.fill", id: "start.templates") {
+                    showTemplates = true
+                }
+                kindStartButton("vault.open", systemImage: "tray.full.fill", id: "start.vault") {
+                    showVault = true
                 }
             }
 
@@ -499,6 +536,7 @@ struct StartView: View {
             let step = try await env.generateNextStep(input: captureInput(raw: raw))
             currentStep = step
             rescheduleMessage = nil
+            vaultMessage = nil
             showPlan = false
             coStartInitialMode = .friendLink
             showCoStart = true
@@ -528,6 +566,7 @@ struct StartView: View {
         do {
             currentStep = try await env.generateNextStep(input: captureInput(raw: raw))
             rescheduleMessage = nil
+            vaultMessage = nil
             showPlan = false
         } catch let usageError as UsageError {
             switch usageError {
@@ -591,6 +630,40 @@ struct StartView: View {
         timerSession = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
     }
 
+    private func apply(_ template: MicroTemplate) {
+        currentStep = env.createLocalNextStep(
+            proposal: template.proposal,
+            sourceText: L(template.titleKey),
+            source: .manual
+        )
+        inputText = ""
+        selectedCategory = template.proposal.category
+        rescheduleMessage = L("template.applied")
+        vaultMessage = nil
+        showPlan = false
+        showTemplates = false
+    }
+
+    private func useVaultItem(_ item: VaultItem) {
+        let category = item.category ?? .other
+        let proposal = NextStepProposal(
+            title: item.title,
+            step: item.body,
+            timerMinutes: 5,
+            stopCondition: L("vault.stop"),
+            category: category,
+            shrinkLevel: .one,
+            whyThisStep: L("vault.why")
+        )
+        currentStep = env.createLocalNextStep(proposal: proposal, sourceText: item.body, source: .manual)
+        inputText = ""
+        selectedCategory = category
+        rescheduleMessage = L("vault.applied")
+        vaultMessage = nil
+        showPlan = false
+        showVault = false
+    }
+
     private func shrink(_ step: NextStepModel) {
         let proposal = env.shrinkCurrentStep(step)
         if proposal.shrinkLevel == step.shrinkLevel {
@@ -603,10 +676,10 @@ struct StartView: View {
         rescheduleMessage = result.message
     }
 
-    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel) {
+    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel, blocker: BlockerReason? = nil) {
         let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
         if outcome == .completed {
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
             timerSession = nil
             withAnimation {
                 currentStep = nil
@@ -616,12 +689,12 @@ struct StartView: View {
             }
         } else if outcome == .partial || outcome == .paused {
             let result = env.rescheduleStep(step, reason: .paused)
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
             timerSession = nil
             rescheduleMessage = result.message
         } else {
             let result = env.rescheduleStep(step, reason: .skipped)
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
             timerSession = nil
             rescheduleMessage = result.message
         }
@@ -717,6 +790,107 @@ struct FlowLayout: Layout {
             subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
+struct MicroTemplatePickerView: View {
+    let templates: [MicroTemplate]
+    let onSelect: (MicroTemplate) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(templates) { template in
+                    Button {
+                        onSelect(template)
+                    } label: {
+                        HStack(spacing: Theme.spacing12) {
+                            Image(systemName: template.systemImage)
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: Theme.spacing4) {
+                                Text(verbatim: L(template.titleKey))
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(Theme.ink)
+                                Text(verbatim: L(template.subtitleKey))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                    }
+                    .accessibilityIdentifier("template.\(template.id)")
+                }
+            }
+            .navigationTitle(L("template.title"))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L("common.close")) { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+struct VaultPickerView: View {
+    @ObservedObject var vault: PersonalVaultStore
+    let onUse: (VaultItem) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if vault.items.isEmpty {
+                    ContentUnavailableView(
+                        L("vault.empty.title"),
+                        systemImage: "tray",
+                        description: Text(verbatim: L("vault.empty.body"))
+                    )
+                } else {
+                    List {
+                        ForEach(vault.items) { item in
+                            Button {
+                                onUse(item)
+                            } label: {
+                                VStack(alignment: .leading, spacing: Theme.spacing4) {
+                                    Text(verbatim: item.title)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Theme.ink)
+                                    Text(verbatim: item.body)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                    if let category = item.category {
+                                        Label(L(category.localizationKey), systemImage: category.systemImage)
+                                            .font(.caption2)
+                                            .foregroundStyle(Theme.accent)
+                                    }
+                                }
+                            }
+                            .accessibilityIdentifier("vault.item")
+                            .swipeActions {
+                                Button(L("common.delete"), role: .destructive) {
+                                    vault.delete(item)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(L("vault.title"))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L("common.close")) { dismiss() }
+                }
+            }
         }
     }
 }

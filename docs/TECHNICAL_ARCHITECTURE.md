@@ -1,6 +1,6 @@
 # Technical Architecture
 
-Last updated: 2026-08-07
+Last updated: 2026-08-09
 
 ## Platform Requirement
 
@@ -37,6 +37,7 @@ The iOS app should implement these domain modules. Future Android should mirror 
 - SwiftData for local persistence where appropriate
 - StoreKit 2 for subscriptions
 - Speech framework or OS dictation path for voice input
+- WidgetKit for Home Screen restart entry points
 - XCTest for unit tests
 - XCUITest for core flows
 
@@ -90,9 +91,11 @@ Plus:
 Free core features should work offline:
 
 - Local templates
+- Local micro-templates
 - Timers
 - Local history
 - Recovery Capsule
+- Personal Vault
 - Basic manual task shrinking
 
 Plus cloud-only features should degrade gracefully:
@@ -123,6 +126,21 @@ Use AI only when it produces clear value:
 - complex rescheduling
 
 Use deterministic local templates for common Free actions.
+
+## iOS Extensions and Local Retention Surfaces
+
+StartKind has two iOS extension targets:
+
+- `StartKindShareExtension`: accepts shared text or URLs and opens `startkind://capture?text=...`.
+- `StartKindWidgetExtension`: provides a WidgetKit quick-start surface that deep-links to `startkind://start`.
+
+The retention surfaces are intentionally local-first:
+
+- `MicroTemplateLibrary` generates common adult-admin next steps without network calls.
+- `PersonalVaultStore` stores reusable tiny-start snippets in `UserDefaults`.
+- Blocker reasons are encoded into existing recovery-capsule metadata to avoid a SwiftData schema migration for this release pass.
+
+If the extension targets are archived for App Store upload, the signing setup must include `ren.startkind.share` and `ren.startkind.widget` bundle identifiers.
 
 ## Security
 

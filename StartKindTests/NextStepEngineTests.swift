@@ -40,6 +40,23 @@ final class NextStepEngineTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(tiny.timerMinutes, 5)
     }
 
+    func testBadDayModeProducesTinyRestartStep() {
+        let p = engine.generate(CaptureInput(rawText: "I'm overwhelmed and I can't start", source: .text, preferredCategory: nil, language: "en"))
+        XCTAssertEqual(p.category, .other)
+        XCTAssertEqual(p.shrinkLevel, .two)
+        XCTAssertEqual(p.timerMinutes, 5)
+        XCTAssertTrue(p.step.lowercased().contains("breath"))
+        XCTAssertFalse((p.whyThisStep ?? "").isEmpty)
+    }
+
+    func testBadDayModeSupportsChineseInput() {
+        let p = engine.generate(CaptureInput(rawText: "我今天一团乱", source: .text, preferredCategory: .bills, language: "zh-Hans"))
+        XCTAssertEqual(p.category, .bills)
+        XCTAssertEqual(p.shrinkLevel, .two)
+        XCTAssertEqual(p.timerMinutes, 5)
+        XCTAssertTrue(p.step.contains("呼气"))
+    }
+
     func testEveryCategoryProducesValidStep() {
         for category in TaskCategory.allCases {
             let p = engine.generate(CaptureInput(rawText: category.rawValue, source: .text, preferredCategory: category, language: "en"))

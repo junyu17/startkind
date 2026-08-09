@@ -25,14 +25,14 @@ struct RecoverView: View {
         .onAppear { capsule = env.activeCapsule() }
         .sheet(isPresented: $showTimer) {
             if let session, let step = env.persistence.fetchNextStep(id: session.nextStepId ?? UUID()) {
-                TimerView(session: session, step: step) { outcome in
+                TimerView(session: session, step: step) { outcome, blocker in
                     let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
                     if outcome == .partial || outcome == .paused {
                         _ = env.rescheduleStep(step, reason: .paused)
                     } else if outcome == .abandoned {
                         _ = env.rescheduleStep(step, reason: .skipped)
                     }
-                    env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step)
+                    env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
                     showTimer = false
                     if outcome == .completed { capsule = nil }
                 }
@@ -62,6 +62,14 @@ struct RecoverView: View {
                 Text(verbatim: L("recover.related") + ": " + link)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
+
+            if let blocker = model.blockerReason {
+                Label(L("recover.blocker", L(blocker.localizationKey)), systemImage: blocker.systemImage)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.accent)
+                    .padding(.vertical, Theme.spacing4)
+                    .accessibilityIdentifier("recover.blocker")
             }
 
             PrimaryButton("recover.startTimer", systemImage: "play.fill") {

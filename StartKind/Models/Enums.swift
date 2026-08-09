@@ -127,6 +127,32 @@ enum CoStartRoomStatus: String, Codable, CaseIterable, Sendable {
     case scheduled, active, ended, cancelled
 }
 
+// MARK: - Blocker
+
+enum BlockerReason: String, Codable, CaseIterable, Sendable, Identifiable {
+    case needLogin = "need_login"
+    case needDocument = "need_document"
+    case tooVague = "too_vague"
+    case tooBig = "too_big"
+    case emotionallyHard = "emotionally_hard"
+    case needAnotherPerson = "need_another_person"
+
+    var id: String { rawValue }
+
+    var localizationKey: String { "blocker.\(rawValue)" }
+
+    var systemImage: String {
+        switch self {
+        case .needLogin: return "key.fill"
+        case .needDocument: return "doc.fill"
+        case .tooVague: return "questionmark.circle.fill"
+        case .tooBig: return "arrow.down.right.circle.fill"
+        case .emotionallyHard: return "heart.circle.fill"
+        case .needAnotherPerson: return "person.2.fill"
+        }
+    }
+}
+
 // MARK: - Admin Artifact
 
 enum AdminArtifactType: String, Codable, CaseIterable, Sendable {

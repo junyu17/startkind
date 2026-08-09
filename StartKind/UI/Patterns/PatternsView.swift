@@ -72,6 +72,13 @@ struct PatternsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            if let blocker = env.activeCapsule()?.blockerReason {
+                Label(L("patterns.model.blocker", L(blocker.localizationKey)), systemImage: blocker.systemImage)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.accent)
+                    .accessibilityIdentifier("patterns.model.blocker")
+            }
+
             HStack(spacing: Theme.spacing8) {
                 modelMetric(
                     title: L("patterns.model.stepSize"),

@@ -31,6 +31,9 @@ struct NextStepEngine: Sendable {
         _ input: CaptureInput,
         calibrationMultiplier: Double = 1.0
     ) -> NextStepProposal {
+        if Self.isBadDayInput(input.rawText) {
+            return Self.badDayProposal(language: input.language, preferred: input.preferredCategory)
+        }
         let category = detectCategory(in: input.rawText, preferred: input.preferredCategory)
         let template = Self.template(for: category, language: input.language)
         let baseMinutes = category.defaultEstimateMinutes
@@ -50,7 +53,7 @@ struct NextStepEngine: Sendable {
 
 // MARK: - Templates
 
-private extension NextStepEngine {
+extension NextStepEngine {
     struct Template {
         let title: String
         let step: String
@@ -214,6 +217,44 @@ private extension NextStepEngine {
         ]
         let entry = table[category] ?? table[.other]!
         return zh ? entry.1 : entry.0
+    }
+
+    static func isBadDayInput(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        let phrases = [
+            "i am a mess today",
+            "i'm a mess today",
+            "im a mess today",
+            "i am overwhelmed",
+            "i'm overwhelmed",
+            "im overwhelmed",
+            "i can't start",
+            "i cant start",
+            "can't start",
+            "cant start",
+            "too overwhelmed",
+            "一团乱",
+            "我今天一团乱",
+            "太乱了",
+            "开始不了",
+            "我开始不了"
+        ]
+        return phrases.contains { lower.contains($0) }
+    }
+
+    static func badDayProposal(language: String, preferred: TaskCategory?) -> NextStepProposal {
+        let zh = language.lowercased().hasPrefix("zh")
+        let category = preferred ?? .other
+        return NextStepProposal(
+            title: zh ? "先回到这一分钟" : "Come back to this minute",
+            step: zh ? "坐下,把一只手放在手机上,慢慢呼气一次。" : "Sit down, put one hand on your phone, and take one slow breath out.",
+            timerMinutes: 5,
+            stopCondition: zh ? "呼完这一口气就停。下一步等会儿再说。" : "Stop after that one breath. The next step can wait.",
+            category: category,
+            shrinkLevel: .two,
+            generatedBy: .localTemplate,
+            whyThisStep: zh ? "状态很乱时,先把入口降到几乎不用决定。" : "On a bad day, the first step should require almost no decisions."
+        )
     }
 
     static let categoryKeywords: [(TaskCategory, [String])] = [

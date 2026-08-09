@@ -23,6 +23,31 @@
 "start.kindStart.resume" = "从上次继续";
 "start.kindStart.adminLeft" = "剩 %d 次事务";
 
+/* MARK: - 微模板与保险箱 */
+"template.open" = "极小模板";
+"template.title" = "极小模板";
+"template.applied" = "模板已载入。准备好就开始计时。";
+"template.bill.title" = "账单启动";
+"template.bill.subtitle" = "只找金额、截止日或付款入口。";
+"template.email.title" = "回复启动";
+"template.email.subtitle" = "只写一句,不是整封回复。";
+"template.appointment.title" = "预约启动";
+"template.appointment.subtitle" = "只找一个预约入口。";
+"template.document.title" = "文件启动";
+"template.document.subtitle" = "只搜索一个地方。";
+"template.home.title" = "家里重置";
+"template.home.subtitle" = "从一个位置拿走三样东西。";
+"template.badDay.title" = "糟糕日重置";
+"template.badDay.subtitle" = "5 分钟,先让身体进入状态。";
+"vault.open" = "个人保险箱";
+"vault.title" = "个人保险箱";
+"vault.saved" = "已保存到本地个人保险箱。";
+"vault.applied" = "已载入保存的步骤。从小处开始。";
+"vault.stop" = "碰一下这个保存步骤就停。";
+"vault.why" = "保存好的启动步骤可以省掉再次决定的力气。";
+"vault.empty.title" = "还没有保存的启动";
+"vault.empty.body" = "在下一步卡片里保存有用步骤,之后会出现在这里。";
+
 /* 分类 */
 "category.bills" = "账单";
 "category.email" = "邮件";
@@ -52,6 +77,8 @@
 "nextstep.estimated" = "约 %d 分钟";
 "nextstep.shrink.level" = "更小的版本";
 "nextstep.tryVersion" = "试试这版";
+"nextstep.share" = "分享";
+"nextstep.saveVault" = "保存";
 
 /* MARK: - 计时器 */
 "timer.title" = "只专注这一步";
@@ -61,6 +88,7 @@
 "timer.pause" = "暂停";
 "timer.resume" = "继续";
 "timer.makeSmaller" = "缩小一步";
+"timer.interrupted" = "我被打断了";
 "timer.continueFive" = "再加 5 分钟";
 "timer.step" = "你的步骤";
 "timer.stopHint" = "停在这里:%@";
@@ -81,7 +109,20 @@
 "recover.resume" = "从这里继续";
 "recover.startTimer" = "开始计时";
 "recover.related" = "备注";
+"recover.blocker" = "卡点:%@";
 "recover.clear" = "清掉这个胶囊";
+
+/* MARK: - 卡点 */
+"blocker.title.pause" = "刚才卡在哪里?";
+"blocker.title.skip" = "是什么挡住了?";
+"blocker.subtitle" = "这不是打分。只是帮 StartKind 下次把重新开始做得更小。";
+"blocker.skip" = "不确定";
+"blocker.need_login" = "需要登录";
+"blocker.need_document" = "需要文件";
+"blocker.too_vague" = "太模糊";
+"blocker.too_big" = "太大";
+"blocker.emotionally_hard" = "情绪上很难";
+"blocker.need_another_person" = "需要另一个人";
 
 /* MARK: - 规律 */
 "patterns.title" = "规律";
@@ -102,6 +143,7 @@
 "patterns.model.summary.tiny" = "%@ 先切得很小时更容易开始。";
 "patterns.model.summary.window" = "%@ 在 %@ 更容易启动。";
 "patterns.model.summary.steady" = "%@ 已逐渐稳定,适合普通 10 分钟启动。";
+"patterns.model.blocker" = "当前重启卡点:%@";
 "window.morning" = "上午";
 "window.afternoon" = "下午";
 "window.evening" = "晚上";
@@ -221,6 +263,7 @@
 "common.continue" = "继续";
 "common.gotIt" = "知道了";
 "common.close" = "关闭";
+"common.delete" = "删除";
 "common.done" = "完成";
 "common.loading" = "稍等一下…";
 "common.error" = "出了点小状况。可以再试一次。";

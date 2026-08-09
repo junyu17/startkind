@@ -59,8 +59,8 @@ struct AdminQuickReaderView: View {
         }
         .sheet(item: $timerSession) { session in
             if let activeStep {
-                TimerView(session: session, step: activeStep) { outcome in
-                    handleTimerOutcome(outcome, session: session, step: activeStep)
+                TimerView(session: session, step: activeStep) { outcome, blocker in
+                    handleTimerOutcome(outcome, session: session, step: activeStep, blocker: blocker)
                 }
             }
         }
@@ -311,14 +311,14 @@ struct AdminQuickReaderView: View {
         timerSession = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
     }
 
-    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel) {
+    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel, blocker: BlockerReason? = nil) {
         let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
         if outcome == .partial || outcome == .paused {
             _ = env.rescheduleStep(step, reason: .paused)
         } else if outcome == .abandoned {
             _ = env.rescheduleStep(step, reason: .skipped)
         }
-        env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step)
+        env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
         timerSession = nil
         if outcome == .completed {
             activeStep = nil

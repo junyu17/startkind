@@ -31,6 +31,7 @@ final class AppEnvironment: ObservableObject {
     let persistence: PersistenceService
     let entitlement: EntitlementService
     let usage: UsageTracker
+    let vault: PersonalVaultStore
     let speech: SpeechService
     let ai: AIClient
     let sync: SyncService
@@ -55,6 +56,7 @@ final class AppEnvironment: ObservableObject {
         self.persistence = persistence
         self.entitlement = EntitlementService()
         self.usage = UsageTracker()
+        self.vault = PersonalVaultStore()
         self.speech = SpeechService()
         let supabase: SupabaseClient? = {
             if let endpoint = SupabaseConfig.endpoint, let anonKey = SupabaseConfig.anonKey {
@@ -253,17 +255,29 @@ final class AppEnvironment: ObservableObject {
     /// Set by an incoming join deep link; the UI presents the guest join flow.
     @Published var pendingJoinRoomId: UUID?
     @Published var pendingJoinRoomCode: String?
+    @Published var pendingCaptureText: String?
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
+        if components.host == "capture" {
+            pendingCaptureText = components.queryItems?.first(where: { $0.name == "text" })?.value
+            markStarted()
+            return
+        }
+        if components.host == "start" {
+            markStarted()
+            return
+        }
         if let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
            Self.isValidRoomCode(code) {
             pendingJoinRoomCode = code
+            markStarted()
             return
         }
         guard let roomIdString = components.queryItems?.first(where: { $0.name == "room" })?.value,
               let roomId = UUID(uuidString: roomIdString) else { return }
         pendingJoinRoomId = roomId
+        markStarted()
     }
 
     /// Join a co-start room as a guest (anonymous auth, no account required).
@@ -430,6 +444,12 @@ final class AppEnvironment: ObservableObject {
         return step
     }
 
+    @discardableResult
+    func createLocalNextStep(proposal: NextStepProposal, sourceText: String, source: CaptureSource = .manual) -> NextStepModel {
+        let capture = persistence.saveCapture(rawText: sourceText, source: source, language: currentLanguage)
+        return persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
+    }
+
     /// Shrink the given step to the next level and persist the change.
     @discardableResult
     func shrinkCurrentStep(_ step: NextStepModel) -> NextStepProposal {
@@ -464,13 +484,14 @@ final class AppEnvironment: ObservableObject {
         persistence.startTimer(for: step, plannedMinutes: minutes, coStart: coStart)
     }
 
-    func finishTimer(session: TimerSessionModel, actualSeconds: Int, outcome: TimerOutcome, step: NextStepModel?) {
+    func finishTimer(session: TimerSessionModel, actualSeconds: Int, outcome: TimerOutcome, step: NextStepModel?, blocker: BlockerReason? = nil) {
         persistence.recordTimerOutcome(
             session: session,
             actualSeconds: actualSeconds,
             outcome: outcome,
             step: step,
-            isPlus: isPlus
+            isPlus: isPlus,
+            blocker: blocker
         )
     }
 
@@ -489,7 +510,10 @@ final class AppEnvironment: ObservableObject {
 
     // MARK: - Data control
 
-    func deleteAllData() { persistence.deleteAllData() }
+    func deleteAllData() {
+        persistence.deleteAllData()
+        vault.clear()
+    }
     func exportJSON() -> String { persistence.exportJSON() }
 
     private static func makeRoomCode() -> String {

@@ -7,6 +7,7 @@ struct NextStepCard: View {
     let onShrink: () -> Void
     let onSkip: () -> Void
     var onCoStart: () -> Void = {}
+    var onSaveToVault: () -> Void = {}
     @EnvironmentObject private var loc: LocalizationManager
 
     private var proposal: NextStepProposal { step.proposal }
@@ -32,6 +33,30 @@ struct NextStepCard: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            HStack(spacing: Theme.spacing8) {
+                ShareLink(item: shareText) {
+                    Label(L("nextstep.share"), systemImage: "square.and.arrow.up")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .accessibilityIdentifier("nextstep.share")
+
+                Button {
+                    onSaveToVault()
+                } label: {
+                    Label(L("nextstep.saveVault"), systemImage: "tray.and.arrow.down.fill")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .accessibilityIdentifier("nextstep.saveVault")
             }
 
             PrimaryButton(
@@ -102,6 +127,16 @@ struct NextStepCard: View {
                     .foregroundStyle(Theme.accent)
             }
         }
+    }
+
+    private var shareText: String {
+        [
+            "StartKind",
+            proposal.title,
+            proposal.step,
+            L("timer.stopHint", proposal.stopCondition),
+            L("nextstep.timer.minutes", proposal.timerMinutes)
+        ].joined(separator: "\n")
     }
 
     private var stopRow: some View {

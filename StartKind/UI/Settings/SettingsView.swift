@@ -65,6 +65,11 @@ struct SettingsView: View {
                     } label: {
                         Text(verbatim: L("privacy.title"))
                     }
+                    NavigationLink {
+                        VaultManagementView(vault: env.vault)
+                    } label: {
+                        Text(verbatim: L("vault.title"))
+                    }
                     Button(L("settings.dataExport")) {
                         exportText = env.exportJSON()
                         showExport = true
@@ -114,6 +119,46 @@ struct SettingsView: View {
     private var versionRow: some View {
         Text(verbatim: L("settings.version", Bundle.main.appVersion))
             .foregroundStyle(.secondary)
+    }
+}
+
+struct VaultManagementView: View {
+    @ObservedObject var vault: PersonalVaultStore
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        List {
+            if vault.items.isEmpty {
+                ContentUnavailableView(
+                    L("vault.empty.title"),
+                    systemImage: "tray",
+                    description: Text(verbatim: L("vault.empty.body"))
+                )
+            } else {
+                ForEach(vault.items) { item in
+                    VStack(alignment: .leading, spacing: Theme.spacing4) {
+                        Text(verbatim: item.title)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Text(verbatim: item.body)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if let category = item.category {
+                            Label(L(category.localizationKey), systemImage: category.systemImage)
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                    .accessibilityIdentifier("settings.vault.item")
+                    .swipeActions {
+                        Button(L("common.delete"), role: .destructive) {
+                            vault.delete(item)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle(L("vault.title"))
     }
 }
 

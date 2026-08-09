@@ -4,7 +4,7 @@ import Combine
 struct TimerView: View {
     let session: TimerSessionModel
     let step: NextStepModel
-    let onOutcome: (TimerOutcome) -> Void
+    let onOutcome: (TimerOutcome, BlockerReason?) -> Void
 
     @EnvironmentObject private var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
@@ -12,10 +12,12 @@ struct TimerView: View {
 
     @State private var remaining: Int
     @State private var isPaused = false
+    @State private var showBlockerPicker = false
+    @State private var pendingOutcome: TimerOutcome = .paused
 
     private let totalSeconds: Int
 
-    init(session: TimerSessionModel, step: NextStepModel, onOutcome: @escaping (TimerOutcome) -> Void) {
+    init(session: TimerSessionModel, step: NextStepModel, onOutcome: @escaping (TimerOutcome, BlockerReason?) -> Void) {
         self.session = session
         self.step = step
         self.onOutcome = onOutcome
@@ -75,17 +77,20 @@ struct TimerView: View {
                         .foregroundStyle(.secondary)
                 }
                 PrimaryButton("timer.done", systemImage: "checkmark.circle.fill", accessibilityId: "timer.done") {
-                    onOutcome(.completed)
+                    onOutcome(.completed, nil)
                 }
                 HStack(spacing: Theme.spacing12) {
                     QuietButton("timer.continueFive", systemImage: "plus", accessibilityId: "timer.continue5") {
                         remaining += 300
                     }
                     QuietButton("timer.makeSmaller", systemImage: "arrow.down.right", accessibilityId: "timer.makesmaller") {
-                        onOutcome(.paused)
+                        askBlocker(for: .paused)
                     }
                 }
                 if !timeIsUp {
+                    QuietButton("timer.interrupted", systemImage: "pause.circle", accessibilityId: "timer.interrupted") {
+                        askBlocker(for: .paused)
+                    }
                     Button {
                         isPaused.toggle()
                     } label: {
@@ -105,11 +110,102 @@ struct TimerView: View {
             guard !isPaused, remaining > 0 else { return }
             remaining -= 1
         }
+        .sheet(isPresented: $showBlockerPicker) {
+            BlockerPickerView(
+                titleKey: pendingOutcome == .abandoned ? "blocker.title.skip" : "blocker.title.pause",
+                onSelect: { blocker in
+                    showBlockerPicker = false
+                    onOutcome(pendingOutcome, blocker)
+                },
+                onSkip: {
+                    showBlockerPicker = false
+                    onOutcome(pendingOutcome, nil)
+                }
+            )
+        }
+    }
+
+    private func askBlocker(for outcome: TimerOutcome) {
+        pendingOutcome = outcome
+        showBlockerPicker = true
     }
 
     private func timeString(_ seconds: Int) -> String {
         let m = max(0, seconds) / 60
         let s = max(0, seconds) % 60
         return String(format: "%d:%02d", m, s)
+    }
+}
+
+struct BlockerPickerView: View {
+    let titleKey: String
+    let onSelect: (BlockerReason) -> Void
+    let onSkip: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var loc: LocalizationManager
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: Theme.spacing16) {
+                Text(verbatim: L("blocker.subtitle"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                VStack(spacing: Theme.spacing8) {
+                    ForEach(BlockerReason.allCases) { reason in
+                        Button {
+                            onSelect(reason)
+                        } label: {
+                            HStack(spacing: Theme.spacing12) {
+                                Image(systemName: reason.systemImage)
+                                    .foregroundStyle(Theme.accent)
+                                    .frame(width: 24)
+                                Text(verbatim: L(reason.localizationKey))
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(Theme.ink)
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                            .padding(.horizontal, Theme.spacing12)
+                            .background(Theme.surfaceRaised)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                                    .stroke(Theme.line, lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("blocker.\(reason.rawValue)")
+                    }
+                }
+
+                Button {
+                    onSkip()
+                } label: {
+                    Text(verbatim: L("blocker.skip"))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("blocker.skip")
+
+                Spacer()
+            }
+            .padding(Theme.spacing16)
+            .navigationTitle(L(titleKey))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L("common.cancel")) {
+                        dismiss()
+                    }
+                }
+            }
+            .background(Theme.background.ignoresSafeArea())
+        }
     }
 }

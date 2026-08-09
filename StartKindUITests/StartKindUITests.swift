@@ -218,6 +218,58 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(voiceAgain.waitForExistence(timeout: 10))
     }
 
+    func testInterruptedShowsBlockerPickerAndRecoveryBlocker() throws {
+        let app = launch()
+        let input = app.textFields["start.input"].exists ? app.textFields["start.input"] : app.textViews["start.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 15))
+        input.tap()
+        input.typeText("I need to deal with a bill but got interrupted")
+        dismissKeyboard(app)
+        let billsChip = app.buttons["Bills"]
+        if billsChip.waitForExistence(timeout: 5) { billsChip.tap() }
+        dismissKeyboard(app)
+        app.buttons["start.submit"].tap()
+
+        let startButton = app.buttons["nextstep.start"]
+        XCTAssertTrue(startButton.waitForExistence(timeout: 10))
+        startButton.tap()
+
+        let interrupted = app.buttons["timer.interrupted"]
+        XCTAssertTrue(interrupted.waitForExistence(timeout: 10))
+        interrupted.tap()
+
+        let needDocument = app.buttons["blocker.need_document"]
+        XCTAssertTrue(needDocument.waitForExistence(timeout: 10))
+        needDocument.tap()
+
+        XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
+        app.tabBars.firstMatch.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["recover.blocker"].waitForExistence(timeout: 10), "Recover should show the saved blocker")
+    }
+
+    func testTemplatesShareAndVaultFlow() throws {
+        let app = launch()
+        let templates = app.descendants(matching: .any)["start.templates"]
+        XCTAssertTrue(templates.waitForExistence(timeout: 15), "Templates entry should exist")
+        templates.tap()
+
+        let billTemplate = app.buttons["template.bill_anchor"]
+        XCTAssertTrue(billTemplate.waitForExistence(timeout: 10), "Bill template should exist")
+        billTemplate.tap()
+
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Template should create a local next step")
+        XCTAssertTrue(app.buttons["nextstep.share"].exists, "Start card share button should exist")
+        let save = app.buttons["nextstep.saveVault"]
+        XCTAssertTrue(save.exists, "Save to vault button should exist")
+        save.tap()
+
+        let vault = app.descendants(matching: .any)["start.vault"]
+        XCTAssertTrue(vault.waitForExistence(timeout: 10), "Vault entry should exist")
+        vault.tap()
+        XCTAssertTrue(app.buttons["vault.item"].waitForExistence(timeout: 10), "Saved vault item should be reusable")
+    }
+
     func testCanSwitchTabs() throws {
         let app = launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))

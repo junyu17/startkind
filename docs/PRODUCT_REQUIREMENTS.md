@@ -1,6 +1,6 @@
 # StartKind Product Requirements
 
-Last updated: 2026-08-07
+Last updated: 2026-08-09
 
 ## Problem
 
@@ -183,10 +183,17 @@ Free includes:
 - Text input
 - Voice input where local OS dictation can be used
 - Local task shrinker templates
+- Local micro-templates for bills, email, appointments, documents, home reset, and bad-day reset
+- Bad Day Mode for overwhelm phrases such as "I'm overwhelmed" or "我今天一团乱"
 - 5, 10, 15, and 25 minute start timers
+- "I got interrupted" timer action
+- Blocker capture after interruption, partial completion, or pause
 - No-Shame Rescheduler
 - Local actual-time history for 14 days
 - One active Recovery Capsule
+- Local Personal Vault for reusable tiny-start snippets
+- Shareable Start Card
+- Start widget and iOS share extension entry points
 - One Admin Quick Start per day
 - Default English and optional Simplified Chinese
 
@@ -226,3 +233,16 @@ This project should not stop at a minimal MVP. The first public release should f
 Capture -> One Step -> Timer -> Done/Not Done -> Calibrate -> Reschedule or Recover.
 
 Do not add broad project management until this loop is excellent.
+
+## Retention and Differentiation Set
+
+The first iOS release includes these non-MVP retention features:
+
+1. I Got Interrupted: a timer exit that preserves context without shame.
+2. Blocker Picker: records why the start broke down so future recovery can improve.
+3. Bad Day Mode: overwhelm phrases immediately produce one tiny 5-minute reset step.
+4. Share Extension: capture text or URLs into StartKind from other iOS apps.
+5. Micro-Templates: local, no-cost tiny-start flows for recurring adult-admin tasks.
+6. Widget: quick return to Start from the Home Screen.
+7. Shareable Start Card: natural encouragement sharing without exposing private history.
+8. Personal Vault: local reusable next-step snippets that help repeat users start faster.
