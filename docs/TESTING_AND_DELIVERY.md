@@ -53,6 +53,13 @@ For extension work:
 - Test the share extension from at least Safari or Mail on a signed device before submission.
 - Confirm the widget opens `startkind://start`.
 
+For Live Activity and rescue notification work:
+
+- Confirm `NSSupportsLiveActivities` is true in the generated app `Info.plist`.
+- Build on simulator to verify ActivityKit/UserNotifications compile.
+- Test timer Live Activity start/end on a signed physical device.
+- Test local notification authorization and `startkind://rescue` tap-through on a signed physical device.
+
 ## Future Android Required Checks
 
 Android is deferred until after iOS market validation. Use these actual Gradle tasks once Android work is explicitly started and the Android project exists.

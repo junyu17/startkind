@@ -23,6 +23,27 @@
 "start.kindStart.resume" = "Pick up where you left";
 "start.kindStart.adminLeft" = "%d admin left";
 
+/* MARK: - Autopilot */
+"autopilot.open" = "Tell me what to start now";
+"autopilot.loaded" = "Autopilot picked one small start.";
+"autopilot.source" = "Autopilot";
+"autopilot.why.recovery" = "Returning to the last open loop is usually easier than choosing from scratch.";
+"autopilot.why.note" = "Your return note says: %@";
+"autopilot.why.vault" = "Saved starts remove the decision work.";
+"autopilot.why.default" = "A tiny visible action is enough to restart momentum.";
+"autopilot.stop.saved" = "Stop when this saved start has been touched once.";
+"autopilot.default.title" = "Tiny restart";
+"autopilot.default.step" = "Put one thing in front of you and name the next tiny move.";
+"autopilot.default.stop" = "Stop after naming the next tiny move.";
+
+/* MARK: - Return Note + Rescue */
+"returnNote.title" = "Return note";
+"returnNote.placeholder" = "Where should future-you restart?";
+"returnNote.hint" = "Optional. One short clue is enough.";
+"returnNote.resume" = "Note: %@";
+"rescue.notification.title" = "Want the smallest restart?";
+"rescue.notification.body" = "StartKind can reopen with one tiny next step. No catch-up list.";
+
 /* MARK: - Micro Templates + Vault */
 "template.open" = "Tiny templates";
 "template.title" = "Tiny templates";
@@ -160,6 +181,21 @@
 "patterns.recommendation.keep" = "Keep using timers so calibration gets sharper.";
 "patterns.unlock.title" = "Personal Execution Model";
 "patterns.unlock.body" = "StartKind Plus learns your best start windows, avoidance patterns, and co-start impact.";
+
+/* MARK: - Friction Map */
+"friction.title" = "Friction Map";
+"friction.empty" = "Blocker patterns will appear after a few interrupted or paused starts.";
+"friction.blocker.title" = "Often blocked by %@";
+"friction.blocker.body" = "This points to the point of friction, not a character flaw.";
+"friction.category.title" = "%@ needs a smaller doorway";
+"friction.category.body" = "This category has been harder to complete, so StartKind should start smaller.";
+"friction.category.step" = "Try a 5-minute doorway step before the real task.";
+"friction.step.login" = "Find the login page and stop before entering details.";
+"friction.step.document" = "Find one possible document location and stop.";
+"friction.step.vague" = "Rewrite the task as one visible verb and one object.";
+"friction.step.big" = "Touch only the first surface: open it, unfold it, or search one term.";
+"friction.step.emotion" = "Set a 5-minute timer and only look at the task title.";
+"friction.step.person" = "Draft one sentence asking the other person for the missing piece.";
 
 /* MARK: - Admin Reader */
 "admin.title" = "Admin Reader";

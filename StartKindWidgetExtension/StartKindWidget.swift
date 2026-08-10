@@ -1,5 +1,8 @@
 import WidgetKit
 import SwiftUI
+#if canImport(ActivityKit)
+import ActivityKit
+#endif
 
 struct StartKindWidgetEntry: TimelineEntry {
     let date: Date
@@ -62,9 +65,65 @@ struct StartKindWidget: Widget {
     }
 }
 
+@available(iOSApplicationExtension 16.2, *)
+struct StartKindTimerLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: StartKindTimerAttributes.self) { context in
+            VStack(alignment: .leading, spacing: 6) {
+                Text(context.attributes.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                Text(context.state.step)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                    .font(.caption2)
+                    .monospacedDigit()
+                    .foregroundStyle(Color(red: 0.11, green: 0.45, blue: 0.29))
+            }
+            .padding(12)
+            .activityBackgroundTint(.white)
+            .activitySystemActionForegroundColor(Color(red: 0.11, green: 0.45, blue: 0.29))
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    Text("StartKind")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                        .font(.caption2)
+                        .monospacedDigit()
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text(context.state.step)
+                        .font(.caption)
+                        .lineLimit(2)
+                }
+            } compactLeading: {
+                Image(systemName: "arrow.up.forward")
+            } compactTrailing: {
+                Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                    .font(.caption2)
+                    .monospacedDigit()
+            } minimal: {
+                Image(systemName: "play.fill")
+            }
+            .widgetURL(URL(string: "startkind://start"))
+        }
+        .configurationDisplayName("StartKind Timer")
+        .description("Keep one small step visible while the timer runs.")
+    }
+}
+
 @main
 struct StartKindWidgetBundle: WidgetBundle {
     var body: some Widget {
         StartKindWidget()
+        if #available(iOSApplicationExtension 16.2, *) {
+            StartKindTimerLiveActivity()
+        }
     }
 }

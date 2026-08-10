@@ -100,8 +100,8 @@ struct StartView: View {
         }
         .sheet(item: $timerSession) { session in
             if let step = currentStep {
-                TimerView(session: session, step: step) { outcome, blocker in
-                    handleTimerOutcome(outcome, session: session, step: step, blocker: blocker)
+                TimerView(session: session, step: step) { outcome, blocker, returnNote in
+                    handleTimerOutcome(outcome, session: session, step: step, blocker: blocker, returnNote: returnNote)
                 }
             }
         }
@@ -152,6 +152,11 @@ struct StartView: View {
             focusedField = .taskInput
             env.pendingCaptureText = nil
         }
+        .onChange(of: env.pendingRescueRestart) { _, value in
+            guard value else { return }
+            runAutopilot()
+            env.pendingRescueRestart = false
+        }
     }
 
     // MARK: - Subviews
@@ -196,6 +201,10 @@ struct StartView: View {
                 }
             }
 
+            kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
+                runAutopilot()
+            }
+
             HStack(spacing: Theme.spacing8) {
                 kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
                     showAdminReader = true
@@ -229,6 +238,12 @@ struct StartView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
+                            if let note = capsule.returnNote {
+                                Text(verbatim: L("returnNote.resume", note))
+                                    .font(.caption2)
+                                    .foregroundStyle(Theme.accent)
+                                    .lineLimit(1)
+                            }
                         }
                         Spacer()
                         Image(systemName: "play.fill")
@@ -664,6 +679,17 @@ struct StartView: View {
         showVault = false
     }
 
+    private func runAutopilot() {
+        focusedField = nil
+        let step = env.createAutopilotStep()
+        currentStep = step
+        inputText = ""
+        selectedCategory = step.category
+        rescheduleMessage = L("autopilot.loaded")
+        vaultMessage = nil
+        showPlan = false
+    }
+
     private func shrink(_ step: NextStepModel) {
         let proposal = env.shrinkCurrentStep(step)
         if proposal.shrinkLevel == step.shrinkLevel {
@@ -676,10 +702,10 @@ struct StartView: View {
         rescheduleMessage = result.message
     }
 
-    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel, blocker: BlockerReason? = nil) {
+    private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel, blocker: BlockerReason? = nil, returnNote: String? = nil) {
         let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
         if outcome == .completed {
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
             timerSession = nil
             withAnimation {
                 currentStep = nil
@@ -689,12 +715,12 @@ struct StartView: View {
             }
         } else if outcome == .partial || outcome == .paused {
             let result = env.rescheduleStep(step, reason: .paused)
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
             timerSession = nil
             rescheduleMessage = result.message
         } else {
             let result = env.rescheduleStep(step, reason: .skipped)
-            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker)
+            env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
             timerSession = nil
             rescheduleMessage = result.message
         }

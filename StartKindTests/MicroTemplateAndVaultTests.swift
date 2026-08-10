@@ -38,4 +38,55 @@ final class MicroTemplateAndVaultTests: XCTestCase {
         XCTAssertEqual(env.pendingCaptureText, "Pay the bill")
         XCTAssertTrue(env.hasStarted)
     }
+
+    func testRescueDeepLinkArmsAutopilotRestart() {
+        let env = AppEnvironment(inMemory: true)
+        env.handleJoinURL(URL(string: "startkind://rescue")!)
+        XCTAssertTrue(env.pendingRescueRestart)
+        XCTAssertTrue(env.hasStarted)
+    }
+
+    func testAutopilotPrefersActiveRecoveryCapsule() throws {
+        let svc = try PersistenceService(inMemory: true)
+        let step = svc.saveNextStep(proposal: NextStepProposal(title: "Resume bill", step: "Open the bill email", timerMinutes: 10, stopCondition: "Stop at the due date", category: .bills), capture: nil, taskTitle: "Resume bill")
+        svc.upsertRecoveryCapsule(for: step, isPlus: false, blocker: .tooBig, returnNote: "Email is open")
+
+        let proposal = AutopilotPlanner().proposal(
+            capsule: svc.activeRecoveryCapsule(),
+            vaultItems: [],
+            templates: MicroTemplateLibrary.templates(language: "en"),
+            currentHour: 14
+        )
+
+        XCTAssertEqual(proposal.title, "Resume bill")
+        XCTAssertEqual(proposal.category, .bills)
+        XCTAssertEqual(proposal.whyThisStep, "Your return note says: Email is open")
+    }
+
+    func testAutopilotUsesVaultBeforeTemplates() {
+        let vaultItem = VaultItem(title: "Saved start", body: "Open one tab", category: .workAdmin)
+        let proposal = AutopilotPlanner().proposal(
+            capsule: nil,
+            vaultItems: [vaultItem],
+            templates: MicroTemplateLibrary.templates(language: "en"),
+            currentHour: 14
+        )
+
+        XCTAssertEqual(proposal.title, "Saved start")
+        XCTAssertEqual(proposal.step, "Open one tab")
+        XCTAssertEqual(proposal.category, .workAdmin)
+    }
+
+    func testFrictionMapReportsCommonBlocker() throws {
+        let svc = try PersistenceService(inMemory: true)
+        let step1 = svc.saveNextStep(proposal: NextStepProposal(title: "Bill", step: "Open bill", timerMinutes: 5, stopCondition: "Stop", category: .bills), capture: nil, taskTitle: "Bill")
+        let step2 = svc.saveNextStep(proposal: NextStepProposal(title: "Email", step: "Open email", timerMinutes: 5, stopCondition: "Stop", category: .email), capture: nil, taskTitle: "Email")
+        svc.upsertRecoveryCapsule(for: step1, isPlus: true, blocker: .needLogin)
+        svc.upsertRecoveryCapsule(for: step2, isPlus: true, blocker: .needLogin)
+
+        let insights = FrictionMap().insights(capsules: svc.recoveryCapsules(), snapshots: [])
+
+        XCTAssertEqual(insights.first?.blocker, .needLogin)
+        XCTAssertEqual(insights.first?.suggestedStep, "Find the login page and stop before entering details.")
+    }
 }

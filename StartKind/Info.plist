@@ -44,6 +44,8 @@
 	<string>StartKind lets you choose screenshots or photos so it can extract text and turn admin tasks into one small next step.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>StartKind uses speech recognition to turn your spoken thoughts into one small next step.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

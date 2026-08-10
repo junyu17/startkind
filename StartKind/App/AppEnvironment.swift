@@ -32,6 +32,8 @@ final class AppEnvironment: ObservableObject {
     let entitlement: EntitlementService
     let usage: UsageTracker
     let vault: PersonalVaultStore
+    let liveActivity: LiveTimerActivityService
+    let rescueNotifications: RescueNotificationService
     let speech: SpeechService
     let ai: AIClient
     let sync: SyncService
@@ -43,6 +45,8 @@ final class AppEnvironment: ObservableObject {
     let shrinker: TaskShrinker
     let rescheduler: Rescheduler
     let calibrator: TimeCalibrator
+    let autopilot: AutopilotPlanner
+    let frictionMap: FrictionMap
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -57,6 +61,8 @@ final class AppEnvironment: ObservableObject {
         self.entitlement = EntitlementService()
         self.usage = UsageTracker()
         self.vault = PersonalVaultStore()
+        self.liveActivity = LiveTimerActivityService()
+        self.rescueNotifications = RescueNotificationService()
         self.speech = SpeechService()
         let supabase: SupabaseClient? = {
             if let endpoint = SupabaseConfig.endpoint, let anonKey = SupabaseConfig.anonKey {
@@ -71,13 +77,15 @@ final class AppEnvironment: ObservableObject {
         self.shrinker = TaskShrinker()
         self.rescheduler = Rescheduler()
         self.calibrator = TimeCalibrator()
+        self.autopilot = AutopilotPlanner()
+        self.frictionMap = FrictionMap()
         let launchArgs = ProcessInfo.processInfo.arguments
         self.hasStarted = !launchArgs.contains("-UITEST_AUTH")
 
         // Keep the persisted profile entitlement in sync with StoreKit.
         entitlement.$state
             .removeDuplicates()
-            .sink { [weak self, weak persistence] state in
+            .sink { [weak persistence] state in
                 persistence?.updateProfile(entitlement: state)
             }
             .store(in: &cancellables)
@@ -256,6 +264,7 @@ final class AppEnvironment: ObservableObject {
     @Published var pendingJoinRoomId: UUID?
     @Published var pendingJoinRoomCode: String?
     @Published var pendingCaptureText: String?
+    @Published var pendingRescueRestart = false
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
@@ -265,6 +274,11 @@ final class AppEnvironment: ObservableObject {
             return
         }
         if components.host == "start" {
+            markStarted()
+            return
+        }
+        if components.host == "rescue" {
+            pendingRescueRestart = true
             markStarted()
             return
         }
@@ -450,6 +464,16 @@ final class AppEnvironment: ObservableObject {
         return persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
     }
 
+    @discardableResult
+    func createAutopilotStep() -> NextStepModel {
+        let proposal = autopilot.proposal(
+            capsule: activeCapsule(),
+            vaultItems: vault.items,
+            templates: MicroTemplateLibrary.templates(language: currentLanguage)
+        )
+        return createLocalNextStep(proposal: proposal, sourceText: L("autopilot.source"), source: .manual)
+    }
+
     /// Shrink the given step to the next level and persist the change.
     @discardableResult
     func shrinkCurrentStep(_ step: NextStepModel) -> NextStepProposal {
@@ -481,18 +505,27 @@ final class AppEnvironment: ObservableObject {
 
     @discardableResult
     func startTimer(step: NextStepModel, minutes: Int, coStart: CoStartMode = .none) -> TimerSessionModel {
-        persistence.startTimer(for: step, plannedMinutes: minutes, coStart: coStart)
+        let session = persistence.startTimer(for: step, plannedMinutes: minutes, coStart: coStart)
+        liveActivity.start(step: step, plannedMinutes: minutes)
+        return session
     }
 
-    func finishTimer(session: TimerSessionModel, actualSeconds: Int, outcome: TimerOutcome, step: NextStepModel?, blocker: BlockerReason? = nil) {
+    func finishTimer(session: TimerSessionModel, actualSeconds: Int, outcome: TimerOutcome, step: NextStepModel?, blocker: BlockerReason? = nil, returnNote: String? = nil) {
         persistence.recordTimerOutcome(
             session: session,
             actualSeconds: actualSeconds,
             outcome: outcome,
             step: step,
             isPlus: isPlus,
-            blocker: blocker
+            blocker: blocker,
+            returnNote: returnNote
         )
+        liveActivity.end()
+        if outcome == .completed {
+            rescueNotifications.cancelRescue()
+        } else if step != nil {
+            rescueNotifications.scheduleRescue()
+        }
     }
 
     // MARK: - Recovery
@@ -507,6 +540,13 @@ final class AppEnvironment: ObservableObject {
     }
 
     func snapshots() -> [CalibrationSnapshot] { persistence.calibrationSnapshots() }
+
+    func frictionInsights() -> [FrictionInsight] {
+        frictionMap.insights(
+            capsules: persistence.recoveryCapsules(),
+            snapshots: snapshots()
+        )
+    }
 
     // MARK: - Data control
 

@@ -410,16 +410,51 @@ final class RecoveryCapsuleModel {
     }
 
     var blockerReason: BlockerReason? {
-        Self.decodeBlocker(from: relatedDraft)
+        Self.decodeMetadata(from: relatedDraft).blocker
+    }
+
+    var returnNote: String? {
+        Self.decodeMetadata(from: relatedDraft).note
     }
 
     static func blockerDraft(_ reason: BlockerReason) -> String {
-        "blocker:\(reason.rawValue)"
+        metadataDraft(blocker: reason, note: nil)!
+    }
+
+    static func metadataDraft(blocker: BlockerReason?, note: String?) -> String? {
+        let trimmedNote = note?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanNote = (trimmedNote?.isEmpty == false) ? String(trimmedNote!.prefix(180)) : nil
+        guard blocker != nil || cleanNote != nil else { return nil }
+        let blockerRaw = blocker?.rawValue ?? ""
+        let notePart = cleanNote?
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "|", with: "\\p")
+            ?? ""
+        return "recovery:\(blockerRaw)|\(notePart)"
     }
 
     static func decodeBlocker(from value: String?) -> BlockerReason? {
-        guard let value, value.hasPrefix("blocker:") else { return nil }
-        return BlockerReason(rawValue: String(value.dropFirst("blocker:".count)))
+        decodeMetadata(from: value).blocker
+    }
+
+    static func decodeMetadata(from value: String?) -> (blocker: BlockerReason?, note: String?) {
+        guard let value else { return (nil, nil) }
+        if value.hasPrefix("blocker:") {
+            let raw = String(value.dropFirst("blocker:".count))
+            return (BlockerReason(rawValue: raw), nil)
+        }
+        guard value.hasPrefix("recovery:") else { return (nil, value.isEmpty ? nil : value) }
+        let body = String(value.dropFirst("recovery:".count))
+        let parts = body.split(separator: "|", maxSplits: 1, omittingEmptySubsequences: false)
+        let blocker = parts.first.flatMap { BlockerReason(rawValue: String($0)) }
+        let rawNote = parts.count > 1 ? String(parts[1]) : ""
+        let note = rawNote
+            .replacingOccurrences(of: "\\p", with: "|")
+            .replacingOccurrences(of: "\\n", with: "\n")
+            .replacingOccurrences(of: "\\\\", with: "\\")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return (blocker, note.isEmpty ? nil : note)
     }
 }
 

@@ -23,6 +23,27 @@
 "start.kindStart.resume" = "从上次继续";
 "start.kindStart.adminLeft" = "剩 %d 次事务";
 
+/* MARK: - 自动驾驶 */
+"autopilot.open" = "现在告诉我先做什么";
+"autopilot.loaded" = "自动驾驶已选出一个小启动。";
+"autopilot.source" = "自动驾驶";
+"autopilot.why.recovery" = "回到上次未完成的线头,通常比重新选择更容易。";
+"autopilot.why.note" = "你的返回备注写着:%@";
+"autopilot.why.vault" = "保存过的启动可以省掉决定成本。";
+"autopilot.why.default" = "一个看得见的小动作,足够重新启动。";
+"autopilot.stop.saved" = "碰一下这个保存启动就停。";
+"autopilot.default.title" = "极小重启";
+"autopilot.default.step" = "把一样东西放到面前,说出下一步极小动作。";
+"autopilot.default.stop" = "说出下一步极小动作后就停。";
+
+/* MARK: - 返回备注与救援 */
+"returnNote.title" = "返回备注";
+"returnNote.placeholder" = "下次从哪里继续?";
+"returnNote.hint" = "可选。一句短线索就够。";
+"returnNote.resume" = "备注:%@";
+"rescue.notification.title" = "要不要最小重启?";
+"rescue.notification.body" = "StartKind 可以直接打开一个极小下一步,没有补任务清单。";
+
 /* MARK: - 微模板与保险箱 */
 "template.open" = "极小模板";
 "template.title" = "极小模板";
@@ -160,6 +181,21 @@
 "patterns.recommendation.keep" = "继续用计时器,校准会更准。";
 "patterns.unlock.title" = "个人执行模型";
 "patterns.unlock.body" = "StartKind Plus 会学习你的最佳启动时段、回避规律和陪伴启动的效果。";
+
+/* MARK: - 摩擦地图 */
+"friction.title" = "摩擦地图";
+"friction.empty" = "几次被打断或暂停后,卡点规律会出现在这里。";
+"friction.blocker.title" = "常见卡点:%@";
+"friction.blocker.body" = "这里显示的是摩擦点,不是性格问题。";
+"friction.category.title" = "%@ 需要更小入口";
+"friction.category.body" = "这个分类完成起来更难,StartKind 应该先给更小的入口。";
+"friction.category.step" = "先做一个 5 分钟入口步骤,再碰真正任务。";
+"friction.step.login" = "只找到登录页面,先不要输入信息。";
+"friction.step.document" = "只找一个可能放文件的位置,然后停止。";
+"friction.step.vague" = "把任务改写成一个看得见的动词和一个对象。";
+"friction.step.big" = "只碰第一层:打开、展开,或搜索一个词。";
+"friction.step.emotion" = "设 5 分钟计时,只看任务标题。";
+"friction.step.person" = "先写一句话,向对方要缺失的信息。";
 
 /* MARK: - 事务阅读器 */
 "admin.title" = "事务阅读器";

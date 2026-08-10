@@ -136,6 +136,14 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["patterns.model.summary"].waitForExistence(timeout: 10), "Personal Execution Model should be visible")
     }
 
+    func testAutopilotCreatesOneNextStep() throws {
+        let app = launch()
+        let autopilot = app.descendants(matching: .any)["start.autopilot"]
+        XCTAssertTrue(autopilot.waitForExistence(timeout: 15), "Autopilot entry should exist")
+        autopilot.tap()
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Autopilot should create a startable next step")
+    }
+
     func testPaywallShowsFreePlusComparison() throws {
         let app = launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
@@ -246,6 +254,38 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
         app.tabBars.firstMatch.buttons.element(boundBy: 1).tap()
         XCTAssertTrue(app.descendants(matching: .any)["recover.blocker"].waitForExistence(timeout: 10), "Recover should show the saved blocker")
+    }
+
+    func testInterruptedReturnNoteAppearsInRecovery() throws {
+        let app = launch()
+        let input = app.textFields["start.input"].exists ? app.textFields["start.input"] : app.textViews["start.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 15))
+        input.tap()
+        input.typeText("I need to handle an insurance form")
+        dismissKeyboard(app)
+        let insuranceChip = app.buttons["Insurance"]
+        if insuranceChip.waitForExistence(timeout: 5) { insuranceChip.tap() }
+        app.buttons["start.submit"].tap()
+
+        let startButton = app.buttons["nextstep.start"]
+        XCTAssertTrue(startButton.waitForExistence(timeout: 10))
+        startButton.tap()
+
+        let interrupted = app.buttons["timer.interrupted"]
+        XCTAssertTrue(interrupted.waitForExistence(timeout: 10))
+        interrupted.tap()
+
+        let note = app.textFields["returnNote.input"].exists ? app.textFields["returnNote.input"] : app.textViews["returnNote.input"]
+        XCTAssertTrue(note.waitForExistence(timeout: 10), "Return note field should appear")
+        note.tap()
+        note.typeText("Form is on page 2")
+        let tooBig = app.buttons["blocker.too_big"]
+        XCTAssertTrue(tooBig.waitForExistence(timeout: 10))
+        tooBig.tap()
+
+        XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10))
+        app.tabBars.firstMatch.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["recover.returnNote"].waitForExistence(timeout: 10), "Recover should show the saved return note")
     }
 
     func testTemplatesShareAndVaultFlow() throws {

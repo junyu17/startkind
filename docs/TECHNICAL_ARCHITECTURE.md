@@ -38,6 +38,8 @@ The iOS app should implement these domain modules. Future Android should mirror 
 - StoreKit 2 for subscriptions
 - Speech framework or OS dictation path for voice input
 - WidgetKit for Home Screen restart entry points
+- ActivityKit for timer Live Activities where available
+- UserNotifications for local no-shame rescue reminders
 - XCTest for unit tests
 - XCUITest for core flows
 
@@ -137,10 +139,14 @@ StartKind has two iOS extension targets:
 The retention surfaces are intentionally local-first:
 
 - `MicroTemplateLibrary` generates common adult-admin next steps without network calls.
+- `AutopilotPlanner` chooses one local start from active recovery, vault items, and time-aware templates.
+- `FrictionMap` derives local blocker/category insights from recovery capsules and calibration snapshots.
 - `PersonalVaultStore` stores reusable tiny-start snippets in `UserDefaults`.
-- Blocker reasons are encoded into existing recovery-capsule metadata to avoid a SwiftData schema migration for this release pass.
+- Blocker reasons and Return Notes are encoded into existing recovery-capsule metadata to avoid a SwiftData schema migration for this release pass.
+- `LiveTimerActivityService` starts/ends an ActivityKit timer and silently no-ops when unavailable.
+- `RescueNotificationService` schedules one local rescue notification after interrupted/paused/abandoned starts and deep-links to `startkind://rescue`.
 
-If the extension targets are archived for App Store upload, the signing setup must include `ren.startkind.share` and `ren.startkind.widget` bundle identifiers.
+If the extension targets are archived for App Store upload, the signing setup must include `ren.startkind.share` and `ren.startkind.widget` bundle identifiers. Live Activities and notification tap-through still need real-device verification because simulator builds do not prove Lock Screen behavior.
 
 ## Security
 

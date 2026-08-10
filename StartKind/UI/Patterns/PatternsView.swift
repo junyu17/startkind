@@ -6,19 +6,21 @@ struct PatternsView: View {
 
     private var insights: [String] { env.insights() }
     private var snapshots: [CalibrationSnapshot] { env.snapshots() }
+    private var frictionInsights: [FrictionInsight] { env.frictionInsights() }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
                     executionModelCard
+                    frictionMapSection
 
                     Text(verbatim: L("patterns.noShame"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    if insights.isEmpty && snapshots.isEmpty {
+                    if insights.isEmpty && snapshots.isEmpty && frictionInsights.isEmpty {
                         emptyState
                     } else {
                         ForEach(Array(insights.enumerated()), id: \.offset) { _, insight in
@@ -44,6 +46,54 @@ struct PatternsView: View {
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, Theme.spacing32)
+    }
+
+    private var frictionMapSection: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            HStack(spacing: Theme.spacing8) {
+                Image(systemName: "map")
+                    .foregroundStyle(Theme.accent)
+                Text(verbatim: L("friction.title"))
+                    .font(.headline)
+                Spacer()
+            }
+
+            if frictionInsights.isEmpty {
+                Text(verbatim: L("friction.empty"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                ForEach(frictionInsights) { insight in
+                    VStack(alignment: .leading, spacing: Theme.spacing8) {
+                        Label {
+                            Text(verbatim: insight.title)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        } icon: {
+                            Image(systemName: insight.blocker?.systemImage ?? insight.category.systemImage)
+                        }
+                        .foregroundStyle(Theme.accent)
+
+                        Text(verbatim: insight.body)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(verbatim: insight.suggestedStep)
+                            .font(.footnote)
+                            .fontWeight(.medium)
+                            .foregroundStyle(Theme.ink)
+                            .padding(Theme.spacing8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Theme.warmWash.opacity(0.7))
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    }
+                    .accessibilityIdentifier("friction.insight")
+                }
+            }
+        }
+        .startKindCard()
     }
 
     private var executionModelCard: some View {

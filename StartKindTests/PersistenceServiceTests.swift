@@ -106,6 +106,32 @@ final class PersistenceServiceTests: XCTestCase {
         XCTAssertEqual(capsule.relatedDraft, RecoveryCapsuleModel.blockerDraft(.needDocument))
     }
 
+    func testPausedTimerStoresBlockerAndReturnNoteInRecoveryCapsule() throws {
+        let svc = try makeService()
+        let step = svc.saveNextStep(proposal: sampleProposal(.insurance), capture: nil, taskTitle: "T")
+        let session = svc.startTimer(for: step, plannedMinutes: 10)
+
+        svc.recordTimerOutcome(
+            session: session,
+            actualSeconds: 120,
+            outcome: .paused,
+            step: step,
+            isPlus: false,
+            blocker: .needDocument,
+            returnNote: "Form is on page 2"
+        )
+
+        let capsule = try XCTUnwrap(svc.activeRecoveryCapsule())
+        XCTAssertEqual(capsule.blockerReason, .needDocument)
+        XCTAssertEqual(capsule.returnNote, "Form is on page 2")
+    }
+
+    func testRecoveryMetadataDecodesLegacyBlockerDraft() {
+        let metadata = RecoveryCapsuleModel.decodeMetadata(from: "blocker:too_big")
+        XCTAssertEqual(metadata.blocker, .tooBig)
+        XCTAssertNil(metadata.note)
+    }
+
     func testAbandonedTimerStoresBlockerInRecoveryCapsule() throws {
         let svc = try makeService()
         let step = svc.saveNextStep(proposal: sampleProposal(.household), capture: nil, taskTitle: "T")

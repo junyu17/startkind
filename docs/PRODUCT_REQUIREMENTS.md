@@ -246,3 +246,8 @@ The first iOS release includes these non-MVP retention features:
 6. Widget: quick return to Start from the Home Screen.
 7. Shareable Start Card: natural encouragement sharing without exposing private history.
 8. Personal Vault: local reusable next-step snippets that help repeat users start faster.
+9. Autopilot Mode: one button chooses a locally sensible next start without planning.
+10. Return Note: interrupted users can leave one short clue for resuming.
+11. Friction Map: blocker and timing history become non-shaming restart insights.
+12. Live Activity: the active timer can stay visible on the Lock Screen where supported.
+13. One-Tap Rescue Notification: a no-shame notification opens the smallest restart.

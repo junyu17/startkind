@@ -4,7 +4,7 @@ import Combine
 struct TimerView: View {
     let session: TimerSessionModel
     let step: NextStepModel
-    let onOutcome: (TimerOutcome, BlockerReason?) -> Void
+    let onOutcome: (TimerOutcome, BlockerReason?, String?) -> Void
 
     @EnvironmentObject private var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
@@ -17,7 +17,7 @@ struct TimerView: View {
 
     private let totalSeconds: Int
 
-    init(session: TimerSessionModel, step: NextStepModel, onOutcome: @escaping (TimerOutcome, BlockerReason?) -> Void) {
+    init(session: TimerSessionModel, step: NextStepModel, onOutcome: @escaping (TimerOutcome, BlockerReason?, String?) -> Void) {
         self.session = session
         self.step = step
         self.onOutcome = onOutcome
@@ -77,7 +77,7 @@ struct TimerView: View {
                         .foregroundStyle(.secondary)
                 }
                 PrimaryButton("timer.done", systemImage: "checkmark.circle.fill", accessibilityId: "timer.done") {
-                    onOutcome(.completed, nil)
+                    onOutcome(.completed, nil, nil)
                 }
                 HStack(spacing: Theme.spacing12) {
                     QuietButton("timer.continueFive", systemImage: "plus", accessibilityId: "timer.continue5") {
@@ -113,13 +113,13 @@ struct TimerView: View {
         .sheet(isPresented: $showBlockerPicker) {
             BlockerPickerView(
                 titleKey: pendingOutcome == .abandoned ? "blocker.title.skip" : "blocker.title.pause",
-                onSelect: { blocker in
+                onSelect: { blocker, note in
                     showBlockerPicker = false
-                    onOutcome(pendingOutcome, blocker)
+                    onOutcome(pendingOutcome, blocker, note)
                 },
-                onSkip: {
+                onSkip: { note in
                     showBlockerPicker = false
-                    onOutcome(pendingOutcome, nil)
+                    onOutcome(pendingOutcome, nil, note)
                 }
             )
         }
@@ -139,11 +139,12 @@ struct TimerView: View {
 
 struct BlockerPickerView: View {
     let titleKey: String
-    let onSelect: (BlockerReason) -> Void
-    let onSkip: () -> Void
+    let onSelect: (BlockerReason, String?) -> Void
+    let onSkip: (String?) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var loc: LocalizationManager
+    @State private var returnNote = ""
 
     var body: some View {
         NavigationStack {
@@ -153,10 +154,21 @@ struct BlockerPickerView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
+                VStack(alignment: .leading, spacing: Theme.spacing8) {
+                    SectionLabel("returnNote.title")
+                    TextField(L("returnNote.placeholder"), text: $returnNote, axis: .vertical)
+                        .lineLimit(1...3)
+                        .textFieldStyle(.roundedBorder)
+                        .accessibilityIdentifier("returnNote.input")
+                    Text(verbatim: L("returnNote.hint"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
                 VStack(spacing: Theme.spacing8) {
                     ForEach(BlockerReason.allCases) { reason in
                         Button {
-                            onSelect(reason)
+                            onSelect(reason, cleanNote)
                         } label: {
                             HStack(spacing: Theme.spacing12) {
                                 Image(systemName: reason.systemImage)
@@ -183,7 +195,7 @@ struct BlockerPickerView: View {
                 }
 
                 Button {
-                    onSkip()
+                    onSkip(cleanNote)
                 } label: {
                     Text(verbatim: L("blocker.skip"))
                         .font(.footnote)
@@ -207,5 +219,10 @@ struct BlockerPickerView: View {
             }
             .background(Theme.background.ignoresSafeArea())
         }
+    }
+
+    private var cleanNote: String? {
+        let trimmed = returnNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

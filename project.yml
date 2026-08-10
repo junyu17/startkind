@@ -59,6 +59,7 @@ targets:
         NSPhotoLibraryUsageDescription: "StartKind lets you choose screenshots or photos so it can extract text and turn admin tasks into one small next step."
         NSSpeechRecognitionUsageDescription: "StartKind uses speech recognition to turn your spoken thoughts into one small next step."
         ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
         CFBundleURLTypes:
           - CFBundleURLName: ren.startkind
             CFBundleURLSchemes:
@@ -108,6 +109,7 @@ targets:
       - path: StartKindWidgetExtension
         excludes:
           - "Info.plist"
+      - path: StartKind/Shared/StartKindTimerAttributes.swift
     info:
       path: StartKindWidgetExtension/Info.plist
       properties:

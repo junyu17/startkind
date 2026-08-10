@@ -150,6 +150,18 @@ final class PersistenceService: ObservableObject {
         isPlus: Bool,
         blocker: BlockerReason?
     ) {
+        recordTimerOutcome(session: session, actualSeconds: actualSeconds, outcome: outcome, step: step, isPlus: isPlus, blocker: blocker, returnNote: nil)
+    }
+
+    func recordTimerOutcome(
+        session: TimerSessionModel,
+        actualSeconds: Int,
+        outcome: TimerOutcome,
+        step: NextStepModel?,
+        isPlus: Bool,
+        blocker: BlockerReason?,
+        returnNote: String?
+    ) {
         session.actualSeconds = actualSeconds
         session.outcome = outcome
         session.endedAt = .now
@@ -160,10 +172,10 @@ final class PersistenceService: ObservableObject {
             clearActiveRecoveryCapsule()
         case .partial, .paused:
             step?.status = .paused
-            if let step { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker) }
+            if let step { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker, returnNote: returnNote) }
         case .abandoned:
             step?.status = .skipped
-            if let step, let blocker { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker) }
+            if let step { upsertRecoveryCapsule(for: step, isPlus: isPlus, blocker: blocker, returnNote: returnNote) }
         }
         step?.updatedAt = .now
         try? context.save()
@@ -171,7 +183,7 @@ final class PersistenceService: ObservableObject {
 
     // MARK: - Recovery Capsule
 
-    func upsertRecoveryCapsule(for step: NextStepModel, isPlus: Bool, blocker: BlockerReason? = nil) {
+    func upsertRecoveryCapsule(for step: NextStepModel, isPlus: Bool, blocker: BlockerReason? = nil, returnNote: String? = nil) {
         let id = userId
         // Free: keep at most one active capsule.
         if !isPlus {
@@ -194,10 +206,19 @@ final class PersistenceService: ObservableObject {
             resumeTimerMinutes: proposal.timerMinutes,
             resumeCategory: proposal.category,
             resumeShrinkLevel: proposal.shrinkLevel,
-            relatedDraft: blocker.map(RecoveryCapsuleModel.blockerDraft)
+            relatedDraft: RecoveryCapsuleModel.metadataDraft(blocker: blocker, note: returnNote)
         )
         context.insert(capsule)
         try? context.save()
+    }
+
+    func recoveryCapsules() -> [RecoveryCapsuleModel] {
+        let id = userId
+        let descriptor = FetchDescriptor<RecoveryCapsuleModel>(
+            predicate: #Predicate { $0.userId == id },
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
     }
 
     func activeRecoveryCapsule() -> RecoveryCapsuleModel? {
