@@ -64,6 +64,19 @@ targets:
           - CFBundleURLName: ren.startkind
             CFBundleURLSchemes:
               - startkind
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: ren.startkind.shortcut.stuck
+            UIApplicationShortcutItemTitle: "I'm stuck"
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeFavorite
+          - UIApplicationShortcutItemType: ren.startkind.shortcut.startFive
+            UIApplicationShortcutItemTitle: Start 5 minutes
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypePlay
+          - UIApplicationShortcutItemType: ren.startkind.shortcut.rescueYesterday
+            UIApplicationShortcutItemTitle: Rescue yesterday
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeTime
+          - UIApplicationShortcutItemType: ren.startkind.shortcut.pasteAdmin
+            UIApplicationShortcutItemTitle: Paste admin text
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeCompose
         UIRequiredDeviceCapabilities:
           - arm64
     settings:
@@ -74,6 +87,7 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
         SUPPORTS_MACCATALYST: NO
+        CODE_SIGN_ENTITLEMENTS: StartKind/StartKind.entitlements
   StartKindShareExtension:
     type: app-extension
     platform: iOS
@@ -124,6 +138,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
         SUPPORTS_MACCATALYST: NO
+        CODE_SIGN_ENTITLEMENTS: StartKindWidgetExtension/StartKindWidgetExtension.entitlements
   StartKindTests:
     type: bundle.unit-test
     platform: iOS

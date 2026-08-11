@@ -383,6 +383,32 @@
 "yesterday.rescue.open" = "昨天恢复";
 "yesterday.rescue.loaded" = "昨天的事已变成 3 分钟重启。";
 "yesterday.source" = "昨天恢复";
+"daypart.open" = "现在最适合的一步";
+"daypart.loaded" = "已按当前时段准备好一个启动。";
+"daypart.source" = "时段启动";
+"emergency.open" = "紧急 3 分钟";
+"emergency.loaded" = "紧急极小模式已准备好。";
+"emergency.source" = "紧急极小模式";
+"frictionMemory.source" = "摩擦记忆";
+"frictionMemory.loaded" = "StartKind 已按常见卡点帮你降低阻力。";
+"startScript.title" = "保存的启动";
+"startScript.save" = "保存这个启动";
+"startScript.saved" = "已保存为可复用启动。";
+"startScript.empty" = "有用的启动可保存在这里；本地保存且没有运营成本。";
+"startScript.loaded" = "已载入保存启动。";
+"startScript.source" = "保存启动";
+"calendarSoft.title" = "日历软着陆";
+"calendarSoft.placeholder" = "会议、牙医、账单截止...";
+"calendarSoft.days" = "%d 天后";
+"calendarSoft.hint" = "输入一个即将到来的日程，StartKind 只转成一个准备动作。";
+"calendarSoft.loaded" = "日程准备步骤已载入。";
+"calendarSoft.noMatch" = "试试账单、预约、会议、截止日、医生、牙医或电话。";
+"quickAction.source" = "主屏幕快捷动作";
+"quickAction.loaded" = "快捷启动已载入。";
+"gentleReview.title" = "温和回顾";
+"gentleReview.starts" = "本周启动";
+"gentleReview.friction" = "常见卡点";
+"gentleReview.none" = "学习中";
 
 /* MARK: - 隐私 */
 "privacy.title" = "隐私";

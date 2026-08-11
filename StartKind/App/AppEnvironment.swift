@@ -52,6 +52,13 @@ final class AppEnvironment: ObservableObject {
     let energyMatcher: EnergyMatcher
     let frictionPresetPlanner: FrictionPresetPlanner
     let yesterdayRescuePlanner: YesterdayRescuePlanner
+    let emergencyTinyModePlanner: EmergencyTinyModePlanner
+    let dayPartPlanner: DayPartPlanner
+    let calendarSoftLandingPlanner: CalendarSoftLandingPlanner
+    let gentleReviewPlanner: GentleReviewPlanner
+    let frictionMemory: FrictionMemoryStore
+    let startScripts: StartScriptStore
+    let widgetNextStepStore: WidgetNextStepStore
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -77,8 +84,10 @@ final class AppEnvironment: ObservableObject {
             }
             return nil
         }()
+        let launchArgs = ProcessInfo.processInfo.arguments
+        let uiTestMode = launchArgs.contains("-UITEST") || launchArgs.contains("-UITEST_AUTH")
         self.supabase = supabase
-        self.ai = CloudAIClient(supabase: supabase)
+        self.ai = uiTestMode ? LocalAIClient() : CloudAIClient(supabase: supabase)
         self.sync = SupabaseSync(supabase: supabase)
         self.engine = NextStepEngine()
         self.shrinker = TaskShrinker()
@@ -89,7 +98,21 @@ final class AppEnvironment: ObservableObject {
         self.energyMatcher = EnergyMatcher()
         self.frictionPresetPlanner = FrictionPresetPlanner()
         self.yesterdayRescuePlanner = YesterdayRescuePlanner()
-        let launchArgs = ProcessInfo.processInfo.arguments
+        self.emergencyTinyModePlanner = EmergencyTinyModePlanner()
+        self.dayPartPlanner = DayPartPlanner()
+        self.calendarSoftLandingPlanner = CalendarSoftLandingPlanner()
+        self.gentleReviewPlanner = GentleReviewPlanner()
+        self.frictionMemory = FrictionMemoryStore()
+        self.startScripts = StartScriptStore()
+        self.widgetNextStepStore = WidgetNextStepStore()
+        if uiTestMode {
+            self.vault.clear()
+            self.proofOfStart.clear()
+            self.tinyAdminInbox.clear()
+            self.frictionMemory.clear()
+            self.startScripts.clear()
+            self.widgetNextStepStore.clear()
+        }
         self.hasStarted = !launchArgs.contains("-UITEST_AUTH")
 
         // Keep the persisted profile entitlement in sync with StoreKit.
@@ -276,6 +299,7 @@ final class AppEnvironment: ObservableObject {
     @Published var pendingCaptureText: String?
     @Published var pendingRescueRestart = false
     @Published var pendingStuckRestart = false
+    @Published var pendingQuickAction: QuickActionKind?
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
@@ -290,6 +314,13 @@ final class AppEnvironment: ObservableObject {
         }
         if components.host == "rescue" {
             pendingRescueRestart = true
+            markStarted()
+            return
+        }
+        if components.host == "quick",
+           let kindValue = components.queryItems?.first(where: { $0.name == "kind" })?.value,
+           let kind = QuickActionKind(rawValue: kindValue) {
+            pendingQuickAction = kind
             markStarted()
             return
         }
@@ -400,6 +431,12 @@ final class AppEnvironment: ObservableObject {
         )
     }
 
+    func handleQuickAction(type: String) {
+        guard let kind = QuickActionKind(shortcutType: type) else { return }
+        pendingQuickAction = kind
+        markStarted()
+    }
+
     // MARK: - Sync
 
     /// Full bidirectional sync (push local -> upsert, pull remote -> merge LWW).
@@ -461,6 +498,13 @@ final class AppEnvironment: ObservableObject {
     func generateNextStep(input: CaptureInput, energy: EnergyLevel? = nil) async throws -> NextStepModel {
         guard canGenerateStep else { throw UsageError.stepLimitReached }
         let detected = engine.detectCategory(in: input.rawText, preferred: input.preferredCategory)
+        if emergencyTinyModePlanner.detectsTrigger(input.rawText) {
+            return createLocalNextStep(
+                proposal: emergencyTinyModePlanner.proposal(language: input.language),
+                sourceText: input.rawText,
+                source: input.source
+            )
+        }
         let multiplier = calibrator.multiplier(for: detected, in: persistence.calibrationSamples())
         var proposal = try await ai.generateNextStep(input: input, calibrationMultiplier: multiplier)
         if let energy {
@@ -468,6 +512,7 @@ final class AppEnvironment: ObservableObject {
         }
         let capture = persistence.saveCapture(rawText: input.rawText, source: input.source, language: input.language)
         let step = persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
+        widgetNextStepStore.save(proposal: proposal)
         usage.recordStepGeneration()
         return step
     }
@@ -475,7 +520,9 @@ final class AppEnvironment: ObservableObject {
     @discardableResult
     func createLocalNextStep(proposal: NextStepProposal, sourceText: String, source: CaptureSource = .manual) -> NextStepModel {
         let capture = persistence.saveCapture(rawText: sourceText, source: source, language: currentLanguage)
-        return persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
+        let step = persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
+        widgetNextStepStore.save(proposal: proposal)
+        return step
     }
 
     @discardableResult
@@ -490,11 +537,13 @@ final class AppEnvironment: ObservableObject {
 
     @discardableResult
     func createFrictionPresetStep(_ preset: FrictionPreset, category: TaskCategory?) -> NextStepModel {
+        let chosenCategory = category ?? .other
         let proposal = frictionPresetPlanner.proposal(
             for: preset,
-            category: category ?? .other,
+            category: chosenCategory,
             language: currentLanguage
         )
+        frictionMemory.record(category: chosenCategory, preset: preset)
         return createLocalNextStep(proposal: proposal, sourceText: "friction:\(preset.rawValue)", source: .manual)
     }
 
@@ -519,6 +568,53 @@ final class AppEnvironment: ObservableObject {
     func createYesterdayRescueStep() -> NextStepModel? {
         guard let proposal = yesterdayRescueProposal() else { return nil }
         return createLocalNextStep(proposal: proposal, sourceText: L("yesterday.source"), source: .manual)
+    }
+
+    @discardableResult
+    func createDayPartStep() -> NextStepModel {
+        let proposal = dayPartPlanner.proposal(
+            activeCapsule: activeCapsule(),
+            recentSteps: persistence.recentNextSteps(days: 2),
+            language: currentLanguage
+        )
+        return createLocalNextStep(proposal: proposal, sourceText: L("daypart.source"), source: .manual)
+    }
+
+    @discardableResult
+    func createEmergencyTinyStep() -> NextStepModel {
+        let proposal = emergencyTinyModePlanner.proposal(language: currentLanguage)
+        return createLocalNextStep(proposal: proposal, sourceText: L("emergency.source"), source: .manual)
+    }
+
+    func frictionMemoryProposal(category: TaskCategory?) -> NextStepProposal? {
+        frictionMemory.proposal(for: category ?? .other, language: currentLanguage)
+    }
+
+    @discardableResult
+    func createFrictionMemoryStep(category: TaskCategory?) -> NextStepModel? {
+        guard let proposal = frictionMemoryProposal(category: category) else { return nil }
+        return createLocalNextStep(proposal: proposal, sourceText: L("frictionMemory.source"), source: .manual)
+    }
+
+    @discardableResult
+    func saveStartScript(from step: NextStepModel) -> StartScript {
+        startScripts.add(title: step.title, body: step.proposal.step, category: step.category)
+    }
+
+    @discardableResult
+    func createStartScriptStep(_ script: StartScript) -> NextStepModel {
+        createLocalNextStep(proposal: startScripts.proposal(from: script, language: currentLanguage), sourceText: L("startScript.source"), source: .manual)
+    }
+
+    func calendarSoftLandingProposal(title: String, daysFromNow: Int) -> NextStepProposal? {
+        let start = Calendar.current.date(byAdding: .day, value: daysFromNow, to: Date()) ?? Date()
+        return calendarSoftLandingPlanner.proposal(for: CalendarSoftLandingEvent(title: title, startDate: start), language: currentLanguage)
+    }
+
+    @discardableResult
+    func createCalendarSoftLandingStep(title: String, daysFromNow: Int) -> NextStepModel? {
+        guard let proposal = calendarSoftLandingProposal(title: title, daysFromNow: daysFromNow) else { return nil }
+        return createLocalNextStep(proposal: proposal, sourceText: title, source: .manual)
     }
 
     @discardableResult
@@ -584,6 +680,7 @@ final class AppEnvironment: ObservableObject {
             returnNote: returnNote
         )
         liveActivity.end()
+        if isUITestMode { return }
         if outcome == .completed {
             rescueNotifications.cancelRescue()
         } else if step != nil {
@@ -611,6 +708,15 @@ final class AppEnvironment: ObservableObject {
         )
     }
 
+    func gentleReviewSummary() -> GentleReviewSummary {
+        gentleReviewPlanner.summary(
+            proofs: proofOfStart.events,
+            frictionSignals: frictionMemory.signals,
+            samples: persistence.calibrationSamples(),
+            language: currentLanguage
+        )
+    }
+
     // MARK: - Data control
 
     func deleteAllData() {
@@ -618,6 +724,9 @@ final class AppEnvironment: ObservableObject {
         vault.clear()
         proofOfStart.clear()
         tinyAdminInbox.clear()
+        frictionMemory.clear()
+        startScripts.clear()
+        widgetNextStepStore.clear()
     }
     func exportJSON() -> String { persistence.exportJSON() }
 

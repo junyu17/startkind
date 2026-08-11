@@ -383,6 +383,32 @@
 "yesterday.rescue.open" = "Yesterday rescue";
 "yesterday.rescue.loaded" = "Yesterday's task is back as a 3-minute restart.";
 "yesterday.source" = "Yesterday rescue";
+"daypart.open" = "Best next start";
+"daypart.loaded" = "A time-of-day start is ready.";
+"daypart.source" = "Day-part start";
+"emergency.open" = "Emergency 3 min";
+"emergency.loaded" = "Emergency tiny mode is ready.";
+"emergency.source" = "Emergency tiny mode";
+"frictionMemory.source" = "Friction memory";
+"frictionMemory.loaded" = "StartKind used your common blocker to make this easier.";
+"startScript.title" = "Saved starts";
+"startScript.save" = "Save this start";
+"startScript.saved" = "Saved as a reusable start.";
+"startScript.empty" = "Save useful starts here; they stay local and cost nothing to run.";
+"startScript.loaded" = "Saved start loaded.";
+"startScript.source" = "Saved start";
+"calendarSoft.title" = "Calendar soft landing";
+"calendarSoft.placeholder" = "Meeting, dentist, bill due...";
+"calendarSoft.days" = "In %d days";
+"calendarSoft.hint" = "Type one upcoming event; StartKind turns it into a prep step.";
+"calendarSoft.loaded" = "Calendar prep step loaded.";
+"calendarSoft.noMatch" = "Try a bill, appointment, meeting, deadline, doctor, dentist, or call.";
+"quickAction.source" = "Home Screen quick action";
+"quickAction.loaded" = "Quick action step loaded.";
+"gentleReview.title" = "Gentle review";
+"gentleReview.starts" = "Starts this week";
+"gentleReview.friction" = "Common blocker";
+"gentleReview.none" = "Learning";
 
 /* MARK: - Privacy */
 "privacy.title" = "Privacy";

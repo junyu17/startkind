@@ -51,6 +51,41 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeFavorite</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>I'm stuck</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>ren.startkind.shortcut.stuck</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypePlay</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Start 5 minutes</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>ren.startkind.shortcut.startFive</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeTime</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Rescue yesterday</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>ren.startkind.shortcut.rescueYesterday</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Paste admin text</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>ren.startkind.shortcut.pasteAdmin</string>
+		</dict>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

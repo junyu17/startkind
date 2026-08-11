@@ -22,6 +22,8 @@ struct StartView: View {
     @State private var showVault = false
     @State private var vaultMessage: String?
     @State private var adminInboxText = ""
+    @State private var calendarEventTitle = ""
+    @State private var calendarDaysFromNow = 1
 
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
@@ -47,8 +49,11 @@ struct StartView: View {
                     todayKindStartPanel
                     composerPanel
                     categoryChips
+                    dayPartAndEmergencyPanel
                     energyMatchChips
                     frictionPresetChips
+                    memoryAndScriptsPanel
+                    calendarSoftLandingPanel
                     usageLine
 
                     if isLoading {
@@ -172,6 +177,11 @@ struct StartView: View {
             guard value else { return }
             handleStuck()
             env.pendingStuckRestart = false
+        }
+        .onChange(of: env.pendingQuickAction) { _, value in
+            guard let value else { return }
+            handleQuickAction(value)
+            env.pendingQuickAction = nil
         }
     }
 
@@ -559,6 +569,114 @@ struct StartView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var dayPartAndEmergencyPanel: some View {
+        HStack(spacing: Theme.spacing8) {
+            kindStartButton("daypart.open", systemImage: "sun.max.fill", id: "start.daypart") {
+                applyDayPart()
+            }
+            kindStartButton("emergency.open", systemImage: "bolt.heart.fill", id: "start.emergency") {
+                applyEmergencyTiny()
+            }
+        }
+    }
+
+    private var memoryAndScriptsPanel: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing10) {
+            SectionLabel("startScript.title")
+            if let step = currentStep {
+                QuietButton("startScript.save", systemImage: "bookmark.fill", accessibilityId: "startScript.save") {
+                    env.saveStartScript(from: step)
+                    proofMessage = L("startScript.saved")
+                    vaultMessage = nil
+                    rescheduleMessage = nil
+                }
+            }
+            if let memory = env.frictionMemoryProposal(category: selectedCategory) {
+                Button {
+                    applyFrictionMemory()
+                } label: {
+                    Label(memory.title, systemImage: "brain.head.profile")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .padding(Theme.spacing12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.softAccent.opacity(0.72))
+                        .foregroundStyle(Theme.ink)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("frictionMemory.apply")
+            }
+            if env.startScripts.scripts.isEmpty {
+                Text(verbatim: L("startScript.empty"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(env.startScripts.recent(limit: 4)) { script in
+                    Button {
+                        applyStartScript(script)
+                    } label: {
+                        HStack(spacing: Theme.spacing10) {
+                            Image(systemName: "bookmark")
+                                .foregroundStyle(Theme.accent)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(verbatim: script.title)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(Theme.ink)
+                                    .lineLimit(1)
+                                Text(verbatim: script.body)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+                            Spacer()
+                        }
+                        .padding(Theme.spacing10)
+                        .background(Theme.surfaceRaised)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("startScript.item")
+                }
+            }
+        }
+        .startKindCard()
+    }
+
+    private var calendarSoftLandingPanel: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing10) {
+            SectionLabel("calendarSoft.title")
+            FieldShell(systemImage: "calendar.badge.clock") {
+                TextField(L("calendarSoft.placeholder"), text: $calendarEventTitle, axis: .vertical)
+                    .lineLimit(1...2)
+                    .submitLabel(.done)
+                    .accessibilityIdentifier("calendarSoft.input")
+                    .onSubmit { focusedField = nil }
+                Button {
+                    applyCalendarSoftLanding()
+                } label: {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(canUseCalendarSoftLanding ? Theme.accent : Color.secondary.opacity(0.45))
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canUseCalendarSoftLanding)
+                .accessibilityIdentifier("calendarSoft.submit")
+            }
+            Stepper(L("calendarSoft.days", calendarDaysFromNow), value: $calendarDaysFromNow, in: 0...7)
+                .font(.caption)
+                .accessibilityIdentifier("calendarSoft.days")
+            Text(verbatim: L("calendarSoft.hint"))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .startKindCard()
+    }
+
     private var usageLine: some View {
         Group {
             if !env.isPlus || env.proofOfStartCount > 0 {
@@ -650,6 +768,10 @@ struct StartView: View {
 
     private var canCaptureAdminInbox: Bool {
         !adminInboxText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
+    }
+
+    private var canUseCalendarSoftLanding: Bool {
+        !calendarEventTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
     }
 
     // MARK: - Actions
@@ -831,13 +953,95 @@ struct StartView: View {
 
     private func applyYesterdayRescue() {
         focusedField = nil
-        guard let step = env.createYesterdayRescueStep() else { return }
+        guard let step = env.createYesterdayRescueStep() else {
+            applyEmergencyTiny()
+            return
+        }
         currentStep = step
         selectedCategory = step.category
         rescheduleMessage = L("yesterday.rescue.loaded")
         vaultMessage = nil
         proofMessage = nil
         showPlan = false
+    }
+
+    private func applyDayPart() {
+        focusedField = nil
+        let step = env.createDayPartStep()
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("daypart.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func applyEmergencyTiny() {
+        focusedField = nil
+        let step = env.createEmergencyTinyStep()
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("emergency.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func applyFrictionMemory() {
+        focusedField = nil
+        guard let step = env.createFrictionMemoryStep(category: selectedCategory) else { return }
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("frictionMemory.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func applyStartScript(_ script: StartScript) {
+        focusedField = nil
+        let step = env.createStartScriptStep(script)
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("startScript.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func applyCalendarSoftLanding() {
+        focusedField = nil
+        let title = calendarEventTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        guard let step = env.createCalendarSoftLandingStep(title: title, daysFromNow: calendarDaysFromNow) else {
+            errorMessage = L("calendarSoft.noMatch")
+            return
+        }
+        currentStep = step
+        selectedCategory = step.category
+        calendarEventTitle = ""
+        rescheduleMessage = L("calendarSoft.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        errorMessage = nil
+        showPlan = false
+    }
+
+    private func handleQuickAction(_ kind: QuickActionKind) {
+        switch kind {
+        case .stuck:
+            handleStuck()
+        case .startFive:
+            if let proposal = kind.proposal(language: env.currentLanguage) {
+                currentStep = env.createLocalNextStep(proposal: proposal, sourceText: L("quickAction.source"), source: .manual)
+                selectedCategory = currentStep?.category
+                rescheduleMessage = L("quickAction.loaded")
+            }
+        case .rescueYesterday:
+            applyYesterdayRescue()
+        case .pasteAdmin:
+            focusedField = .adminInbox
+        }
     }
 
     private func applyFrictionPreset(_ preset: FrictionPreset) {

@@ -7,11 +7,13 @@ struct PatternsView: View {
     private var insights: [String] { env.insights() }
     private var snapshots: [CalibrationSnapshot] { env.snapshots() }
     private var frictionInsights: [FrictionInsight] { env.frictionInsights() }
+    private var gentleReview: GentleReviewSummary { env.gentleReviewSummary() }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
+                    gentleReviewCard
                     executionModelCard
                     frictionMapSection
 
@@ -46,6 +48,35 @@ struct PatternsView: View {
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, Theme.spacing32)
+    }
+
+    private var gentleReviewCard: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            HStack(spacing: Theme.spacing8) {
+                Image(systemName: "leaf.fill")
+                    .foregroundStyle(Theme.accent)
+                Text(verbatim: L("gentleReview.title"))
+                    .font(.headline)
+                Spacer()
+            }
+
+            Text(verbatim: gentleReview.message)
+                .font(.subheadline)
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: Theme.spacing8) {
+                modelMetric(title: L("gentleReview.starts"), value: "\(gentleReview.startsThisWeek)", icon: "play.circle.fill")
+                modelMetric(title: L("gentleReview.friction"), value: gentleReviewFrictionText, icon: "exclamationmark.circle")
+            }
+        }
+        .startKindCard()
+        .accessibilityIdentifier("gentleReview.card")
+    }
+
+    private var gentleReviewFrictionText: String {
+        guard let preset = gentleReview.mostCommonFriction else { return L("gentleReview.none") }
+        return L("frictionPreset.\(preset.rawValue)")
     }
 
     private var frictionMapSection: some View {

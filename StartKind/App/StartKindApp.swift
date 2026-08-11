@@ -4,15 +4,33 @@ import UserNotifications
 
 extension Notification.Name {
     static let startKindNotificationURL = Notification.Name("StartKindNotificationURL")
+    static let startKindShortcutAction = Notification.Name("StartKindShortcutAction")
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    static var pendingShortcutType: String?
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        if let shortcut = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem {
+            Self.pendingShortcutType = shortcut.type
+            return false
+        }
         return true
+    }
+
+    nonisolated func application(
+        _ application: UIApplication,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        let type = shortcutItem.type
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .startKindShortcutAction, object: type)
+        }
+        completionHandler(true)
     }
 
     nonisolated func userNotificationCenter(
@@ -53,6 +71,16 @@ struct StartKindApp: App {
                 .environmentObject(LocalizationManager.shared)
                 .task { await env.bootstrap() }
                 .onOpenURL { env.handleJoinURL($0) }
+                .onAppear {
+                    if let type = AppDelegate.pendingShortcutType {
+                        AppDelegate.pendingShortcutType = nil
+                        env.handleQuickAction(type: type)
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .startKindShortcutAction)) { notification in
+                    guard let type = notification.object as? String else { return }
+                    env.handleQuickAction(type: type)
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .startKindNotificationURL)) { notification in
                     guard let url = notification.object as? URL else { return }
                     env.handleJoinURL(url)
