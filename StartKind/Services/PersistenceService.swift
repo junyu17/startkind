@@ -111,6 +111,16 @@ final class PersistenceService: ObservableObject {
         return try? context.fetch(descriptor).first
     }
 
+    func recentNextSteps(days: Int = 2) -> [NextStepModel] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: .now) ?? .now
+        let id = userId
+        let descriptor = FetchDescriptor<NextStepModel>(
+            predicate: #Predicate { $0.userId == id && $0.createdAt >= cutoff },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
     // MARK: - Timer
 
     @discardableResult

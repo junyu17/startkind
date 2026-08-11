@@ -144,6 +144,28 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Autopilot should create a startable next step")
     }
 
+    func testRetentionControlsCreateStartableStep() throws {
+        let app = launch()
+        XCTAssertTrue(app.textFields["adminInbox.input"].waitForExistence(timeout: 15), "Tiny admin inbox should be visible")
+
+        let energy = app.buttons["energy.overwhelmed"]
+        XCTAssertTrue(energy.waitForExistence(timeout: 10), "Energy Match should be visible")
+        energy.tap()
+
+        let tabsPreset = app.buttons["frictionPreset.too_many_tabs"]
+        XCTAssertTrue(tabsPreset.waitForExistence(timeout: 10), "Friction presets should be visible")
+        tabsPreset.tap()
+
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Friction preset should create a startable step")
+        XCTAssertTrue(app.buttons["proof.started"].waitForExistence(timeout: 5), "Proof of Start should be available on a step")
+        app.buttons["proof.started"].tap()
+
+        let stuck = app.buttons["global.stuck"]
+        XCTAssertTrue(stuck.waitForExistence(timeout: 10), "Global Stuck button should always be available")
+        stuck.tap()
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Stuck should keep a startable step ready")
+    }
+
     func testPaywallShowsFreePlusComparison() throws {
         let app = launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))

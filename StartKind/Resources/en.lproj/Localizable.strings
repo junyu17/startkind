@@ -357,6 +357,33 @@
 "costart.join" = "Join";
 "costart.roomNotFound" = "Couldn't find that room. It may have ended.";
 
+/* MARK: - Retention assists */
+"stuck.button" = "I'm stuck";
+"stuck.loaded" = "No problem. Start with this smaller version.";
+"stuck.source" = "Stuck restart";
+"energy.title" = "Energy match";
+"energy.low" = "Low";
+"energy.medium" = "Medium";
+"energy.wired" = "Wired";
+"energy.overwhelmed" = "Overwhelmed";
+"frictionPreset.title" = "Friction preset";
+"frictionPreset.need_login" = "Login";
+"frictionPreset.need_document" = "Document";
+"frictionPreset.too_vague" = "Vague";
+"frictionPreset.too_many_tabs" = "Tabs";
+"frictionPreset.need_another_person" = "Person";
+"frictionPreset.loaded" = "A friction-only start is ready.";
+"proof.started" = "I started";
+"proof.saved" = "Started counts. %d starts in the last 7 days.";
+"proof.count" = "Started %d times this week";
+"adminInbox.title" = "Tiny admin inbox";
+"adminInbox.placeholder" = "Paste a bill, email, appointment, or form text";
+"adminInbox.hint" = "StartKind saves only one next-step card from this.";
+"adminInbox.saved" = "Saved as one small admin step.";
+"yesterday.rescue.open" = "Yesterday rescue";
+"yesterday.rescue.loaded" = "Yesterday's task is back as a 3-minute restart.";
+"yesterday.source" = "Yesterday rescue";
+
 /* MARK: - Privacy */
 "privacy.title" = "Privacy";
 "privacy.principlesTitle" = "Principles";

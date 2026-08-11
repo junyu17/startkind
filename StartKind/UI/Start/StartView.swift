@@ -9,16 +9,19 @@ struct StartView: View {
     @FocusState private var focusedField: FocusedField?
     @State private var lastSource: CaptureSource = .text
     @State private var selectedCategory: TaskCategory?
+    @State private var selectedEnergy: EnergyLevel?
     @State private var currentStep: NextStepModel?
     @State private var isLoading = false
     @State private var isJoiningRoom = false
     @State private var errorMessage: String?
     @State private var rescheduleMessage: String?
+    @State private var proofMessage: String?
     @State private var showPlan = false
     @State private var showAdminReader = false
     @State private var showTemplates = false
     @State private var showVault = false
     @State private var vaultMessage: String?
+    @State private var adminInboxText = ""
 
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
@@ -33,6 +36,7 @@ struct StartView: View {
     private enum FocusedField: Hashable {
         case taskInput
         case roomCode
+        case adminInbox
     }
 
     var body: some View {
@@ -43,6 +47,8 @@ struct StartView: View {
                     todayKindStartPanel
                     composerPanel
                     categoryChips
+                    energyMatchChips
+                    frictionPresetChips
                     usageLine
 
                     if isLoading {
@@ -64,6 +70,7 @@ struct StartView: View {
                                 vaultMessage = L("vault.saved")
                             }
                         )
+                        proofOfStartPanel(step)
                     } else {
                         emptyHint
                     }
@@ -74,6 +81,10 @@ struct StartView: View {
                     }
                     if let vaultMessage {
                         KindBanner(text: vaultMessage)
+                            .transition(.opacity)
+                    }
+                    if let proofMessage {
+                        KindBanner(text: proofMessage)
                             .transition(.opacity)
                     }
                     if let errorMessage {
@@ -157,6 +168,11 @@ struct StartView: View {
             runAutopilot()
             env.pendingRescueRestart = false
         }
+        .onChange(of: env.pendingStuckRestart) { _, value in
+            guard value else { return }
+            handleStuck()
+            env.pendingStuckRestart = false
+        }
     }
 
     // MARK: - Subviews
@@ -203,6 +219,12 @@ struct StartView: View {
 
             kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
                 runAutopilot()
+            }
+
+            if env.yesterdayRescueProposal() != nil {
+                kindStartButton("yesterday.rescue.open", systemImage: "clock.arrow.circlepath", id: "start.yesterdayRescue") {
+                    applyYesterdayRescue()
+                }
             }
 
             HStack(spacing: Theme.spacing8) {
@@ -296,6 +318,7 @@ struct StartView: View {
         VStack(spacing: Theme.spacing12) {
             voiceButton
             captureField
+            tinyAdminInboxField
             quickFriendCoStartButton
             roomCodeJoinField
         }
@@ -427,6 +450,37 @@ struct StartView: View {
         }
     }
 
+    private var tinyAdminInboxField: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            SectionLabel("adminInbox.title")
+            FieldShell(systemImage: "tray.and.arrow.down.fill") {
+                TextField(L("adminInbox.placeholder"), text: $adminInboxText, axis: .vertical)
+                    .lineLimit(1...3)
+                    .submitLabel(.done)
+                    .focused($focusedField, equals: .adminInbox)
+                    .onSubmit { focusedField = nil }
+                    .accessibilityIdentifier("adminInbox.input")
+
+                Button {
+                    Task { await captureAdminInbox() }
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 38, height: 38)
+                        .background(canCaptureAdminInbox ? Theme.accent : Color.secondary.opacity(0.45))
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canCaptureAdminInbox)
+                .accessibilityIdentifier("adminInbox.submit")
+            }
+            Text(verbatim: L("adminInbox.hint"))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private var categoryChips: some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
             SectionLabel("start.category.section")
@@ -445,13 +499,73 @@ struct StartView: View {
         [.bills, .email, .appointments, .household, .workAdmin]
     }
 
+    private var energyMatchChips: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            SectionLabel("energy.title")
+            FlexibleHStack(spacing: Theme.spacing8) {
+                ForEach(EnergyLevel.allCases) { energy in
+                    Button {
+                        selectedEnergy = selectedEnergy == energy ? nil : energy
+                    } label: {
+                        Text(verbatim: L("energy.\(energy.rawValue)"))
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, Theme.spacing12)
+                            .padding(.vertical, Theme.spacing8)
+                            .frame(minHeight: Theme.minTapTarget)
+                            .background(selectedEnergy == energy ? Theme.softAccent : Theme.surfaceRaised)
+                            .foregroundStyle(selectedEnergy == energy ? Theme.accent : Theme.ink)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                                    .stroke(selectedEnergy == energy ? Theme.accent.opacity(0.35) : Theme.line, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("energy.\(energy.rawValue)")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var frictionPresetChips: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            SectionLabel("frictionPreset.title")
+            FlexibleHStack(spacing: Theme.spacing8) {
+                ForEach(FrictionPreset.allCases) { preset in
+                    Button {
+                        applyFrictionPreset(preset)
+                    } label: {
+                        Label(L("frictionPreset.\(preset.rawValue)"), systemImage: frictionPresetIcon(preset))
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, Theme.spacing10)
+                            .padding(.vertical, Theme.spacing8)
+                            .frame(minHeight: Theme.minTapTarget)
+                            .background(Theme.surfaceRaised)
+                            .foregroundStyle(Theme.ink)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                                    .stroke(Theme.line, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("frictionPreset.\(preset.rawValue)")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var usageLine: some View {
         Group {
-            if !env.isPlus {
+            if !env.isPlus || env.proofOfStartCount > 0 {
                 HStack(spacing: Theme.spacing8) {
                     Image(systemName: "bolt.heart")
                         .foregroundStyle(Theme.accent)
-                    Text(verbatim: L("usage.stepsLeft", env.usageState.stepsRemaining, env.usageState.stepsLimit))
+                    Text(verbatim: usageSummaryText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -461,6 +575,26 @@ struct StartView: View {
                 .background(Theme.softAccent.opacity(0.7))
                 .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
             }
+        }
+    }
+
+    private var usageSummaryText: String {
+        var parts: [String] = []
+        if !env.isPlus {
+            parts.append(L("usage.stepsLeft", env.usageState.stepsRemaining, env.usageState.stepsLimit))
+        }
+        if env.proofOfStartCount > 0 {
+            parts.append(L("proof.count", env.proofOfStartCount))
+        }
+        return parts.joined(separator: "  ")
+    }
+
+    private func proofOfStartPanel(_ step: NextStepModel) -> some View {
+        QuietButton("proof.started", systemImage: "checkmark.circle.fill", accessibilityId: "proof.started") {
+            env.recordProofOfStart(step: step)
+            proofMessage = L("proof.saved", env.proofOfStartCount)
+            vaultMessage = nil
+            rescheduleMessage = nil
         }
     }
 
@@ -514,6 +648,10 @@ struct StartView: View {
         !isJoiningRoom && AppEnvironment.isValidRoomCode(joinRoomCode)
     }
 
+    private var canCaptureAdminInbox: Bool {
+        !adminInboxText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
+    }
+
     // MARK: - Actions
 
     private func toggleVoice() {
@@ -548,7 +686,7 @@ struct StartView: View {
         isLoading = true
         errorMessage = nil
         do {
-            let step = try await env.generateNextStep(input: captureInput(raw: raw))
+            let step = try await env.generateNextStep(input: captureInput(raw: raw), energy: selectedEnergy)
             currentStep = step
             rescheduleMessage = nil
             vaultMessage = nil
@@ -579,7 +717,7 @@ struct StartView: View {
         isLoading = true
         errorMessage = nil
         do {
-            currentStep = try await env.generateNextStep(input: captureInput(raw: raw))
+            currentStep = try await env.generateNextStep(input: captureInput(raw: raw), energy: selectedEnergy)
             rescheduleMessage = nil
             vaultMessage = nil
             showPlan = false
@@ -635,6 +773,7 @@ struct StartView: View {
 
     private func startTimer(for step: NextStepModel) {
         let minutes = min(step.proposal.timerMinutes, 25)
+        env.recordProofOfStart(step: step)
         timerSession = env.startTimer(step: step, minutes: minutes)
     }
 
@@ -688,6 +827,81 @@ struct StartView: View {
         rescheduleMessage = L("autopilot.loaded")
         vaultMessage = nil
         showPlan = false
+    }
+
+    private func applyYesterdayRescue() {
+        focusedField = nil
+        guard let step = env.createYesterdayRescueStep() else { return }
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("yesterday.rescue.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func applyFrictionPreset(_ preset: FrictionPreset) {
+        focusedField = nil
+        let step = env.createFrictionPresetStep(preset, category: selectedCategory)
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("frictionPreset.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func handleStuck() {
+        focusedField = nil
+        let step = env.createStuckStep(current: currentStep)
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("stuck.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
+    private func captureAdminInbox() async {
+        focusedField = nil
+        let raw = adminInboxText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty else { return }
+        guard env.canUseAdminQuickStart else {
+            paywallReason = .adminLimit
+            showPaywall = true
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        do {
+            let step = try await env.captureAdminInbox(text: raw)
+            currentStep = step
+            selectedCategory = step.category
+            adminInboxText = ""
+            rescheduleMessage = L("adminInbox.saved")
+            vaultMessage = nil
+            proofMessage = nil
+            showPlan = false
+        } catch let usageError as UsageError {
+            switch usageError {
+            case .stepLimitReached: paywallReason = .stepLimit
+            case .adminLimitReached: paywallReason = .adminLimit
+            }
+            showPaywall = true
+        } catch {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
+        }
+        isLoading = false
+    }
+
+    private func frictionPresetIcon(_ preset: FrictionPreset) -> String {
+        switch preset {
+        case .needLogin: return "key.fill"
+        case .needDocument: return "doc.fill"
+        case .tooVague: return "questionmark.circle.fill"
+        case .tooManyTabs: return "rectangle.stack.fill"
+        case .needAnotherPerson: return "person.2.fill"
+        }
     }
 
     private func shrink(_ step: NextStepModel) {

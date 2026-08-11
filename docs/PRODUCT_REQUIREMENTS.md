@@ -195,6 +195,12 @@ Free includes:
 - Shareable Start Card
 - Start widget and iOS share extension entry points
 - One Admin Quick Start per day
+- Global Stuck Button that creates a smaller restart from anywhere
+- Energy Match selection for low, medium, wired, or overwhelmed states
+- Friction Presets for login, document, vague task, too many tabs, and needing another person
+- Proof of Start counter that records "I started" without requiring completion
+- Tiny Admin Inbox that saves one next-step card from pasted admin text
+- Yesterday Rescue that offers a 3-minute restart without streak pressure
 - Default English and optional Simplified Chinese
 
 Free excludes:
@@ -251,3 +257,9 @@ The first iOS release includes these non-MVP retention features:
 11. Friction Map: blocker and timing history become non-shaming restart insights.
 12. Live Activity: the active timer can stay visible on the Lock Screen where supported.
 13. One-Tap Rescue Notification: a no-shame notification opens the smallest restart.
+14. Global Stuck Button: a persistent escape hatch creates a smaller next step from any tab.
+15. Yesterday Rescue: yesterday's unfinished work returns as a 3-minute restart, not a missed streak.
+16. Energy Match: low/medium/wired/overwhelmed changes the step size and framing.
+17. Friction Presets: common blockers immediately become startable micro-steps.
+18. Proof of Start: records "I started" as meaningful progress without requiring task completion.
+19. Tiny Admin Inbox: pasted admin text becomes one saved next-step card rather than a long list.

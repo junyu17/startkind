@@ -1,9 +1,9 @@
 # StartKind iOS - Delivery & QA Report
 
-**Date:** 2026-08-09
+**Date:** 2026-08-10
 **Platform:** iOS native, Swift 6, SwiftUI, SwiftData, StoreKit 2, Speech, WidgetKit, ActivityKit, UserNotifications
 **Toolchain:** Xcode 26.6, Swift 6.3.3, iPhone 17 Simulator
-**Status:** Core product plus 13 retention/differentiation features are implemented and tested. StoreKit purchase/restore still requires sandbox/device or TestFlight verification before App Store submission.
+**Status:** Core product plus 19 retention/differentiation features are implemented and simulator-tested. StoreKit purchase/restore still requires sandbox/device or TestFlight verification before App Store submission.
 
 ---
 
@@ -15,7 +15,7 @@ StartKind implements the adult ADHD execution loop:
 
 The app is local-first, native SwiftUI, English by default with Simplified Chinese available, and uses StoreKit 2 for Plus subscriptions. The first screen remains the Start flow, not a dashboard. The product still avoids punitive streaks, overdue stacks, and long generated task lists.
 
-This pass adds the second requested retention set: Autopilot Mode, Return Note, Friction Map, Live Activity support, and One-Tap Rescue Notification.
+The latest pass adds the third retention set: Global Stuck Button, Yesterday Rescue, Energy Match, Friction Presets, Proof of Start, and Tiny Admin Inbox.
 
 ## 2. Deliverables
 
@@ -28,7 +28,7 @@ This pass adds the second requested retention set: Autopilot Mode, Return Note, 
 | UI | Start, Recover, Patterns, Settings, Paywall, Timer, blocker picker, return note, vault picker, template picker, friction map |
 | Extensions | `StartKindShareExtension`, `StartKindWidgetExtension` |
 | Resources | English + Simplified Chinese localization, app icon, StoreKit config |
-| Tests | 98 unit tests executed with 4 StoreKit simulator skips; 21 UI tests passed |
+| Tests | 104 unit tests executed with 4 StoreKit simulator skips; 22 UI tests passed |
 | Project | `project.yml` regenerates `StartKind.xcodeproj` with app, share extension, and widget extension targets |
 
 ## 3. Requirement Match
@@ -54,6 +54,12 @@ This pass adds the second requested retention set: Autopilot Mode, Return Note, 
 | Friction Map from blocker/history signals | Done and tested |
 | Live Activity support for timer | Done; simulator build verifies ActivityKit integration and `NSSupportsLiveActivities` |
 | One-Tap Rescue local notification | Done; unit-tested deep link and simulator build verifies notification service |
+| Global Stuck Button | Done; persistent tab-shell button routes to smaller restart |
+| Yesterday Rescue | Done; active recovery or yesterday unfinished step returns as a 3-minute restart |
+| Energy Match | Done; low/medium/wired/overwhelmed adjusts step framing |
+| Friction Presets | Done; common blockers produce immediate micro-steps |
+| Proof of Start | Done; local "I started" store and counter without completion pressure |
+| Tiny Admin Inbox | Done; pasted admin text is stored as one next-step card |
 
 ## 4. The 8 Requested Retention Features
 
@@ -76,8 +82,8 @@ Commands run after implementation:
 cd /Users/jun/Documents/project/startkind
 xcodegen generate
 xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' build
-xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindTests
-xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindUITests
+xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindTests -parallel-testing-enabled NO
+xcodebuild -project StartKind.xcodeproj -scheme StartKind -destination 'platform=iOS Simulator,name=iPhone 17' test -only-testing:StartKindUITests -parallel-testing-enabled NO
 ```
 
 Results:
@@ -87,11 +93,14 @@ Results:
 | XcodeGen project generation | Passed |
 | Debug simulator build | Passed |
 | Focused new-feature unit + UI suite | Passed |
-| Full unit suite | 98 tests executed, 4 StoreKit simulator skips, 0 failures |
-| Full UI suite | 21 passed, 0 failures |
+| Full unit suite | 104 tests executed, 4 StoreKit simulator skips, 0 failures |
+| Full UI suite | 22 tests executed, 0 failures |
 
-The latest UI run executed 21 tests with 0 failures. Latest UI `.xcresult`:
-`/Users/jun/Library/Developer/Xcode/DerivedData/StartKind-hhzoqshjiqpuazedynrbbteaucjv/Logs/Test/Test-StartKind-2026.08.09_19-35-01--0700.xcresult`.
+Latest unit `.xcresult`:
+`/Users/jun/Library/Developer/Xcode/DerivedData/StartKind-hhzoqshjiqpuazedynrbbteaucjv/Logs/Test/Test-StartKind-2026.08.10_20-19-55--0700.xcresult`.
+
+Latest UI `.xcresult`:
+`/Users/jun/Library/Developer/Xcode/DerivedData/StartKind-hhzoqshjiqpuazedynrbbteaucjv/Logs/Test/Test-StartKind-2026.08.10_20-20-36--0700.xcresult`.
 
 ## 5.1 The 5 Added Features From This Pass
 
@@ -104,6 +113,19 @@ The latest UI run executed 21 tests with 0 failures. Latest UI `.xcresult`:
 | One-Tap Rescue Notification | Paused/interrupted/abandoned steps schedule no-shame local rescue notification with `startkind://rescue` | Unit test for rescue deep link; Debug build passes with UserNotifications delegate |
 
 Agent delegation audit: per `/Users/jun/.codex/AGENTS.md`, code agents were tried in order. `opencode/deepseek-v4-flash-free` only read files and produced no edits; Pi `volc-coding/glm-5.2` produced no output before interruption; Reasonix `deepseek/deepseek-v4-flash` only read/analyzed and produced no edits. Final implementation and verification were completed here by Codex.
+
+## 5.2 The 6 Added Features From This Pass
+
+| Feature | Implementation | Verification |
+|---|---|---|
+| Global Stuck Button | Floating button in `RootView` sets a pending stuck restart and returns to Start | UI test `testRetentionControlsCreateStartableStep` |
+| Yesterday Rescue | `YesterdayRescuePlanner` creates a 3-minute restart from active recovery or yesterday's unfinished step | Unit test `testYesterdayRescuePrefersActiveCapsule` |
+| Energy Match | `EnergyMatcher` adapts proposals for low, medium, wired, and overwhelmed states | Unit test `testEnergyMatcherOverwhelmedShrinksToFrictionOnly` |
+| Friction Presets | `FrictionPresetPlanner` maps common blockers to micro-steps | Unit + UI tests |
+| Proof of Start | `ProofOfStartStore` records starts in local JSON and Start UI shows count | Unit + UI tests |
+| Tiny Admin Inbox | `TinyAdminInboxStore` keeps pasted admin text plus one proposal card | Unit test; Start UI entry present |
+
+OpenCode audit for this pass: standard OpenCode mode was configured correctly but stalled in repo plugin/context exploration. `--pure` mode was verified with a repo write probe and then used to create `RetentionFeatureKit.swift` and `RetentionFeatureTests.swift`; Codex performed integration, review, and testing.
 
 ## 6. StoreKit Status
 
@@ -140,4 +162,5 @@ These are not code blockers, but they must be handled before upload/review:
 | 6 Co-Start | Implemented from earlier pass |
 | 7 Retention differentiation set | Done: all 8 features implemented and tested |
 | 8 Second retention set | Done: all 5 features implemented and tested |
-| 9 Release readiness | Code is simulator-tested; signed device StoreKit/share-extension/Live Activity/notification verification still pending |
+| 9 Third retention set | Done: all 6 features implemented and tested |
+| 10 Release readiness | Code is simulator-tested; signed device StoreKit/share-extension/Live Activity/notification verification still pending |

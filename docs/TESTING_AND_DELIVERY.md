@@ -124,6 +124,17 @@ Expected:
 - Includes stop condition.
 - Estimated time is 5 to 15 minutes unless shrink level requires less.
 
+## Retention Feature Tests
+
+The iOS suite should cover:
+
+- Energy Match shrinks overwhelmed/low-energy starts.
+- Friction Presets create startable 5-minute or smaller steps.
+- Proof of Start persists and counts starts without completion.
+- Tiny Admin Inbox stores only one next-step card from pasted admin text.
+- Yesterday Rescue returns a 3-minute restart.
+- Global Stuck button remains available from the tab shell.
+
 ## Manual Smoke Test Script
 
 Run this before any milestone delivery:
@@ -139,6 +150,9 @@ Run this before any milestone delivery:
 9. Switch language to Simplified Chinese.
 10. Repeat one text capture.
 11. Confirm UI remains readable and uncluttered.
+12. Tap "I'm stuck" from another tab and confirm a smaller start is ready.
+13. Tap a friction preset and confirm one startable step appears.
+14. Tap "I started" and confirm the proof counter updates without requiring completion.
 
 ## Completion Report Format
 

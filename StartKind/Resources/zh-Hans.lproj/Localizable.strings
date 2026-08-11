@@ -357,6 +357,33 @@
 "costart.join" = "加入";
 "costart.roomNotFound" = "找不到那个房间,可能已结束。";
 
+/* MARK: - 留存辅助 */
+"stuck.button" = "我卡住了";
+"stuck.loaded" = "没关系。先从更小版本开始。";
+"stuck.source" = "卡住后重启";
+"energy.title" = "匹配能量";
+"energy.low" = "低";
+"energy.medium" = "中";
+"energy.wired" = "很亢奋";
+"energy.overwhelmed" = "过载";
+"frictionPreset.title" = "阻力预设";
+"frictionPreset.need_login" = "登录";
+"frictionPreset.need_document" = "文件";
+"frictionPreset.too_vague" = "太模糊";
+"frictionPreset.too_many_tabs" = "标签页";
+"frictionPreset.need_another_person" = "需要别人";
+"frictionPreset.loaded" = "已准备一个只降低阻力的开头。";
+"proof.started" = "我已经开始了";
+"proof.saved" = "开始过就算。最近 7 天已开始 %d 次。";
+"proof.count" = "本周开始 %d 次";
+"adminInbox.title" = "极小事务收件箱";
+"adminInbox.placeholder" = "粘贴账单、邮件、预约或表格文字";
+"adminInbox.hint" = "StartKind 只保存一个下一步卡片。";
+"adminInbox.saved" = "已保存成一个小事务步骤。";
+"yesterday.rescue.open" = "昨天恢复";
+"yesterday.rescue.loaded" = "昨天的事已变成 3 分钟重启。";
+"yesterday.source" = "昨天恢复";
+
 /* MARK: - 隐私 */
 "privacy.title" = "隐私";
 "privacy.principlesTitle" = "原则";

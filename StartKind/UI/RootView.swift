@@ -37,21 +37,42 @@ struct RootView: View {
     }
 
     private var mainTabs: some View {
-        TabView(selection: $selectedTab) {
-            StartView()
-                .tabItem { Label(L("tab.start"), systemImage: "play.circle.fill") }
-                .tag(Tab.start)
-            RecoverView()
-                .tabItem { Label(L("tab.recover"), systemImage: "arrow.uturn.backward.circle") }
-                .tag(Tab.recover)
-            PatternsView()
-                .tabItem { Label(L("tab.patterns"), systemImage: "waveform.path.ecg") }
-                .tag(Tab.patterns)
-            SettingsView()
-                .tabItem { Label(L("tab.settings"), systemImage: "gearshape") }
-                .tag(Tab.settings)
+        ZStack(alignment: .bottomTrailing) {
+            TabView(selection: $selectedTab) {
+                StartView()
+                    .tabItem { Label(L("tab.start"), systemImage: "play.circle.fill") }
+                    .tag(Tab.start)
+                RecoverView()
+                    .tabItem { Label(L("tab.recover"), systemImage: "arrow.uturn.backward.circle") }
+                    .tag(Tab.recover)
+                PatternsView()
+                    .tabItem { Label(L("tab.patterns"), systemImage: "waveform.path.ecg") }
+                    .tag(Tab.patterns)
+                SettingsView()
+                    .tabItem { Label(L("tab.settings"), systemImage: "gearshape") }
+                    .tag(Tab.settings)
+            }
+            .tint(Theme.accent)
+
+            Button {
+                selectedTab = .start
+                env.pendingStuckRestart = true
+            } label: {
+                Label(L("stuck.button"), systemImage: "lifepreserver.fill")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, Theme.spacing12)
+                    .frame(minHeight: Theme.minTapTarget)
+                    .foregroundStyle(.white)
+                    .background(Theme.accent)
+                    .clipShape(Capsule())
+                    .shadow(color: Theme.accent.opacity(0.2), radius: 10, x: 0, y: 5)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, Theme.spacing16)
+            .padding(.bottom, 64)
+            .accessibilityIdentifier("global.stuck")
         }
-        .tint(Theme.accent)
     }
 }
 

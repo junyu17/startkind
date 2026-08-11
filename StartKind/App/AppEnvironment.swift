@@ -34,6 +34,8 @@ final class AppEnvironment: ObservableObject {
     let vault: PersonalVaultStore
     let liveActivity: LiveTimerActivityService
     let rescueNotifications: RescueNotificationService
+    let proofOfStart: ProofOfStartStore
+    let tinyAdminInbox: TinyAdminInboxStore
     let speech: SpeechService
     let ai: AIClient
     let sync: SyncService
@@ -47,6 +49,9 @@ final class AppEnvironment: ObservableObject {
     let calibrator: TimeCalibrator
     let autopilot: AutopilotPlanner
     let frictionMap: FrictionMap
+    let energyMatcher: EnergyMatcher
+    let frictionPresetPlanner: FrictionPresetPlanner
+    let yesterdayRescuePlanner: YesterdayRescuePlanner
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -63,6 +68,8 @@ final class AppEnvironment: ObservableObject {
         self.vault = PersonalVaultStore()
         self.liveActivity = LiveTimerActivityService()
         self.rescueNotifications = RescueNotificationService()
+        self.proofOfStart = ProofOfStartStore()
+        self.tinyAdminInbox = TinyAdminInboxStore()
         self.speech = SpeechService()
         let supabase: SupabaseClient? = {
             if let endpoint = SupabaseConfig.endpoint, let anonKey = SupabaseConfig.anonKey {
@@ -79,6 +86,9 @@ final class AppEnvironment: ObservableObject {
         self.calibrator = TimeCalibrator()
         self.autopilot = AutopilotPlanner()
         self.frictionMap = FrictionMap()
+        self.energyMatcher = EnergyMatcher()
+        self.frictionPresetPlanner = FrictionPresetPlanner()
+        self.yesterdayRescuePlanner = YesterdayRescuePlanner()
         let launchArgs = ProcessInfo.processInfo.arguments
         self.hasStarted = !launchArgs.contains("-UITEST_AUTH")
 
@@ -265,6 +275,7 @@ final class AppEnvironment: ObservableObject {
     @Published var pendingJoinRoomCode: String?
     @Published var pendingCaptureText: String?
     @Published var pendingRescueRestart = false
+    @Published var pendingStuckRestart = false
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
@@ -447,11 +458,14 @@ final class AppEnvironment: ObservableObject {
     var usageState: UsageState { usage.usage }
 
     @discardableResult
-    func generateNextStep(input: CaptureInput) async throws -> NextStepModel {
+    func generateNextStep(input: CaptureInput, energy: EnergyLevel? = nil) async throws -> NextStepModel {
         guard canGenerateStep else { throw UsageError.stepLimitReached }
         let detected = engine.detectCategory(in: input.rawText, preferred: input.preferredCategory)
         let multiplier = calibrator.multiplier(for: detected, in: persistence.calibrationSamples())
-        let proposal = try await ai.generateNextStep(input: input, calibrationMultiplier: multiplier)
+        var proposal = try await ai.generateNextStep(input: input, calibrationMultiplier: multiplier)
+        if let energy {
+            proposal = energyMatcher.apply(proposal, energy: energy, language: input.language)
+        }
         let capture = persistence.saveCapture(rawText: input.rawText, source: input.source, language: input.language)
         let step = persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
         usage.recordStepGeneration()
@@ -472,6 +486,55 @@ final class AppEnvironment: ObservableObject {
             templates: MicroTemplateLibrary.templates(language: currentLanguage)
         )
         return createLocalNextStep(proposal: proposal, sourceText: L("autopilot.source"), source: .manual)
+    }
+
+    @discardableResult
+    func createFrictionPresetStep(_ preset: FrictionPreset, category: TaskCategory?) -> NextStepModel {
+        let proposal = frictionPresetPlanner.proposal(
+            for: preset,
+            category: category ?? .other,
+            language: currentLanguage
+        )
+        return createLocalNextStep(proposal: proposal, sourceText: "friction:\(preset.rawValue)", source: .manual)
+    }
+
+    @discardableResult
+    func createStuckStep(current step: NextStepModel?) -> NextStepModel {
+        if let step {
+            let proposal = shrinker.shrink(step.proposal, to: shrinker.nextLevel(after: step.shrinkLevel), language: currentLanguage)
+            return createLocalNextStep(proposal: proposal, sourceText: L("stuck.source"), source: .manual)
+        }
+        return createFrictionPresetStep(.tooVague, category: .other)
+    }
+
+    func yesterdayRescueProposal() -> NextStepProposal? {
+        yesterdayRescuePlanner.proposal(
+            activeCapsule: activeCapsule(),
+            recentSteps: persistence.recentNextSteps(days: 2),
+            language: currentLanguage
+        )
+    }
+
+    @discardableResult
+    func createYesterdayRescueStep() -> NextStepModel? {
+        guard let proposal = yesterdayRescueProposal() else { return nil }
+        return createLocalNextStep(proposal: proposal, sourceText: L("yesterday.source"), source: .manual)
+    }
+
+    @discardableResult
+    func recordProofOfStart(step: NextStepModel) -> ProofOfStartEvent {
+        proofOfStart.record(stepId: step.id, title: step.title, category: step.category)
+    }
+
+    var proofOfStartCount: Int {
+        proofOfStart.recentCount()
+    }
+
+    @discardableResult
+    func captureAdminInbox(text: String) async throws -> NextStepModel {
+        let result = try await parseAdmin(text: text)
+        tinyAdminInbox.add(rawText: text, proposal: result.oneNextStep)
+        return createLocalNextStep(proposal: result.oneNextStep, sourceText: text, source: .text)
     }
 
     /// Shrink the given step to the next level and persist the change.
@@ -553,6 +616,8 @@ final class AppEnvironment: ObservableObject {
     func deleteAllData() {
         persistence.deleteAllData()
         vault.clear()
+        proofOfStart.clear()
+        tinyAdminInbox.clear()
     }
     func exportJSON() -> String { persistence.exportJSON() }
 

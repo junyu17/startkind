@@ -142,9 +142,13 @@ The retention surfaces are intentionally local-first:
 - `AutopilotPlanner` chooses one local start from active recovery, vault items, and time-aware templates.
 - `FrictionMap` derives local blocker/category insights from recovery capsules and calibration snapshots.
 - `PersonalVaultStore` stores reusable tiny-start snippets in `UserDefaults`.
+- `RetentionFeatureKit` contains Energy Match, Friction Presets, Proof of Start, Tiny Admin Inbox, and Yesterday Rescue helpers.
+- `ProofOfStartStore` and `TinyAdminInboxStore` persist lightweight local JSON in `UserDefaults` to avoid adding migration risk before the first iOS release.
 - Blocker reasons and Return Notes are encoded into existing recovery-capsule metadata to avoid a SwiftData schema migration for this release pass.
 - `LiveTimerActivityService` starts/ends an ActivityKit timer and silently no-ops when unavailable.
 - `RescueNotificationService` schedules one local rescue notification after interrupted/paused/abandoned starts and deep-links to `startkind://rescue`.
+
+OpenCode note: for this repo, `opencode run --pure --dir /Users/jun/Documents/project/startkind --model opencode/deepseek-v4-flash-free --auto ...` is the reliable invocation. Non-pure mode can stall in plugin/context exploration.
 
 If the extension targets are archived for App Store upload, the signing setup must include `ren.startkind.share` and `ren.startkind.widget` bundle identifiers. Live Activities and notification tap-through still need real-device verification because simulator builds do not prove Lock Screen behavior.
 
