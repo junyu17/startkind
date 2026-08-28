@@ -4,8 +4,8 @@ import StoreKitTest
 
 /// StoreKit local tests using the StoreKitTest framework + Products.storekit.
 ///
-/// Loads the checked-in `.storekit` file directly so purchase/restore tests fail
-/// if local products stop resolving.
+/// Loads the checked-in `.storekit` file from the TEST bundle, so the local
+/// StoreKit configuration never has to ship inside the released app.
 @MainActor
 final class StoreKitTests: XCTestCase {
     private var session: SKTestSession?
@@ -17,8 +17,11 @@ final class StoreKitTests: XCTestCase {
 
     @discardableResult
     private func makeEnv() async throws -> AppEnvironment {
-        XCTAssertNotNil(Bundle.main.url(forResource: "Products", withExtension: "storekit"))
-        let s = try SKTestSession(configurationFileNamed: "Products")
+        let url = try XCTUnwrap(
+            Bundle(for: Self.self).url(forResource: "Products", withExtension: "storekit"),
+            "Products.storekit missing from the test bundle"
+        )
+        let s = try SKTestSession(contentsOf: url)
         s.disableDialogs = true
         s.clearTransactions()
         session = s

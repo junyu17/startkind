@@ -33,8 +33,6 @@ targets:
           - "Resources/Products.storekit"
       - path: StartKind/Resources/Assets.xcassets
         buildPhase: resources
-      - path: StartKind/Resources/Products.storekit
-        buildPhase: resources
     dependencies:
       - target: StartKindShareExtension
         embed: true
