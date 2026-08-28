@@ -9,7 +9,7 @@ The project should be built as a complete iOS first release, but implementation 
 Deliverables:
 
 - iOS native project
-- Supabase project configuration
+- Backend service configuration (`server/`, deployed to startk.livepet.ren)
 - Shared product docs
 - Local build scripts
 - CI plan
@@ -58,12 +58,12 @@ Acceptance:
 - Free limits work.
 - Plus unlocks gated features.
 
-## Milestone 3: Supabase Sync and AI Proxy
+## Milestone 3: CloudKit Sync and AI Proxy
 
 Deliverables:
 
-- Auth
-- User profile sync
+- Anonymous device identity (no accounts)
+- CloudKit sync of personal history across the user's own devices
 - Task and timer sync
 - Edge Function for AI
 - Usage limits

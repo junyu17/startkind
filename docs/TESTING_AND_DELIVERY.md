@@ -88,12 +88,16 @@ For UI work:
 
 ## Backend Required Checks
 
-For Supabase Edge Functions:
+For the self-hosted backend (`server/`):
 
 ```bash
-supabase functions serve
-supabase db diff
-supabase db lint
+# type-check every endpoint without resolving Deno/npm URLs
+npx -p typescript@5 tsc --noEmit --noResolve --target esnext --module esnext \
+  --moduleResolution bundler --allowImportingTsExtensions --skipLibCheck server/src/*.ts
+
+# deploy + verify (see docs/BACKEND_DEPLOYMENT.md for the full runbook)
+curl -sS https://startk.livepet.ren/health
+curl -sS -X POST https://startk.livepet.ren/v1/device/register
 ```
 
 Before production deploy:

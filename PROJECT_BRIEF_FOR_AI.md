@@ -17,7 +17,8 @@ This is not a generic todo app, habit tracker, or medical treatment product.
 - Platform strategy: ship native iOS first, validate market demand, then consider Android
 - iOS stack: Swift, SwiftUI, StoreKit 2
 - Future Android stack: Kotlin, Jetpack Compose, BillingClient. Do not start until explicitly requested.
-- Backend: Supabase
+- Sync: CloudKit (the user's own iCloud)
+- Backend: self-hosted Deno service at startk.livepet.ren (AI proxy, co-start rooms, entitlement verification only)
 - App name: StartKind
 - Apple App ID: 6799113108
 - Apple Developer ID: Jun.yu@live.com

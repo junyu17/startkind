@@ -9,7 +9,6 @@
 /* MARK: - Start Screen */
 "start.title" = "Start";
 "start.subtitle" = "One kind step to start.";
-"start.voice.button" = "Hold to speak";
 "start.voice.listening" = "Listening…";
 "start.voice.tap" = "Tap to speak";
 "start.text.placeholder" = "What's on your mind? Just type it messy.";
@@ -91,23 +90,17 @@
 "category.other" = "Other";
 
 /* MARK: - Next Step Card */
-"nextstep.title" = "One next step";
 "nextstep.timer.label" = "Start";
 "nextstep.timer.minutes" = "%d minutes";
 "nextstep.makeSmaller" = "Make it smaller";
 "nextstep.showPlan" = "Show a plan";
 "nextstep.hidePlan" = "Hide plan";
-"nextstep.why" = "Why this step";
-"nextstep.stop" = "Stop";
-"nextstep.estimated" = "About %d min";
 "nextstep.shrink.level" = "Smaller version";
-"nextstep.tryVersion" = "Try this version";
 "nextstep.share" = "Share";
 "nextstep.saveVault" = "Save";
 
 /* MARK: - Timer */
 "timer.title" = "Focus on this step";
-"timer.remaining" = "Time left";
 "timer.paused" = "Paused";
 "timer.done" = "Done";
 "timer.pause" = "Pause";
@@ -115,23 +108,15 @@
 "timer.makeSmaller" = "Make it smaller";
 "timer.interrupted" = "I got interrupted";
 "timer.continueFive" = "Continue 5 minutes";
-"timer.step" = "Your step";
 "timer.stopHint" = "Stop when: %@";
 "timer.finished.title" = "Nice — you started.";
 "timer.finished.subtitle" = "How did it go?";
-"timer.outcome.completed" = "Done";
-"timer.outcome.partial" = "Partly done";
-"timer.outcome.paused" = "Paused for now";
 "timer.outcome.skipped" = "Move on";
-"timer.afterPartial" = "Want a smaller version to keep going?";
-"timer.afterDone" = "Good. Want to start another?";
-"timer.afterSkipped" = "No problem. Try a smaller version later.";
 
 /* MARK: - Recover */
 "recover.title" = "Recover";
 "recover.empty" = "Nothing to recover right now.\nWhen you pause a step, it waits here — gently.";
 "recover.lastStep" = "Pick up where you left";
-"recover.resume" = "Continue from here";
 "recover.startTimer" = "Start timer";
 "recover.related" = "Note: %@";
 "recover.blocker" = "Blocker: %@";
@@ -248,7 +233,6 @@
 "settings.subscription" = "Subscription";
 "settings.subscription.free" = "Free";
 "settings.subscription.plus" = "StartKind Plus";
-"settings.subscription.manage" = "Manage subscription";
 "settings.subscription.restore" = "Restore purchases";
 "settings.privacy" = "Privacy";
 "settings.dataExport" = "Export my data";
@@ -263,13 +247,11 @@
 
 /* MARK: - Paywall */
 "paywall.title" = "StartKind Plus";
-"paywall.subtitle" = "The complete execution system.";
 "paywall.monthly" = "Monthly";
 "paywall.annual" = "Annual";
 "paywall.monthly.price" = "$9.99 / month";
 "paywall.annual.price" = "$89.99 / year";
 "paywall.annual.save" = "Save about 25%";
-"paywall.trial" = "7-day free trial";
 "paywall.cta" = "Start free trial";
 "paywall.cta.buy" = "Subscribe";
 "paywall.restore" = "Restore purchases";
@@ -300,44 +282,20 @@
 
 /* MARK: - Usage */
 "usage.stepsLeft" = "%d of %d free steps left today";
-"usage.stepsReset" = "Free steps reset overnight.";
 
 /* MARK: - Common */
-"common.ok" = "OK";
 "common.cancel" = "Cancel";
-"common.continue" = "Continue";
-"common.gotIt" = "Got it";
 "common.close" = "Close";
 "common.delete" = "Delete";
 "common.done" = "Done";
-"common.loading" = "One moment…";
 "common.error" = "Something went sideways. You can try again.";
 
 /* MARK: - Onboarding */
-"onboard.title" = "One kind step to start.";
-"onboard.body" = "StartKind turns overwhelm into one small action. No lists. No streaks. No shame.";
-"onboard.cta" = "Begin";
 
 /* MARK: - Capture feedback */
 "capture.generating" = "Shaping one small step…";
-"capture.fallback" = "Here's a gentle first move:";
 
 /* MARK: - Auth */
-"auth.title" = "StartKind";
-"auth.subtitle" = "Sign in to sync and use cloud-powered steps.";
-"auth.email" = "Email";
-"auth.password" = "Password";
-"auth.signIn" = "Sign in";
-"auth.signUp" = "Sign up";
-"auth.switchToSignUp" = "No account? Sign up";
-"auth.switchToSignIn" = "Already have an account? Sign in";
-"auth.error" = "Sign-in failed. Check your email and password.";
-"auth.continueLocal" = "Continue without account";
-"settings.account" = "Account";
-"settings.signedIn" = "Signed in";
-"settings.signedOutLocal" = "Using locally (no account)";
-"settings.signOut" = "Sign out";
-"settings.signIn" = "Sign in to sync";
 
 /* MARK: - Co-Start */
 "costart.title" = "Co-start";
@@ -475,8 +433,6 @@
 "error.speech.notAvailable" = "Speech recognition isn't available right now.";
 "error.speech.engineFailure" = "Couldn't start the audio engine.";
 "error.api.notConfigured" = "Cloud features aren't configured.";
-"error.auth.notConfigured" = "Cloud sign-in isn't configured.";
-"error.auth.invalidCredentials" = "Sign-in failed. Check your email and password.";
 "error.auth.network" = "Couldn't reach the server. Try again.";
 
 /* Display preferences */

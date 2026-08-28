@@ -1,13 +1,23 @@
 import SwiftUI
 
+private enum SettingsSheet: Identifiable {
+    case paywall
+    case export(String)
+
+    var id: String {
+        switch self {
+        case .paywall: return "paywall"
+        case .export: return "export"
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
     @EnvironmentObject private var appearance: AppearanceSettings
-    @State private var showPaywall = false
+    @State private var sheet: SettingsSheet?
     @State private var showDeleteConfirm = false
-    @State private var exportText: String?
-    @State private var showExport = false
     @State private var restoring = false
 
     var body: some View {
@@ -62,7 +72,7 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     if !env.isPlus {
-                        Button(L("settings.subscription.plus")) { showPaywall = true }
+                        Button(L("settings.subscription.plus")) { sheet = .paywall }
                     }
                     Button(L("settings.subscription.restore")) {
                         restoring = true
@@ -83,18 +93,20 @@ struct SettingsView: View {
                     } label: {
                         Text(verbatim: L("privacy.title"))
                     }
+                    .accessibilityIdentifier("settings.privacy")
                     NavigationLink {
                         VaultManagementView(vault: env.vault)
                     } label: {
                         Text(verbatim: L("vault.title"))
                     }
                     Button(L("settings.dataExport")) {
-                        exportText = env.exportJSON()
-                        showExport = true
+                        sheet = .export(env.exportJSON())
                     }
+                    .accessibilityIdentifier("settings.dataExport")
                     Button(L("settings.deleteAccount"), role: .destructive) {
                         showDeleteConfirm = true
                     }
+                    .accessibilityIdentifier("settings.deleteData")
                 } header: {
                     Text(verbatim: L("settings.privacy"))
                 }
@@ -108,11 +120,15 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(L("settings.title"))
-            .sheet(isPresented: $showPaywall) {
-                PaywallView(trigger: .feature).environmentObject(env)
-            }
-            .sheet(isPresented: $showExport) {
-                if let exportText { ExportView(text: exportText) }
+            // One sheet driven by an item, so the content can never be built
+            // from state that is still nil and present an empty sheet.
+            .sheet(item: $sheet) { which in
+                switch which {
+                case .paywall:
+                    PaywallView(trigger: .feature).environmentObject(env)
+                case .export(let text):
+                    ExportView(text: text)
+                }
             }
             .alert(L("settings.deleteAccount"), isPresented: $showDeleteConfirm) {
                 Button(L("common.cancel"), role: .cancel) {}

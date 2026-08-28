@@ -57,7 +57,7 @@ Do not start Android implementation during the iOS-first release phase unless ex
 
 ## Backend Stack
 
-Use Supabase for:
+Use the self-hosted backend for:
 
 - Auth
 - User profile
@@ -66,7 +66,7 @@ Use Supabase for:
 - AI proxy Edge Functions
 - Secure file metadata for screenshots/photos where needed
 
-Use Supabase Edge Functions for:
+Use backend endpoints for:
 
 - AI request routing
 - Prompt assembly
@@ -108,7 +108,7 @@ Plus cloud-only features should degrade gracefully:
 
 ## Entitlements
 
-The iOS release must treat StoreKit as the source signal. Future Android should use Play Billing after market validation. Backend entitlements should be mirrored in Supabase for cross-device features.
+The iOS release must treat StoreKit as the source signal. Future Android should use Play Billing after market validation. The backend verifies Apple's signed StoreKit 2 transaction locally so it can gate the AI proxy; it never takes the client's word for the tier.
 
 Entitlement states:
 
@@ -154,7 +154,7 @@ If the extension targets are archived for App Store upload, the signing setup mu
 
 ## Security
 
-- Never hardcode service-role Supabase keys in app binaries.
+- Never ship a provider API key in the app binary; the backend holds it.
 - Never send Apple or future Google shared secrets directly from clients except through official billing flows.
 - Do not log user task content in production logs.
 - Redact emails, phone numbers, and payment amounts in diagnostics unless explicit debugging mode is enabled.

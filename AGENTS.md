@@ -21,8 +21,9 @@ StartKind helps adults move from "I know what I need to do" to "I have started o
 
 - iOS: Swift, SwiftUI, SwiftData where appropriate, StoreKit 2, XCTest.
 - Future Android: Kotlin, Jetpack Compose, Room, BillingClient, JUnit. Do not start Android work until explicitly requested.
-- Backend: Supabase for auth, sync, encrypted user data, and AI proxy functions when cloud AI is needed.
-- AI: Cloud model behind Supabase Edge Functions for Plus features; deterministic local templates for Free features where possible.
+- Sync: CloudKit. Personal history lives in the user's own iCloud and never reaches our server. There are no accounts, emails or passwords.
+- Backend: a small self-hosted Deno service (startk.livepet.ren) doing only what CloudKit cannot — AI proxy, co-start rooms, entitlement verification. Identity is an anonymous device token; only its hash is stored.
+- AI: DeepSeek behind that proxy for Plus features; deterministic local templates for Free features where possible.
 
 ## Delivery Gate
 

@@ -9,7 +9,6 @@
 /* MARK: - 开始页 */
 "start.title" = "开始";
 "start.subtitle" = "迈出温和的一小步。";
-"start.voice.button" = "按住说话";
 "start.voice.listening" = "正在聆听…";
 "start.voice.tap" = "点按说话";
 "start.text.placeholder" = "脑子里一团乱？随便打几个字就好。";
@@ -91,23 +90,17 @@
 "category.other" = "其他";
 
 /* MARK: - 下一步卡片 */
-"nextstep.title" = "下一步";
 "nextstep.timer.label" = "开始";
 "nextstep.timer.minutes" = "%d 分钟";
 "nextstep.makeSmaller" = "缩小一步";
 "nextstep.showPlan" = "看看计划";
 "nextstep.hidePlan" = "收起计划";
-"nextstep.why" = "为什么是这一步";
-"nextstep.stop" = "停止点";
-"nextstep.estimated" = "约 %d 分钟";
 "nextstep.shrink.level" = "更小的版本";
-"nextstep.tryVersion" = "试试这版";
 "nextstep.share" = "分享";
 "nextstep.saveVault" = "保存";
 
 /* MARK: - 计时器 */
 "timer.title" = "只专注这一步";
-"timer.remaining" = "剩余时间";
 "timer.paused" = "已暂停";
 "timer.done" = "完成了";
 "timer.pause" = "暂停";
@@ -115,23 +108,15 @@
 "timer.makeSmaller" = "缩小一步";
 "timer.interrupted" = "我被打断了";
 "timer.continueFive" = "再加 5 分钟";
-"timer.step" = "你的步骤";
 "timer.stopHint" = "停在这里：%@";
 "timer.finished.title" = "很好，你已经开始了。";
 "timer.finished.subtitle" = "感觉怎么样？";
-"timer.outcome.completed" = "完成了";
-"timer.outcome.partial" = "做了一部分";
-"timer.outcome.paused" = "先暂停";
 "timer.outcome.skipped" = "换一个";
-"timer.afterPartial" = "要不要来个更小的版本接着做？";
-"timer.afterDone" = "真棒。要不要再开始一个？";
-"timer.afterSkipped" = "没关系。稍后可以试更小的版本。";
 
 /* MARK: - 恢复 */
 "recover.title" = "恢复";
 "recover.empty" = "现在没有需要恢复的步骤。\n暂停的步骤会安静地在这里等你。";
 "recover.lastStep" = "从上次的地方继续";
-"recover.resume" = "从这里继续";
 "recover.startTimer" = "开始计时";
 "recover.related" = "备注：%@";
 "recover.blocker" = "卡点：%@";
@@ -248,7 +233,6 @@
 "settings.subscription" = "订阅";
 "settings.subscription.free" = "免费版";
 "settings.subscription.plus" = "StartKind Plus";
-"settings.subscription.manage" = "管理订阅";
 "settings.subscription.restore" = "恢复购买";
 "settings.privacy" = "隐私";
 "settings.dataExport" = "导出我的数据";
@@ -263,13 +247,11 @@
 
 /* MARK: - 付费墙 */
 "paywall.title" = "StartKind Plus";
-"paywall.subtitle" = "完整的执行系统。";
 "paywall.monthly" = "按月";
 "paywall.annual" = "按年";
 "paywall.monthly.price" = "$9.99 / 月";
 "paywall.annual.price" = "$89.99 / 年";
 "paywall.annual.save" = "省约 25%";
-"paywall.trial" = "7 天免费试用";
 "paywall.cta" = "开始免费试用";
 "paywall.cta.buy" = "订阅";
 "paywall.restore" = "恢复购买";
@@ -300,44 +282,20 @@
 
 /* MARK: - 用量 */
 "usage.stepsLeft" = "今天剩余 %d / %d 个免费步骤";
-"usage.stepsReset" = "免费步骤次日重置。";
 
 /* MARK: - 通用 */
-"common.ok" = "好";
 "common.cancel" = "取消";
-"common.continue" = "继续";
-"common.gotIt" = "知道了";
 "common.close" = "关闭";
 "common.delete" = "删除";
 "common.done" = "完成";
-"common.loading" = "稍等一下…";
 "common.error" = "出了点小状况。可以再试一次。";
 
 /* MARK: - 引导 */
-"onboard.title" = "迈出温和的一小步。";
-"onboard.body" = "StartKind 把一团乱变成一个小动作。没有清单，没有连续打卡，没有羞耻。";
-"onboard.cta" = "开始";
 
 /* MARK: - 捕获反馈 */
 "capture.generating" = "正在整理一个小步骤…";
-"capture.fallback" = "这是一个温和的开头：";
 
 /* MARK: - 登录 */
-"auth.title" = "StartKind";
-"auth.subtitle" = "登录以同步并使用云端步骤。";
-"auth.email" = "邮箱";
-"auth.password" = "密码";
-"auth.signIn" = "登录";
-"auth.signUp" = "注册";
-"auth.switchToSignUp" = "没有账号？注册";
-"auth.switchToSignIn" = "已有账号？登录";
-"auth.error" = "登录失败，请检查邮箱和密码。";
-"auth.continueLocal" = "不登录，继续使用";
-"settings.account" = "账号";
-"settings.signedIn" = "已登录";
-"settings.signedOutLocal" = "本地使用(未登录)";
-"settings.signOut" = "退出登录";
-"settings.signIn" = "登录以同步";
 
 /* MARK: - 陪伴启动 */
 "costart.title" = "陪伴启动";
@@ -475,8 +433,6 @@
 "error.speech.notAvailable" = "现在无法使用语音识别。";
 "error.speech.engineFailure" = "无法启动音频引擎。";
 "error.api.notConfigured" = "还没有配置云端功能。";
-"error.auth.notConfigured" = "还没有配置云端登录。";
-"error.auth.invalidCredentials" = "登录失败，请检查邮箱和密码。";
 "error.auth.network" = "无法连接服务器，请稍后再试。";
 
 /* Display preferences */

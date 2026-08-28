@@ -2,7 +2,11 @@
 
 Last updated: 2026-08-07
 
-This model should be implemented locally on iOS first and mirrored to Supabase for Plus sync. Future Android should mirror this model after iOS market validation.
+This model is implemented locally on iOS with SwiftData. The eight personal
+entities sync across the user's own devices via CloudKit; co-start rooms are
+server state and stay in a separate local-only store. Nothing personal is held
+on our backend. Future Android should mirror this model after iOS market
+validation.
 
 ## Core Entities
 
