@@ -38,6 +38,11 @@ struct StartView: View {
     @State private var joinedCoStartStepText = ""
     @State private var showJoinedCoStart = false
 
+    /// Anchor for the produced step card. Every "give me a step" action renders
+    /// its result below the fold, so without scrolling to it the screen looks
+    /// like nothing happened - the worst possible feedback for this app.
+    private static let stepAnchor = "start.nextStepCard"
+
     private enum FocusedField: Hashable {
         case taskInput
         case roomCode
@@ -47,6 +52,7 @@ struct StartView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
+                ScrollViewReader { proxy in
                 VStack(spacing: Theme.spacing16) {
                     headerBand
                     primaryStartPanel
@@ -81,6 +87,7 @@ struct StartView: View {
                             }
                         )
                         proofOfStartPanel(step)
+                            .id(Self.stepAnchor)
                     } else {
                         emptyHint
                     }
@@ -106,6 +113,13 @@ struct StartView: View {
                 .padding(.horizontal, Theme.spacing16)
                 .padding(.vertical, Theme.spacing16)
                 .animation(.easeInOut, value: rescheduleMessage)
+                .onChange(of: currentStep?.id) { _, id in
+                    guard id != nil else { return }
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo(Self.stepAnchor, anchor: .bottom)
+                    }
+                }
+                }
             }
             .navigationTitle(L("start.title"))
             .navigationBarTitleDisplayMode(.inline)
