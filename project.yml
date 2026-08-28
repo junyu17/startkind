@@ -57,6 +57,11 @@ targets:
           UIColorName: BackgroundColor
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        # NSPersistentCloudKitContainer needs this to receive the silent
+        # pushes CloudKit sends when another device writes; without it the
+        # mirrored store only catches up on a foreground poll.
+        UIBackgroundModes:
+          - remote-notification
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         NSMicrophoneUsageDescription: "StartKind uses the microphone to capture your spoken thoughts and turn them into one small next step."
