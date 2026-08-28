@@ -1,4 +1,4 @@
-import { corsHeaders, handleOptions, json } from "../_shared/cors.ts";
+import { handleOptions, json } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // System prompt mirrors prompts/one_next_step_system.md
@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { input, language, calibrationMultiplier } = body ?? {};
     if (!input || typeof input !== "string") return json({ error: "bad_request" }, 400);
+    const safeInput = input.slice(0, 4000);
 
     // Entitlement + usage enforcement (server-side source of truth).
     const { data: ent } = await supabase
@@ -64,13 +65,15 @@ Deno.serve(async (req) => {
         return json({ error: "limit_reached" }, 402);
       }
     }
-    await supabase.from("ai_usage").insert({ user_id: user.id, day: today, endpoint: "one_next_step" });
 
     const aiKey = Deno.env.get("OPENAI_API_KEY");
     if (!aiKey) return json({ error: "ai_not_configured" }, 503);
 
-    const userPrompt = `Language: ${language ?? "en"}\nCalibration multiplier: ${calibrationMultiplier ?? 1}\nUser input:\n${input}`;
+    const userPrompt = `Language: ${language ?? "en"}\nCalibration multiplier: ${calibrationMultiplier ?? 1}\nUser input:\n${safeInput}`;
     const result = await callAI(aiKey, SYSTEM_PROMPT, userPrompt);
+    // Usage is recorded only after the call succeeds, so a server failure never
+    // costs the user one of their free steps.
+    await supabase.from("ai_usage").insert({ user_id: user.id, day: today, endpoint: "one_next_step" });
     return json(result, 200);
   } catch (e) {
     return json({ error: "server_error", detail: String(e) }, 500);

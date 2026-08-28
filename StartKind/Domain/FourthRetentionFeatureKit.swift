@@ -14,6 +14,7 @@ struct EmergencyTinyModePlanner: Sendable {
 }
 
 enum QuickActionKind: String, CaseIterable, Sendable {
+    case emergencyTiny
     case stuck
     case startFive
     case rescueYesterday
@@ -29,6 +30,8 @@ enum QuickActionKind: String, CaseIterable, Sendable {
     func proposal(language: String) -> NextStepProposal? {
         let zh = language.lowercased().hasPrefix("zh")
         switch self {
+        case .emergencyTiny:
+            return EmergencyTinyModePlanner().proposal(language: language)
         case .stuck:
             return FrictionPresetPlanner().proposal(for: .tooVague, category: .other, language: language)
         case .startFive:
@@ -62,11 +65,11 @@ struct DayPartPlanner: Sendable {
         let sourceStep = source?.step
         switch part {
         case .morning:
-            return NextStepProposal(title: zh ? "今天先开始这一点" : "Start this first today", step: sourceStep.map { zh ? "只做这个最小开头: \($0)" : "Do the smallest start of this: \($0)" } ?? (zh ? "打开一个需要处理的地方，看到第一项就停。" : "Open one place that needs attention and stop when the first item is visible."), timerMinutes: 5, stopCondition: zh ? "看到第一项就停。" : "Stop when the first item is visible.", category: category, shrinkLevel: .two, generatedBy: .localTemplate, whyThisStep: zh ? "早上只选一个入口，不做今日清单。" : "Morning landing picks one doorway, not a day plan.")
+            return NextStepProposal(title: zh ? "今天先开始这一点" : "Start this first today", step: sourceStep.map { zh ? "只做这个最小开头：\($0)" : "Do the smallest start of this: \($0)" } ?? (zh ? "打开一个需要处理的地方，看到第一项就停。" : "Open one place that needs attention and stop when the first item is visible."), timerMinutes: 5, stopCondition: zh ? "看到第一项就停。" : "Stop when the first item is visible.", category: category, shrinkLevel: .two, generatedBy: .localTemplate, whyThisStep: zh ? "早上只选一个入口，不做今日清单。" : "Morning landing picks one doorway, not a day plan.")
         case .afternoon:
-            return NextStepProposal(title: zh ? "现在只重启一小步" : "Restart one small step now", step: sourceStep.map { zh ? "只重启这一步的开头: \($0)" : "Restart only the opening move: \($0)" } ?? (zh ? "选一个最容易打开的入口，做 5 分钟。" : "Pick the easiest doorway and give it 5 minutes."), timerMinutes: 5, stopCondition: zh ? "5 分钟到就停。" : "Stop at 5 minutes.", category: category, shrinkLevel: .two, generatedBy: .localTemplate, whyThisStep: zh ? "下午只恢复动能。" : "Afternoon mode restores motion only.")
+            return NextStepProposal(title: zh ? "现在只重启一小步" : "Restart one small step now", step: sourceStep.map { zh ? "只重启这一步的开头：\($0)" : "Restart only the opening move: \($0)" } ?? (zh ? "选一个最容易打开的入口，做 5 分钟。" : "Pick the easiest doorway and give it 5 minutes."), timerMinutes: 5, stopCondition: zh ? "5 分钟到就停。" : "Stop at 5 minutes.", category: category, shrinkLevel: .two, generatedBy: .localTemplate, whyThisStep: zh ? "下午只恢复动能。" : "Afternoon mode restores motion only.")
         case .evening:
-            return NextStepProposal(title: zh ? "今晚救回 3 分钟" : "Evening 3-minute rescue", step: sourceStep.map { zh ? "只做 3 分钟版本: \($0)" : "Do the 3-minute version: \($0)" } ?? (zh ? "把一个东西放到明早能看到的位置。" : "Put one needed item where tomorrow-you can see it."), timerMinutes: 3, stopCondition: zh ? "3 分钟到就停，开始过就算。" : "Stop at 3 minutes. Starting counts.", category: category, shrinkLevel: .three, generatedBy: .localTemplate, whyThisStep: zh ? "这是温和收尾，不是补打卡。" : "A gentle close, not streak repair.")
+            return NextStepProposal(title: zh ? "今晚救回 3 分钟" : "Evening 3-minute rescue", step: sourceStep.map { zh ? "只做 3 分钟版本：\($0)" : "Do the 3-minute version: \($0)" } ?? (zh ? "把一个东西放到明早能看到的位置。" : "Put one needed item where tomorrow-you can see it."), timerMinutes: 3, stopCondition: zh ? "3 分钟到就停，开始过就算。" : "Stop at 3 minutes. Starting counts.", category: category, shrinkLevel: .three, generatedBy: .localTemplate, whyThisStep: zh ? "这是温和收尾，不是补打卡。" : "A gentle close, not streak repair.")
         }
     }
 }
@@ -130,6 +133,72 @@ final class FrictionMemoryStore: ObservableObject {
         guard let data = defaults.data(forKey: key), let decoded = try? JSONDecoder().decode([FrictionMemorySignal].self, from: data) else { return [] }
         return decoded.sorted { $0.createdAt > $1.createdAt }
     }
+}
+
+struct FrictionForecast: Equatable, Sendable {
+    let preset: FrictionPreset
+    let category: TaskCategory
+    let reason: String
+    let proposal: NextStepProposal
+}
+
+struct FrictionForecastPlanner: Sendable {
+    func forecast(text: String, category: TaskCategory? = nil, memory: [FrictionMemorySignal] = [], language: String = "en") -> FrictionForecast? {
+        let zh = language.lowercased().hasPrefix("zh")
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let hint = textHint(in: trimmed.lowercased()) {
+            return FrictionForecast(
+                preset: hint.preset,
+                category: category ?? .other,
+                reason: zh ? hint.reasonZH : hint.reasonEN,
+                proposal: FrictionPresetPlanner().proposal(for: hint.preset, category: category ?? .other, language: language)
+            )
+        }
+        guard let preset = topPreset(in: memory, matching: category) else { return nil }
+        return FrictionForecast(
+            preset: preset,
+            category: category ?? .other,
+            reason: zh ? Self.memoryReasonZH : Self.memoryReasonEN,
+            proposal: FrictionPresetPlanner().proposal(for: preset, category: category ?? .other, language: language)
+        )
+    }
+
+    private func textHint(in lowercased: String) -> TextHint? {
+        Self.textHints.first { hint in hint.keywords.contains { lowercased.contains($0) } }
+    }
+
+    private func topPreset(in memory: [FrictionMemorySignal], matching category: TaskCategory?) -> FrictionPreset? {
+        var pool = memory
+        if let category {
+            let scoped = memory.filter { $0.category == category }
+            if !scoped.isEmpty { pool = scoped }
+        }
+        guard !pool.isEmpty else { return nil }
+        let counts = pool.reduce(into: [FrictionPreset: Int]()) { partial, signal in
+            partial[signal.preset, default: 0] += 1
+        }
+        return counts.sorted { lhs, rhs in
+            lhs.value == rhs.value ? lhs.key.rawValue < rhs.key.rawValue : lhs.value > rhs.value
+        }.first?.key
+    }
+
+    private struct TextHint: Sendable {
+        let preset: FrictionPreset
+        let keywords: [String]
+        let reasonEN: String
+        let reasonZH: String
+    }
+
+    private static let textHints: [TextHint] = [
+        TextHint(preset: .needLogin, keywords: ["login", "log in", "password", "登录", "密码"], reasonEN: "Login or password access seems to be the blocker.", reasonZH: "看起来是登录或密码信息卡住了你。"),
+        TextHint(preset: .tooManyTabs, keywords: ["too big", "too much", "overwhelmed", "太大", "太多", "过载"], reasonEN: "It feels like too much at once, so the plan shrinks to one small thing.", reasonZH: "感觉一下子太多，先缩成一件小事。"),
+        TextHint(preset: .tooVague, keywords: ["unclear", "vague", "don't know where", "不知道从哪", "不清楚"], reasonEN: "The next step sounds vague, so it becomes one concrete action.", reasonZH: "下一步听起来不太清楚，先把它变成一句具体动作。"),
+        TextHint(preset: .needAnotherPerson, keywords: ["waiting", "need reply", "等回复", "等人回复"], reasonEN: "You're waiting on someone, so the next step is one small ask.", reasonZH: "你在等别人，下一步变成一个小的请求。"),
+        TextHint(preset: .tooManyTabs, keywords: ["no energy", "tired", "没精力", "累了", "疲惫"], reasonEN: "You mentioned low energy, so the plan starts even smaller.", reasonZH: "你提到没精力，把开始缩得更小。")
+    ]
+
+    private static let memoryReasonEN = "Based on how you've restarted this kind of task before."
+    private static let memoryReasonZH = "根据这类任务以前顺利重启的方式。"
 }
 
 struct StartScript: Identifiable, Codable, Equatable, Sendable {

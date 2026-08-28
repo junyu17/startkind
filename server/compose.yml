@@ -1,0 +1,33 @@
+# StartKind backend.
+#
+# Deliberately mirrors the PlatePace gateway pattern already proven on this box:
+#   * joins the EXISTING external network `deploy_default` so the running nginx
+#     can reach it by service name;
+#   * publishes NO ports, so 80/443, sslh, Xray and every existing site are
+#     untouched;
+#   * reuses the EXISTING postgres container via its own database and role,
+#     rather than starting a second Postgres on a 2GB box.
+services:
+  startkind-api:
+    build: .
+    image: startkind-api:latest
+    container_name: startkind-api
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DATABASE_URL: ${STARTKIND_DATABASE_URL}
+      AI_API_KEY: ${STARTKIND_AI_API_KEY}
+      AI_ENDPOINT: ${STARTKIND_AI_ENDPOINT:-https://api.deepseek.com/v1/chat/completions}
+      AI_MODEL: ${STARTKIND_AI_MODEL:-deepseek-chat}
+    networks:
+      - deploy_default
+    mem_limit: 320m
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  deploy_default:
+    external: true

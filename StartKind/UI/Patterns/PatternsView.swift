@@ -8,12 +8,14 @@ struct PatternsView: View {
     private var snapshots: [CalibrationSnapshot] { env.snapshots() }
     private var frictionInsights: [FrictionInsight] { env.frictionInsights() }
     private var gentleReview: GentleReviewSummary { env.gentleReviewSummary() }
+    private var startProfile: StartProfile { env.startProfile() }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
                     gentleReviewCard
+                    startProfileCard
                     executionModelCard
                     frictionMapSection
 
@@ -125,6 +127,50 @@ struct PatternsView: View {
             }
         }
         .startKindCard()
+    }
+
+    private var startProfileCard: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            HStack(spacing: Theme.spacing8) {
+                Image(systemName: "person.text.rectangle")
+                    .foregroundStyle(Theme.accent)
+                Text(verbatim: L("startProfile.title"))
+                    .font(.headline)
+                Spacer()
+            }
+
+            Text(verbatim: startProfileSummary)
+                .font(.subheadline)
+                .foregroundStyle(startProfile.sampleCount == 0 ? .secondary : Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if startProfile.sampleCount > 0 {
+                HStack(spacing: Theme.spacing8) {
+                    modelMetric(title: L("startProfile.window"), value: startProfileWindow, icon: "clock")
+                    modelMetric(title: L("startProfile.duration"), value: startProfileDuration, icon: "timer")
+                    modelMetric(title: L("startProfile.category"), value: startProfileCategory, icon: "checkmark.circle")
+                }
+            }
+        }
+        .startKindCard()
+        .accessibilityIdentifier("startProfile.card")
+    }
+
+    private var startProfileSummary: String {
+        guard startProfile.sampleCount > 0 else { return L("startProfile.empty") }
+        return L("startProfile.summary")
+    }
+
+    private var startProfileWindow: String {
+        startProfile.preferredWindow.map { L("window.\($0.rawValue)") } ?? L("startProfile.learning")
+    }
+
+    private var startProfileDuration: String {
+        startProfile.helpfulMinutes.map { L("startProfile.minutes", $0) } ?? L("startProfile.learning")
+    }
+
+    private var startProfileCategory: String {
+        startProfile.productiveCategory.map { L($0.localizationKey) } ?? L("startProfile.learning")
     }
 
     private var executionModelCard: some View {

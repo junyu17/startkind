@@ -19,9 +19,12 @@
 "start.empty.hint" = "Say or type what's overwhelming you. You'll get one small step.";
 "start.kindStart.title" = "Today's Kind Start";
 "start.kindStart.admin" = "Paste a bill, email, or appointment";
-"start.kindStart.photo" = "Photo to one step";
+"start.kindStart.photo" = "Scan photo or screenshot";
 "start.kindStart.resume" = "Pick up where you left";
 "start.kindStart.adminLeft" = "%d admin left";
+"start.moreWays" = "More ways to start";
+"frictionForecast.title" = "Likely blocker";
+"frictionForecast.loaded" = "StartKind made that blocker smaller.";
 
 /* MARK: - Autopilot */
 "autopilot.open" = "Tell me what to start now";
@@ -62,6 +65,7 @@
 "template.badDay.subtitle" = "A 5-minute nervous-system start.";
 "vault.open" = "Personal vault";
 "vault.title" = "Personal vault";
+"vault.defaultTitle" = "Saved start";
 "vault.saved" = "Saved to your local vault.";
 "vault.applied" = "Vault step loaded. Start small.";
 "vault.stop" = "Stop when this saved step has been touched once.";
@@ -129,7 +133,7 @@
 "recover.lastStep" = "Pick up where you left";
 "recover.resume" = "Continue from here";
 "recover.startTimer" = "Start timer";
-"recover.related" = "Note";
+"recover.related" = "Note: %@";
 "recover.blocker" = "Blocker: %@";
 "recover.clear" = "Clear this capsule";
 
@@ -210,6 +214,11 @@
 "admin.parse.loading" = "Finding the next step...";
 "admin.ocr.empty" = "No readable text found. You can type a few words instead.";
 "admin.ocr.error" = "Couldn't read that image. Try a clearer screenshot or paste the text.";
+"admin.scan.title" = "Scan a bill, letter, or screenshot";
+"admin.scan.body" = "Choose one image source. You can close this screen anytime.";
+"admin.camera" = "Use camera";
+"admin.photoLibrary" = "Choose photo";
+"admin.cameraUnavailable" = "Camera is not available on this device. Choose a photo or paste text instead.";
 "admin.result.title" = "What matters";
 "admin.confidence" = "%d%% confidence";
 "admin.fact.type" = "Type";
@@ -244,7 +253,7 @@
 "settings.privacy" = "Privacy";
 "settings.dataExport" = "Export my data";
 "settings.deleteAccount" = "Delete account & data";
-"settings.deleteConfirm.body" = "This removes your local history, capsules, and calibration data. This cannot be undone.";
+"settings.deleteConfirm.body" = "This permanently deletes your StartKind account and every synced copy of your history, capsules, and calibration data, clears this device, and signs you out. This cannot be undone.";
 "settings.contact" = "Contact";
 "settings.contactEmail" = "billy.yu@me.com";
 "settings.about" = "About";
@@ -269,25 +278,25 @@
 "paywall.free.title" = "Free";
 "paywall.free.price" = "$0";
 "paywall.free.stepLimit" = "Enough daily one-step help to build the habit.";
-"paywall.free.adminLimit" = "A small daily Admin Quick Start allowance.";
+"paywall.free.adminLimit" = "1 Admin Quick Start per day.";
 "paywall.free.recovery" = "Recovery capsule and timers stay usable.";
-"paywall.free.costart" = "Join or try quiet co-start when you need company.";
+"paywall.free.costart" = "Create 1 friend room every 7 days. Joining and quiet rooms stay free.";
 "paywall.plus.title" = "Plus";
 "paywall.plus.price" = "$9.99/month or $89.99/year";
 "paywall.plus.unlimited" = "Unlimited one-step starts.";
 "paywall.plus.admin" = "Unlimited bill, email, appointment, and admin parsing.";
 "paywall.plus.calibration" = "Personal time calibration and execution patterns.";
 "paywall.plus.sync" = "Cross-device sync and the full execution model.";
-"paywall.feature.unlimited" = "Unlimited one next step";
-"paywall.feature.admin" = "Admin Task Reader for bills & emails";
-"paywall.feature.calibration" = "Personal time calibration";
-"paywall.feature.recovery" = "Unlimited recovery capsules";
-"paywall.feature.costart" = "Friend co-start links";
-"paywall.feature.sync" = "Cross-device sync";
-"paywall.feature.model" = "Personal execution model";
 "paywall.limit.title" = "You've used today's free steps";
+"paywall.limit.title.admin" = "Admin Quick Start is free 1 time today";
+"paywall.limit.title.friend" = "Friend co-start is a one-in-seven-day free benefit";
 "paywall.limit.body" = "You can still use timers and the recovery capsule. Or unlock unlimited steps with Plus.";
+"paywall.limit.body.admin" = "You can still use timers and the recovery capsule. Upgrade Plus for unlimited admin parsing and co-start.";
+"paywall.limit.body.friend" = "You created a free friend room in the past 7 days. Joining stays free, or upgrade for unlimited invites.";
 "paywall.limit.keepFree" = "Keep using free";
+"paywall.value.statement" = "Plus helps you stay consistent: one less decision, more small starts.";
+"paywall.annual.monthlyEquivalent" = "Billed as ≈ $7.50/month";
+"paywall.plus.coStart" = "Unlimited one-on-one co-start invitations";
 
 /* MARK: - Usage */
 "usage.stepsLeft" = "%d of %d free steps left today";
@@ -356,6 +365,7 @@
 "costart.defaultGuestStep" = "Starting now";
 "costart.join" = "Join";
 "costart.roomNotFound" = "Couldn't find that room. It may have ended.";
+"costart.createError" = "That room couldn't start right now. Your free invite is still available. Please try again.";
 
 /* MARK: - Retention assists */
 "stuck.button" = "I'm stuck";
@@ -428,3 +438,42 @@
 "privacy.sensitive1" = "Admin tasks may contain financial, medical, or family information; it is not logged in production.";
 "privacy.sensitive2" = "Service-role keys stay server-side; the app only holds your publishable key.";
 "privacy.contactTitle" = "Contact";
+
+/* MARK: - Fifth retention release */
+"ladder.title" = "Choose a start length";
+"ladder.minutes" = "%d min";
+"dailyOne.title" = "One gentle thing for today";
+"dailyOne.source.recovery" = "Resume";
+"dailyOne.source.admin" = "Admin";
+"dailyOne.source.vault" = "Saved";
+"dailyOne.start" = "Use this one";
+"dailyOne.replace" = "Choose another";
+"dailyOne.dismiss" = "Not today";
+"dailyOne.stop" = "Stop after the smallest useful opening.";
+"dailyOne.why" = "A saved start you chose before.";
+"dailyOne.source" = "Daily one thing";
+"dailyOne.loaded" = "Your one gentle thing is ready.";
+"urgentAdmin.start" = "Find the contact path";
+"startProfile.title" = "Your start profile";
+"startProfile.empty" = "It will learn from real starts, without asking you to plan perfectly.";
+"startProfile.summary" = "A quiet summary of when and how starting has tended to work for you.";
+"startProfile.window" = "Time";
+"startProfile.duration" = "Length";
+"startProfile.category" = "Often";
+"startProfile.learning" = "Learning";
+"startProfile.minutes" = "%d min";
+"costart.again" = "Start another 25 min with %@";
+"costart.saveFriend" = "Save this friend";
+"costart.friendSaved" = "Saved for a future co-start";
+
+/* Error messages surfaced from LocalizedError types */
+"error.usage.stepLimit" = "Today's free steps are used up.";
+"error.usage.adminLimit" = "Today's free Admin Quick Start is used up.";
+"error.speech.notAuthorized" = "Speech recognition permission was not granted.";
+"error.speech.microphoneNotAuthorized" = "Microphone permission was not granted.";
+"error.speech.notAvailable" = "Speech recognition isn't available right now.";
+"error.speech.engineFailure" = "Couldn't start the audio engine.";
+"error.api.notConfigured" = "Cloud features aren't configured.";
+"error.auth.notConfigured" = "Cloud sign-in isn't configured.";
+"error.auth.invalidCredentials" = "Sign-in failed. Check your email and password.";
+"error.auth.network" = "Couldn't reach the server. Try again.";

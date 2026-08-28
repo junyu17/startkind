@@ -7,10 +7,10 @@ enum SpeechError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notAuthorized: return "Speech recognition permission was not granted."
-        case .microphoneNotAuthorized: return "Microphone permission was not granted."
-        case .notAvailable: return "Speech recognition isn't available right now."
-        case .engineFailure: return "Couldn't start the audio engine."
+        case .notAuthorized: return L("error.speech.notAuthorized")
+        case .microphoneNotAuthorized: return L("error.speech.microphoneNotAuthorized")
+        case .notAvailable: return L("error.speech.notAvailable")
+        case .engineFailure: return L("error.speech.engineFailure")
         }
     }
 }

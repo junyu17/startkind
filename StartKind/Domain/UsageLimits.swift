@@ -4,6 +4,8 @@ import Foundation
 enum UsageLimits {
     static let freeStepsPerDay = 5
     static let freeAdminQuickStartsPerDay = 1
+    static let freeFriendCoStartPerWindow = 1
+    static let freeFriendCoStartWindowDays = 7
     static let freeHistoryDays = 14
     static let freeActiveRecoveryCapsules = 1
     static let trialDays = 7

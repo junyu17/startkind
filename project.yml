@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.startkind
   deploymentTarget:
     iOS: "17.0"
+    watchOS: "10.0"
   createIntermediateGroups: true
   groupSortPosition: top
   generateEmptyDirectories: true
@@ -39,6 +40,11 @@ targets:
         embed: true
       - target: StartKindWidgetExtension
         embed: true
+      - target: StartKindWatch
+        embed: true
+        copy:
+          destination: wrapper
+          subpath: Watch
     info:
       path: StartKind/Info.plist
       properties:
@@ -50,12 +56,13 @@ targets:
           - en
           - zh-Hans
         UILaunchScreen:
-          UIColorName: ""
+          UIColorName: BackgroundColor
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         NSMicrophoneUsageDescription: "StartKind uses the microphone to capture your spoken thoughts and turn them into one small next step."
+        NSCameraUsageDescription: "StartKind lets you scan bills, letters, or appointment notes so it can turn them into one small next step."
         NSPhotoLibraryUsageDescription: "StartKind lets you choose screenshots or photos so it can extract text and turn admin tasks into one small next step."
         NSSpeechRecognitionUsageDescription: "StartKind uses speech recognition to turn your spoken thoughts into one small next step."
         ITSAppUsesNonExemptEncryption: false
@@ -139,6 +146,22 @@ targets:
         SKIP_INSTALL: YES
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_ENTITLEMENTS: StartKindWidgetExtension/StartKindWidgetExtension.entitlements
+  StartKindWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: StartKindWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ren.startkind.watchkitapp
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: StartKind
+        INFOPLIST_KEY_WKApplication: YES
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: ren.startkind
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "4"
   StartKindTests:
     type: bundle.unit-test
     platform: iOS
@@ -174,6 +197,7 @@ schemes:
         StartKind: all
         StartKindShareExtension: all
         StartKindWidgetExtension: all
+        StartKindWatch: all
         StartKindTests: [test]
         StartKindUITests: [test]
     run:

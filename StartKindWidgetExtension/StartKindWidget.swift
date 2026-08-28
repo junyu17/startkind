@@ -50,6 +50,39 @@ struct StartKindWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        content
+            .containerBackground(.background, for: .widget)
+            .widgetURL(widgetDeepLink)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch family {
+        case .accessoryInline:
+            Text(accessoryInlineText)
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                Image(systemName: "bolt.heart.fill")
+                    .font(.title3)
+                    .foregroundStyle(Color(red: 0.11, green: 0.45, blue: 0.29))
+            }
+        case .accessoryRectangular:
+            VStack(alignment: .leading, spacing: 3) {
+                Label("Tiny rescue", systemImage: "bolt.heart.fill")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text(widgetStepText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+        default:
+            homeScreenContent
+        }
+    }
+
+    private var homeScreenContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "arrow.up.forward")
@@ -71,14 +104,35 @@ struct StartKindWidgetView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(family == .systemSmall ? 3 : 4)
         }
-        .containerBackground(.background, for: .widget)
-        .widgetURL(URL(string: entry.snapshot?.deepLinkString ?? "startkind://start"))
     }
 }
 
 extension StartKindWidgetView {
     private var widgetStepText: String {
         entry.snapshot?.step ?? (family == .systemSmall ? "One kind step." : "Open StartKind and start with one small step.")
+    }
+
+    private var accessoryInlineText: String {
+        entry.snapshot?.title ?? "StartKind: tiny rescue"
+    }
+
+    private var widgetDeepLink: URL? {
+        if family == .accessoryInline || family == .accessoryCircular || family == .accessoryRectangular {
+            return URL(string: "startkind://quick?kind=emergencyTiny")
+        }
+        return URL(string: entry.snapshot?.deepLinkString ?? "startkind://start")
+    }
+}
+
+/// Builds an always-valid countdown range. `ClosedRange` traps when the upper
+/// bound is in the past, which happens as soon as a timer runs out.
+enum StartKindTimerRange {
+    static func countdown(to endsAt: Date, from now: Date = .now) -> ClosedRange<Date> {
+        min(now, endsAt)...endsAt
+    }
+
+    static func text(_ seconds: Int) -> String {
+        String(format: "%d:%02d", max(0, seconds) / 60, max(0, seconds) % 60)
     }
 }
 
@@ -90,8 +144,23 @@ struct StartKindWidget: Widget {
             StartKindWidgetView(entry: entry)
         }
         .configurationDisplayName("StartKind")
-        .description("Start one kind step from your Home Screen.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .description("Start one kind step from your Home Screen or Lock Screen.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryInline, .accessoryCircular, .accessoryRectangular])
+    }
+}
+
+@available(iOSApplicationExtension 16.2, *)
+private struct StartKindTimerCountdown: View {
+    let state: StartKindTimerAttributes.ContentState
+
+    var body: some View {
+        Group {
+            if let paused = state.pausedSecondsRemaining {
+                Text(verbatim: StartKindTimerRange.text(paused))
+            } else {
+                Text(timerInterval: StartKindTimerRange.countdown(to: state.endsAt), countsDown: true)
+            }
+        }
     }
 }
 
@@ -107,7 +176,7 @@ struct StartKindTimerLiveActivity: Widget {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
-                Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                StartKindTimerCountdown(state: context.state)
                     .font(.caption2)
                     .monospacedDigit()
                     .foregroundStyle(Color(red: 0.11, green: 0.45, blue: 0.29))
@@ -123,7 +192,7 @@ struct StartKindTimerLiveActivity: Widget {
                         .fontWeight(.semibold)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                    StartKindTimerCountdown(state: context.state)
                         .font(.caption2)
                         .monospacedDigit()
                 }
@@ -135,7 +204,7 @@ struct StartKindTimerLiveActivity: Widget {
             } compactLeading: {
                 Image(systemName: "arrow.up.forward")
             } compactTrailing: {
-                Text(timerInterval: Date.now...context.state.endsAt, countsDown: true)
+                StartKindTimerCountdown(state: context.state)
                     .font(.caption2)
                     .monospacedDigit()
             } minimal: {

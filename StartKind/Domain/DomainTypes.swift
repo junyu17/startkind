@@ -133,12 +133,17 @@ struct UsageState: Equatable, Sendable, Codable {
     var stepsLimit: Int
     var adminQuickStartsUsedToday: Int
     var adminQuickStartLimit: Int
+    var friendCoStartsUsedInWindow: Int
+    var friendCoStartLimit: Int
+    var friendCoStartWindowStart: Date?
     var resetsAt: Date
 
     var stepsRemaining: Int { max(0, stepsLimit - stepsUsedToday) }
     var adminQuickStartsRemaining: Int { max(0, adminQuickStartLimit - adminQuickStartsUsedToday) }
+    var friendCoStartsRemaining: Int { max(0, friendCoStartLimit - friendCoStartsUsedInWindow) }
     var canGenerateStep: Bool { stepsRemaining > 0 }
     var canUseAdminQuickStart: Bool { adminQuickStartsRemaining > 0 }
+    var canCreateFriendCoStart: Bool { friendCoStartsRemaining > 0 }
 }
 
 /// What kind of capture input the engine received.

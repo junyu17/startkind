@@ -7,10 +7,13 @@ struct CoStartView: View {
     @Environment(\.dismiss) private var dismiss
     let step: NextStepModel
     var initialMode: CoStartRoomType? = nil
+    var onFriendLimitReached: (() -> Void)? = nil
 
     @State private var room: CoStartRoomModel?
     @State private var session: TimerSessionModel?
     @State private var didApplyInitialMode = false
+    @State private var isStarting = false
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -35,7 +38,7 @@ struct CoStartView: View {
         .task {
             guard !didApplyInitialMode, let initialMode else { return }
             didApplyInitialMode = true
-            start(type: initialMode)
+            await start(type: initialMode)
         }
     }
 
@@ -58,82 +61,53 @@ struct CoStartView: View {
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous))
                 }
-                PrimaryButton("costart.aiQuiet", systemImage: "sparkles", accessibilityId: "costart.ai") { start(type: .aiQuiet) }
-                PrimaryButton("costart.friend", systemImage: "link", accessibilityId: "costart.friend") { start(type: .friendLink) }
-            }
-            .padding()
-        }
-    }
-
-    private func start(type: CoStartRoomType) {
-        let result = env.startCoStart(type: type, step: step, stepText: step.proposal.step)
-        room = result.room
-        session = result.session
-    }
-}
-
-/// Guest join entry (reached via invite deep link): state a name + step, then join.
-struct CoStartGuestJoinView: View {
-    @EnvironmentObject var env: AppEnvironment
-    @EnvironmentObject private var loc: LocalizationManager
-    @Environment(\.dismiss) private var dismiss
-    let roomId: UUID
-
-    @State private var name = ""
-    @State private var stepText = ""
-    @State private var joining = false
-    @State private var errorMessage: String?
-    @State private var room: CoStartRoomModel?
-
-    var body: some View {
-        NavigationStack {
-            Group {
-                if let room {
-                    CoStartRoomView(room: room, stepText: stepText, isGuest: true) { outcome in
-                        Task { await env.endCoStartGuest(roomId: roomId, outcome: outcome) }
-                        dismiss()
+                if let errorMessage {
+                    KindBanner(text: errorMessage)
+                        .accessibilityIdentifier("costart.error")
+                }
+                PrimaryButton("costart.aiQuiet", systemImage: "sparkles", enabled: !isStarting, accessibilityId: "costart.ai") {
+                    Task { await start(type: .aiQuiet) }
+                }
+                PrimaryButton("costart.friend", systemImage: "link", enabled: !isStarting, accessibilityId: "costart.friend") {
+                    Task { await start(type: .friendLink) }
+                }
+                if let preferred = env.coStartContinuity.preferred {
+                    Button {
+                        Task { await start(type: .friendLink) }
+                    } label: {
+                        Label(L("costart.again", preferred.displayName), systemImage: "arrow.clockwise")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
                     }
-                } else {
-                    joinForm
-                }
-            }
-            .navigationTitle(L("costart.title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button(L("common.close")) { dismiss() } }
-            }
-        }
-    }
-
-    private var joinForm: some View {
-        ScrollView {
-            VStack(spacing: Theme.spacing16) {
-                Text(verbatim: L("costart.guestSubtitle"))
-                    .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                    .padding(.top, Theme.spacing24)
-                TextField(L("costart.yourName"), text: $name)
-                    .textFieldStyle(.roundedBorder).accessibilityIdentifier("costart.guestname")
-                TextField(L("costart.yourStep"), text: $stepText, axis: .vertical)
-                    .textFieldStyle(.roundedBorder).lineLimit(1...3).accessibilityIdentifier("costart.gueststep")
-                if let errorMessage { Text(verbatim: errorMessage).font(.footnote).foregroundStyle(.red) }
-                PrimaryButton("costart.join", systemImage: "arrow.right.circle.fill", enabled: !joining && !stepText.isEmpty) {
-                    Task { await join() }
+                    .buttonStyle(.bordered)
+                    .tint(Theme.accent)
+                    .accessibilityIdentifier("costart.again")
                 }
             }
             .padding()
         }
     }
 
-    private func join() async {
-        joining = true
-        errorMessage = nil
-        do {
-            room = try await env.joinCoStartRoom(roomId: roomId, stepText: stepText, displayName: name.isEmpty ? L("costart.friend") : name)
-            if room == nil { errorMessage = L("costart.roomNotFound") }
-        } catch {
-            errorMessage = L("common.error")
+    private func start(type: CoStartRoomType) async {
+        guard !isStarting else { return }
+        if type == .friendLink && !env.canCreateFriendCoStart {
+            onFriendLimitReached?()
+            return
         }
-        joining = false
+        isStarting = true
+        errorMessage = nil
+        defer { isStarting = false }
+
+        do {
+            let result = try await env.startCoStart(type: type, step: step, stepText: step.proposal.step)
+            room = result.room
+            session = result.session
+        } catch CoStartError.friendLimitReached {
+            onFriendLimitReached?()
+        } catch {
+            errorMessage = L("costart.createError")
+        }
     }
 }
 
@@ -244,6 +218,7 @@ struct CoStartRoomView: View {
     @State private var remaining = 25 * 60
     @State private var participants: [AppEnvironment.CoStartParticipantInfo] = []
     @State private var copied = false
+    @State private var savedFriend = false
 
     var body: some View {
         VStack(spacing: Theme.spacing16) {
@@ -339,8 +314,25 @@ struct CoStartRoomView: View {
                     Label(L("costart.copy"), systemImage: "doc.on.doc").font(.caption)
                 }
             }
+            if let partner = friendParticipant {
+                Button {
+                    env.savePreferredCoStarter(displayName: partner.displayName, roomCode: room.roomCode)
+                    savedFriend = true
+                } label: {
+                    Label(L("costart.saveFriend"), systemImage: "person.crop.circle.badge.plus")
+                        .font(.caption)
+                }
+                .buttonStyle(.bordered)
+                .tint(Theme.accent)
+                .accessibilityIdentifier("costart.saveFriend")
+            }
             if copied { Text(verbatim: L("costart.copied")).font(.caption2).foregroundStyle(Theme.accent) }
+            if savedFriend { Text(verbatim: L("costart.friendSaved")).font(.caption2).foregroundStyle(Theme.accent) }
         }
+    }
+
+    private var friendParticipant: AppEnvironment.CoStartParticipantInfo? {
+        participants.first { $0.displayName != L("costart.you") && $0.displayName != L("costart.ai") }
     }
 
     private func pollParticipants() async {

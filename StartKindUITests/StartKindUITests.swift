@@ -28,7 +28,7 @@ final class StartKindUITests: XCTestCase {
 
     private func dismissKeyboard(_ app: XCUIApplication) {
         guard app.keyboards.firstMatch.exists else { return }
-        let done = app.buttons["keyboard.done"]
+        let done = app.buttons["keyboard.done"].exists ? app.buttons["keyboard.done"] : app.buttons["admin.keyboard.done"]
         if done.waitForExistence(timeout: 2) {
             done.tap()
             if app.keyboards.firstMatch.waitForNonExistence(timeout: 5) { return }
@@ -39,6 +39,47 @@ final class StartKindUITests: XCTestCase {
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.05)).tap()
         }
         _ = app.keyboards.firstMatch.waitForNonExistence(timeout: 5)
+    }
+
+    private func openMoreWays(_ app: XCUIApplication) {
+        let adminButton = app.buttons["start.kind.admin"]
+        if adminButton.exists { return }
+        let disclosure = app.buttons["start.moreWays"].firstMatch
+        XCTAssertTrue(disclosure.waitForExistence(timeout: 15), "More ways section should be present")
+        // The early return above already proved it is collapsed, so tap once up
+        // front. After that, re-check before every further tap so a slow
+        // expansion is never toggled shut again.
+        disclosure.tap()
+        var attempts = 1
+        while !adminButton.waitForExistence(timeout: 5), attempts < 3 {
+            disclosure.tap()
+            attempts += 1
+        }
+        XCTAssertTrue(adminButton.waitForExistence(timeout: 5), "More ways section should expand")
+        if !adminButton.isHittable, app.scrollViews.firstMatch.exists {
+            app.scrollViews.firstMatch.swipeUp()
+        }
+    }
+
+    /// Tap a field and wait for it to actually hold keyboard focus before typing.
+    /// Typing into a field that is still animating in throws "neither element nor
+    /// any descendant has keyboard focus".
+    private func focusAndType(_ app: XCUIApplication, _ field: XCUIElement, _ text: String) {
+        field.tap()
+        if !app.keyboards.firstMatch.waitForExistence(timeout: 5) {
+            field.tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "Field should take keyboard focus")
+        }
+        field.typeText(text)
+    }
+
+    private func openSettings() -> XCUIApplication {
+        let app = launch()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
+        app.tabBars.firstMatch.buttons.element(boundBy: 3).tap()
+        XCTAssertTrue(app.buttons["StartKind Plus"].waitForExistence(timeout: 10))
+        app.buttons["StartKind Plus"].tap()
+        return app
     }
 
     func testAppLaunchesToStartTab() throws {
@@ -67,6 +108,7 @@ final class StartKindUITests: XCTestCase {
             ? app.textFields["start.input"]
             : app.textViews["start.input"]
         XCTAssertTrue(input.waitForExistence(timeout: 15), "Capture field should exist")
+        openMoreWays(app)
         input.tap()
         input.typeText("I need someone to sit with me while I start my bill")
         let friendInvite = app.buttons["start.costart.friend"]
@@ -91,6 +133,7 @@ final class StartKindUITests: XCTestCase {
 
     func testRoomCodeFieldLimitsToSixDigits() throws {
         let app = launch()
+        openMoreWays(app)
         let codeField = app.textFields["start.join.code"]
         XCTAssertTrue(codeField.waitForExistence(timeout: 15), "Room code field should exist")
         codeField.tap()
@@ -101,22 +144,40 @@ final class StartKindUITests: XCTestCase {
 
     func testCategorySelectionShowsFeedback() throws {
         let app = launch()
+        openMoreWays(app)
         let billsChip = app.buttons["Bills"]
         XCTAssertTrue(billsChip.waitForExistence(timeout: 15), "Bills chip should exist")
         billsChip.tap()
         XCTAssertTrue(app.descendants(matching: .any)["start.category.selected"].waitForExistence(timeout: 5), "Category selection should show visible feedback")
     }
 
+    func testFrictionForecastCreatesStartableStep() throws {
+        let app = launch()
+        openMoreWays(app)
+        let input = app.textFields["start.input"].exists
+            ? app.textFields["start.input"]
+            : app.textViews["start.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 15), "Capture field should exist")
+        input.tap()
+        input.typeText("I need the password before I can pay this bill")
+        dismissKeyboard(app)
+
+        let forecast = app.buttons["frictionForecast.apply"]
+        XCTAssertTrue(forecast.waitForExistence(timeout: 10), "Friction Forecast should appear for a likely blocker")
+        forecast.tap()
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Friction Forecast should create a startable step")
+    }
+
     func testKindStartAdminReaderParsesBillText() throws {
         let app = launch()
+        openMoreWays(app)
         let adminButton = app.descendants(matching: .any)["start.kind.admin"]
         XCTAssertTrue(adminButton.waitForExistence(timeout: 15), "Kind Start admin entry should exist")
         adminButton.tap()
 
         let adminInput = app.textViews["admin.input"]
         XCTAssertTrue(adminInput.waitForExistence(timeout: 10), "Admin Reader input should exist")
-        adminInput.tap()
-        adminInput.typeText("Invoice bill $42 due 12/15/2026 pay at https://example.com")
+        focusAndType(app, adminInput, "Invoice bill $42 due 12/15/2026 pay at https://example.com")
         dismissKeyboard(app)
 
         let parse = app.buttons["admin.parse"]
@@ -128,12 +189,31 @@ final class StartKindUITests: XCTestCase {
 
     func testPhotoToStepAndExecutionModelEntriesVisible() throws {
         let app = launch()
+        openMoreWays(app)
         XCTAssertTrue(app.descendants(matching: .any)["start.kindStart"].waitForExistence(timeout: 15), "Kind Start panel should exist")
         XCTAssertTrue(app.descendants(matching: .any)["start.kind.photo"].exists, "Photo-to-step entry should exist")
 
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
         app.tabBars.firstMatch.buttons.element(boundBy: 2).tap()
         XCTAssertTrue(app.descendants(matching: .any)["patterns.model.summary"].waitForExistence(timeout: 10), "Personal Execution Model should be visible")
+        XCTAssertTrue(app.descendants(matching: .any)["startProfile.card"].exists, "Start Profile should be visible")
+    }
+
+    func testPhotoEntryOpensDismissibleScanChoices() throws {
+        let app = launch()
+        openMoreWays(app)
+        let photoEntry = app.descendants(matching: .any)["start.kind.photo"]
+        XCTAssertTrue(photoEntry.waitForExistence(timeout: 15), "Photo entry should exist")
+        photoEntry.tap()
+
+        XCTAssertTrue(app.buttons["admin.camera"].waitForExistence(timeout: 10), "Camera scan choice should be visible")
+        XCTAssertTrue(app.buttons["admin.photoLibrary"].exists, "Photo library scan choice should be visible")
+        XCTAssertTrue(app.buttons["admin.photo"].exists, "Inline photo choice should remain available")
+
+        let close = app.buttons["Close"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5), "Admin scan screen should be dismissible")
+        close.tap()
+        XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10), "Closing scan screen should return to Start")
     }
 
     func testAutopilotCreatesOneNextStep() throws {
@@ -144,8 +224,32 @@ final class StartKindUITests: XCTestCase {
         XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Autopilot should create a startable next step")
     }
 
+    func testStartLadderAndUrgentAdminEntriesWork() throws {
+        let app = launch()
+        openMoreWays(app)
+        let autopilot = app.descendants(matching: .any)["start.autopilot"]
+        XCTAssertTrue(autopilot.waitForExistence(timeout: 15))
+        autopilot.tap()
+        XCTAssertTrue(app.buttons["nextstep.ladder.2"].waitForExistence(timeout: 10), "Start Ladder should offer a two-minute version")
+        app.buttons["nextstep.ladder.2"].tap()
+        XCTAssertTrue(app.buttons["nextstep.start"].waitForExistence(timeout: 10), "Selected ladder version should remain startable")
+
+        let admin = app.descendants(matching: .any)["start.kind.admin"]
+        XCTAssertTrue(admin.waitForExistence(timeout: 10))
+        admin.tap()
+        let input = app.textViews["admin.input"]
+        XCTAssertTrue(input.waitForExistence(timeout: 10))
+        input.tap()
+        input.typeText("Final notice: your payment is due today.")
+        dismissKeyboard(app)
+        let urgentStart = app.buttons["urgentAdmin.start"]
+        XCTAssertTrue(urgentStart.waitForExistence(timeout: 10), "Urgent admin mode should offer a neutral contact-first start")
+        XCTAssertTrue(urgentStart.isEnabled)
+    }
+
     func testRetentionControlsCreateStartableStep() throws {
         let app = launch()
+        openMoreWays(app)
         XCTAssertTrue(app.textFields["adminInbox.input"].waitForExistence(timeout: 15), "Tiny admin inbox should be visible")
 
         let energy = app.buttons["energy.overwhelmed"]
@@ -167,14 +271,37 @@ final class StartKindUITests: XCTestCase {
     }
 
     func testPaywallShowsFreePlusComparison() throws {
+        let app = openSettings()
+        let comparison = app.staticTexts["Free vs Plus"]
+        let annual = app.buttons["paywall.annual"]
+        let monthly = app.buttons["paywall.monthly"]
+        let subscribe = app.buttons["paywall.subscribe"]
+        XCTAssertTrue(comparison.waitForExistence(timeout: 10), "Paywall should compare Free and Plus")
+        XCTAssertTrue(annual.waitForExistence(timeout: 10), "Annual selector should exist")
+        XCTAssertTrue(monthly.waitForExistence(timeout: 10), "Monthly selector should exist")
+        XCTAssertTrue(subscribe.waitForExistence(timeout: 10), "Subscribe button should exist")
+        XCTAssertLessThan(annual.frame.minY, comparison.frame.minY, "Annual selector should precede Free-vs-Plus comparison")
+        XCTAssertLessThan(monthly.frame.minY, comparison.frame.minY, "Monthly selector should precede Free-vs-Plus comparison")
+        XCTAssertLessThan(subscribe.frame.minY, comparison.frame.minY, "Subscribe CTA should precede Free-vs-Plus comparison")
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "9.99")).count > 0, "Fallback monthly price should be visible")
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "89.99")).count > 0, "Fallback annual price should be visible")
+
+        monthly.tap()
+        XCTAssertTrue(subscribe.waitForExistence(timeout: 5), "Subscribe button should still exist after plan select")
+    }
+
+    func testMoreWaysRevealsSecondaryOptions() throws {
         let app = launch()
-        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
-        app.tabBars.firstMatch.buttons.element(boundBy: 3).tap()
-        let plusButton = app.buttons["StartKind Plus"]
-        XCTAssertTrue(plusButton.waitForExistence(timeout: 10), "Plus button should exist in Settings")
-        plusButton.tap()
-        XCTAssertTrue(app.staticTexts["Free vs Plus"].waitForExistence(timeout: 10), "Paywall should compare Free and Plus")
-        XCTAssertTrue(app.staticTexts["$9.99/month or $89.99/year"].exists, "Paywall should show Plus prices")
+        openMoreWays(app)
+        XCTAssertTrue(app.buttons["start.kind.admin"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["start.kind.photo"].exists, "Photo scan should be in more ways")
+        XCTAssertTrue(app.buttons["start.templates"].exists, "Templates should be in more ways")
+        XCTAssertTrue(app.buttons["start.vault"].exists, "Vault should be in more ways")
+        XCTAssertTrue(app.textFields["adminInbox.input"].exists, "Tiny admin inbox should be in more ways")
+        XCTAssertTrue(app.buttons["start.costart.friend"].exists, "Friend co-start should be in more ways")
+        XCTAssertTrue(app.buttons["start.join.submit"].exists, "Room code join should be in more ways")
+        XCTAssertTrue(app.buttons["energy.overwhelmed"].exists, "Energy panels should be in more ways")
+        XCTAssertTrue(app.buttons["frictionPreset.too_many_tabs"].exists, "Friction presets should be in more ways")
     }
 
     func testCoreLoopCaptureToTimerToDone() throws {
@@ -312,6 +439,7 @@ final class StartKindUITests: XCTestCase {
 
     func testTemplatesShareAndVaultFlow() throws {
         let app = launch()
+        openMoreWays(app)
         let templates = app.descendants(matching: .any)["start.templates"]
         XCTAssertTrue(templates.waitForExistence(timeout: 15), "Templates entry should exist")
         templates.tap()
@@ -345,78 +473,4 @@ final class StartKindUITests: XCTestCase {
         }
     }
 
-    // MARK: - Auth + cloud
-
-    func testAuthScreenShows() throws {
-        let app = launch(skipAuth: false)
-        XCTAssertTrue(app.textFields["auth.email"].waitForExistence(timeout: 15), "Auth screen should show when not started")
-        XCTAssertTrue(app.buttons["auth.submit"].exists)
-        XCTAssertTrue(app.buttons["auth.skip"].exists)
-    }
-
-    func testAuthEmailAtButtonInsertsAt() throws {
-        let app = launch(skipAuth: false)
-        let emailField = app.textFields["auth.email"]
-        XCTAssertTrue(emailField.waitForExistence(timeout: 15), "Email field should show on auth screen")
-        emailField.tap()
-        let atButton = app.buttons["auth.emailAt"]
-        XCTAssertTrue(atButton.waitForExistence(timeout: 5), "Email helper button should be visible")
-        atButton.tap()
-        XCTAssertTrue(((emailField.value as? String) ?? "").contains("@"), "At-sign helper should insert @")
-    }
-
-    func testSkipAuthEntersAppLocally() throws {
-        let app = launch(skipAuth: false)
-        XCTAssertTrue(app.buttons["auth.skip"].waitForExistence(timeout: 15))
-        app.buttons["auth.skip"].tap()
-        XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10), "Skipping should enter the app locally")
-    }
-
-    /// Full cloud e2e: sign up -> enter app -> capture -> cloud (DeepSeek) next step.
-    func testCloudSignUpAndStep() throws {
-        let app = launch(skipAuth: false)
-        XCTAssertTrue(app.textFields["auth.email"].waitForExistence(timeout: 15))
-        let emailField = app.textFields["auth.email"]
-        let email = "sk-ui-\(Int(Date().timeIntervalSince1970))@example.com"
-        emailField.tap()
-        emailField.typeText(email)
-        app.secureTextFields["auth.password"].tap()
-        app.secureTextFields["auth.password"].typeText("TestPass123!")
-        dismissKeyboard(app)
-        // Switch to Sign Up mode (default is Sign In), then submit.
-        app.buttons["auth.switch"].tap()
-        app.buttons["auth.submit"].tap()
-
-        // Dismiss iOS Password AutoFill sheet/alert ("Save Password?") if it appeared.
-        if app.sheets.firstMatch.waitForExistence(timeout: 8) {
-            app.sheets.firstMatch.swipeDown()
-            _ = app.sheets.firstMatch.waitForNonExistence(timeout: 5)
-            if app.sheets.firstMatch.exists {
-                app.sheets.firstMatch.buttons.element(boundBy: 0).tap()
-            }
-        }
-        if app.alerts.firstMatch.exists {
-            app.alerts.firstMatch.buttons.element(boundBy: 0).tap()
-        }
-
-        // After sign-up, enters the main app.
-        let voice = app.buttons["start.voice"]
-        if !voice.waitForExistence(timeout: 25) {
-            XCTFail("Did not enter app after sign-up. StaticTexts:\n\(app.staticTexts.debugDescription)")
-        }
-
-        // Capture -> cloud-powered next step.
-        let input = app.textFields["start.input"].exists ? app.textFields["start.input"] : app.textViews["start.input"]
-        XCTAssertTrue(input.waitForExistence(timeout: 10))
-        dismissKeyboard(app)
-        input.tap()
-        input.typeText("I am a mess today and I have an insurance bill I have been avoiding")
-        dismissKeyboard(app)
-        let billsChip = app.buttons["Bills"]
-        if billsChip.waitForExistence(timeout: 5) { billsChip.tap() }
-        dismissKeyboard(app)
-        app.buttons["start.submit"].tap()
-        let startButton = app.buttons["nextstep.start"]
-        XCTAssertTrue(startButton.waitForExistence(timeout: 25), "A cloud next step should appear after capture")
-    }
 }

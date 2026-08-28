@@ -36,14 +36,12 @@ final class MicroTemplateAndVaultTests: XCTestCase {
         let env = AppEnvironment(inMemory: true)
         env.handleJoinURL(URL(string: "startkind://capture?text=Pay%20the%20bill")!)
         XCTAssertEqual(env.pendingCaptureText, "Pay the bill")
-        XCTAssertTrue(env.hasStarted)
     }
 
     func testRescueDeepLinkArmsAutopilotRestart() {
         let env = AppEnvironment(inMemory: true)
         env.handleJoinURL(URL(string: "startkind://rescue")!)
         XCTAssertTrue(env.pendingRescueRestart)
-        XCTAssertTrue(env.hasStarted)
     }
 
     func testAutopilotPrefersActiveRecoveryCapsule() throws {

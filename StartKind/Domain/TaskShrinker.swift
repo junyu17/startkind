@@ -27,7 +27,7 @@ struct TaskShrinker: Sendable {
             return proposal
         case .one:
             return proposal.mutating(
-                title: zh ? "缩小:找到它" : "Smaller: find it",
+                title: zh ? "缩小：找到它" : "Smaller: find it",
                 step: zh ? "打开\(parts.object)，找到\(parts.target)。看到就停。" : "Open \(parts.object) and find \(parts.target). Stop when you see it.",
                 stopCondition: zh ? "看到\(parts.target)就停。" : "Stop when you see \(parts.target).",
                 timerMinutes: timer,
@@ -35,7 +35,7 @@ struct TaskShrinker: Sendable {
             )
         case .two:
             return proposal.mutating(
-                title: zh ? "更小:只打开" : "Tiny: just open it",
+                title: zh ? "更小：只打开" : "Tiny: just open it",
                 step: zh ? "打开\(parts.object)。打开就停。" : "Open \(parts.object). Stop once it's open.",
                 stopCondition: zh ? "打开\(parts.object)就停。" : "Stop once \(parts.object) is open.",
                 timerMinutes: timer,
@@ -43,7 +43,7 @@ struct TaskShrinker: Sendable {
             )
         case .three:
             return proposal.mutating(
-                title: zh ? "最小:准备一下" : "Friction-only: set up",
+                title: zh ? "最小：准备一下" : "Friction-only: set up",
                 step: zh ? "把\(parts.tool)放到手边。放好就停。" : "Put \(parts.tool) within reach. Stop once it's there.",
                 stopCondition: zh ? "\(parts.tool)到手边就停。" : "Stop once \(parts.tool) is within reach.",
                 timerMinutes: timer,
@@ -89,6 +89,10 @@ private extension TaskShrinker {
     struct Parts { let object: String; let target: String; let tool: String }
 
     static func parts(for category: TaskCategory, zh: Bool) -> Parts {
+        let fallback: (Parts, Parts) = (
+            Parts(object: "the task", target: "the smallest part", tool: "a note"),
+            Parts(object: "这件事", target: "最小的一步", tool: "便签")
+        )
         let table: [TaskCategory: (Parts, Parts)] = [
             .bills: (Parts(object: "your email", target: "one bill", tool: "your phone"),
                      Parts(object: "邮件", target: "一封账单", tool: "手机")),
@@ -118,10 +122,9 @@ private extension TaskShrinker {
                         Parts(object: "一个台面", target: "清空的台面", tool: "抹布")),
             .errands: (Parts(object: "a note", target: "one errand", tool: "a pen"),
                        Parts(object: "便签", target: "一件跑腿", tool: "笔")),
-            .other: (Parts(object: "the task", target: "the smallest part", tool: "a note"),
-                     Parts(object: "这件事", target: "最小的一步", tool: "便签"))
+            .other: fallback
         ]
-        let entry = table[category] ?? table[.other]!
+        let entry = table[category] ?? fallback
         return zh ? entry.1 : entry.0
     }
 }

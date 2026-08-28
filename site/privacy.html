@@ -1,52 +1,127 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StartKind Privacy Policy</title>
-  <meta name="description" content="Privacy Policy for StartKind.">
-  <link rel="stylesheet" href="./styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy Policy — StartKind</title>
+<meta name="description" content="StartKind privacy policy. Your task history stays in your own iCloud account. No accounts, no tracking, no advertising.">
+<meta name="theme-color" content="#1c7349">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main class="policy">
-    <a class="back" href="./index.html">StartKind</a>
-    <h1>Privacy Policy</h1>
-    <p class="updated">Effective date: August 8, 2026</p>
 
-    <section>
-      <h2>Overview</h2>
-      <p>StartKind helps users turn overwhelming tasks into small next steps. We design the app to collect only what is needed to provide the service and to keep local use available without an account.</p>
-    </section>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./">
+      <span class="mark" aria-hidden="true">↗</span>
+      StartKind
+    </a>
+    <nav>
+      <a href="./"><span data-en>Home</span><span data-zh>首页</span></a>
+      <a href="./#support"><span data-en>Support</span><span data-zh>支持</span></a>
+      <a href="./#terms"><span data-en>Terms</span><span data-zh>条款</span></a>
+    </nav>
+    <button class="lang" id="lang" type="button">中文</button>
+  </div>
+</header>
 
-    <section>
-      <h2>Information We Process</h2>
-      <p>The app may process task text, voice transcription text, timer activity, task categories, recovery notes, language preference, account email, subscription status, and optional co-start room participation details.</p>
-    </section>
+<main class="wrap">
+  <article class="prose">
+    <h1><span data-en>Privacy Policy</span><span data-zh>隐私政策</span></h1>
+    <p class="updated"><span data-en>Last updated 27 August 2026.</span><span data-zh>最后更新：2026 年 8 月 27 日。</span></p>
 
-    <section>
-      <h2>Local And Cloud Use</h2>
-      <p>StartKind can be used locally without signing in. If you sign in, selected app data may sync through Supabase so your account can use cloud-powered steps, cross-device sync, and co-start features.</p>
-    </section>
+    <p class="note" style="margin:22px 0">
+      <span data-en><strong>The short version.</strong> StartKind has no accounts. What you write is stored on your device and synced through <em>your own</em> iCloud account, which we cannot read. Our server only relays AI requests, hosts short-lived co-start rooms, and checks your subscription. There is no tracking and no advertising.</span>
+      <span data-zh><strong>一句话版本。</strong>StartKind 没有账号体系。你写下的内容保存在你的设备上，并通过<em>你自己的</em> iCloud 账户同步，我们读不到。我们的服务器只做三件事：转发 AI 请求、承载临时的陪伴房间、校验订阅状态。没有任何追踪，也没有广告。</span>
+    </p>
 
-    <section>
-      <h2>Speech</h2>
-      <p>Voice capture uses Apple speech and microphone permissions to convert spoken input into text. StartKind uses the resulting text to create a next step.</p>
-    </section>
+    <h2><span data-en>What stays on your device and in your iCloud</span><span data-zh>留在你设备和 iCloud 里的内容</span></h2>
+    <p><span data-en>Everything personal:</span><span data-zh>所有个人内容：</span></p>
+    <ul>
+      <li><span data-en>The task text you type or speak, and the steps generated from it</span><span data-zh>你输入或说出的任务文本，以及由此生成的步骤</span></li>
+      <li><span data-en>Timer history, outcomes and calibration data</span><span data-zh>计时历史、结果与校准数据</span></li>
+      <li><span data-en>Recovery capsules and your return notes</span><span data-zh>恢复胶囊与你的返回备注</span></li>
+      <li><span data-en>Saved starts, admin inbox items and friction signals</span><span data-zh>已保存的开始、事务收件箱条目与卡点信号</span></li>
+    </ul>
+    <p><span data-en>These sync between your own devices using Apple's CloudKit, inside your personal iCloud account. That data is governed by Apple's privacy terms, and we have no access to it — not to read it, not to export it, not to delete it. Only you can.</span><span data-zh>这些内容通过 Apple 的 CloudKit 在你自己的设备之间同步，存放在你的个人 iCloud 账户中。该数据受 Apple 隐私条款约束，我们无权访问——不能读取、不能导出、也不能删除。只有你可以。</span></p>
 
-    <section>
-      <h2>AI Features</h2>
-      <p>When cloud-powered steps are enabled, task text may be sent to a server-side AI provider through StartKind's backend. We do not sell this data.</p>
-    </section>
+    <h2><span data-en>What reaches our server</span><span data-zh>会到达我们服务器的内容</span></h2>
+    <ul>
+      <li><span data-en><strong>AI requests.</strong> When you ask for a generated step, the text you entered is sent to our server, which forwards it to our AI provider (DeepSeek) and returns the result. We do not store the text of these requests; we store only a per-day counter so the free allowance can be enforced.</span><span data-zh><strong>AI 请求。</strong>当你请求生成步骤时，你输入的文本会发送到我们的服务器，由它转发给 AI 服务商（DeepSeek）并返回结果。我们<strong>不保存</strong>这些请求的文本，只保存一个按天计数，用于执行免费额度。</span></li>
+      <li><span data-en><strong>Co-start rooms.</strong> If you start or join a room, the six-digit code, the display name you choose and the one-line step you state are stored so the other person can see them. Rooms are closed after two hours and deleted after seven days.</span><span data-zh><strong>陪伴房间。</strong>当你创建或加入房间时，六位数字码、你填写的昵称、以及你写的一句话步骤会被保存，以便对方看到。房间在两小时后关闭，七天后删除。</span></li>
+      <li><span data-en><strong>An anonymous device token.</strong> Used to apply your free allowance and your subscription status. It is a random value tied to no name, email or Apple ID, and only its hash is stored.</span><span data-zh><strong>一个匿名设备令牌。</strong>用于识别你的免费额度和订阅状态。它是一个随机值，不关联任何姓名、邮箱或 Apple ID，而且我们只保存它的哈希值。</span></li>
+      <li><span data-en><strong>Subscription status.</strong> Apple signs a proof of your purchase; our server verifies that signature and records only the resulting tier (free, trial, active, expired).</span><span data-zh><strong>订阅状态。</strong>Apple 会对你的购买签名，我们的服务器校验该签名，只记录最终的等级（免费、试用、有效、已过期）。</span></li>
+    </ul>
 
-    <section>
-      <h2>Subscriptions</h2>
-      <p>Purchases are handled by Apple App Store systems. StartKind may send receipt data to its backend to verify Plus entitlement and mirror subscription state for cloud features.</p>
-    </section>
+    <h2><span data-en>What we never do</span><span data-zh>我们绝不做的事</span></h2>
+    <ul>
+      <li><span data-en>No advertising, and no selling or sharing of your data</span><span data-zh>没有广告，不出售也不共享你的数据</span></li>
+      <li><span data-en>No analytics SDKs, no behavioural tracking, no device fingerprinting</span><span data-zh>不接入分析 SDK，不做行为追踪，不做设备指纹</span></li>
+      <li><span data-en>No account, no email address and no password are ever required</span><span data-zh>全程不需要账号、邮箱或密码</span></li>
+      <li><span data-en>No reading of your calendar, contacts or photo library in the background</span><span data-zh>不会在后台读取你的日历、通讯录或照片库</span></li>
+    </ul>
 
-    <section>
-      <h2>Contact</h2>
-      <p>For privacy questions, contact Jun Yu at <a href="mailto:billy.yu@me.com">billy.yu@me.com</a>.</p>
-    </section>
-  </main>
+    <h2><span data-en>Permissions the app asks for</span><span data-zh>App 会请求的权限</span></h2>
+    <ul>
+      <li><span data-en><strong>Microphone and speech recognition</strong> — only while you hold voice capture open, to turn what you say into text. Recognition runs on device where your iPhone supports it.</span><span data-zh><strong>麦克风与语音识别</strong> — 仅在你打开语音捕捉时使用，把你说的话转成文字。在支持的 iPhone 上，识别在设备本地完成。</span></li>
+      <li><span data-en><strong>Camera and photo library</strong> — only when you choose to scan a bill or letter. The image is read on device; only the extracted text is ever sent, and only if you then ask for a parse.</span><span data-zh><strong>相机与照片库</strong> — 仅当你主动选择扫描账单或信件时使用。图片在设备本地识别，只有提取出的文字才可能被发送，而且需要你再次确认解析。</span></li>
+      <li><span data-en><strong>Notifications</strong> — only for the optional no-shame restart reminder.</span><span data-zh><strong>通知</strong> — 仅用于可选的、不带责备的重启提醒。</span></li>
+    </ul>
+    <p><span data-en>Every one of these is optional. Declining any of them leaves the rest of StartKind fully usable.</span><span data-zh>以上权限全部可选。拒绝其中任何一项，StartKind 的其余功能依然完全可用。</span></p>
+
+    <h2><span data-en>Sensitive content</span><span data-zh>敏感内容</span></h2>
+    <p><span data-en>Admin tasks can contain financial, medical or family information. That is exactly why the text is not stored on our server and the history never leaves your iCloud. Please still avoid pasting card numbers, passwords or government ID numbers — StartKind does not need them.</span><span data-zh>事务任务可能包含财务、医疗或家庭信息。这正是我们不在服务器保存这些文本、历史记录也不离开你 iCloud 的原因。但仍请不要粘贴银行卡号、密码或身份证件号码——StartKind 不需要它们。</span></p>
+
+    <h2><span data-en>Children</span><span data-zh>关于儿童</span></h2>
+    <p><span data-en>StartKind is designed for adults and is not directed at children under 13. We do not knowingly collect information from them.</span><span data-zh>StartKind 面向成年人设计，不针对 13 岁以下儿童。我们不会有意收集他们的信息。</span></p>
+
+    <h2><span data-en>Your control</span><span data-zh>你的控制权</span></h2>
+    <ul>
+      <li><span data-en><strong>Export</strong> — Settings › Export data gives you your history as JSON you can copy or share.</span><span data-zh><strong>导出</strong> — 「设置 › 导出数据」会把你的历史以 JSON 形式给你，可复制或分享。</span></li>
+      <li><span data-en><strong>Delete</strong> — Settings › Delete data clears the device immediately. To remove the synced copy, delete the StartKind data in your iCloud settings; it is your account, so it is your call.</span><span data-zh><strong>删除</strong> — 「设置 › 删除数据」会立刻清空本机。若要移除同步副本，请在你的 iCloud 设置中删除 StartKind 数据；那是你的账户，由你决定。</span></li>
+      <li><span data-en><strong>Stop the server side</strong> — deleting the app removes the anonymous device token. Its row is reaped automatically afterwards.</span><span data-zh><strong>停止服务端记录</strong> — 删除 App 即会移除匿名设备令牌，其记录随后会被自动清理。</span></li>
+    </ul>
+
+    <h2><span data-en>Medical disclaimer</span><span data-zh>医疗免责声明</span></h2>
+    <p><span data-en>StartKind helps you organise and begin tasks. It does not diagnose or treat ADHD and offers no medication advice. For diagnosis, medication or treatment decisions, please consult a qualified clinician.</span><span data-zh>StartKind 帮助你整理和开始任务。它不能诊断或治疗注意缺陷多动障碍（ADHD），也不提供任何用药建议。如需诊断、用药或治疗决定，请咨询合格的临床医生。</span></p>
+
+    <h2><span data-en>Changes and contact</span><span data-zh>变更与联系</span></h2>
+    <p><span data-en>If this policy changes materially, the date at the top changes and the new version is published here before it takes effect. Questions, requests or concerns: </span><span data-zh>如本政策有实质性变更，顶部日期会随之更新，新版本会在生效前发布于此。有任何问题、请求或疑虑请联系：</span><a href="mailto:billy.yu@me.com" style="color:var(--accent)">billy.yu@me.com</a></p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 StartKind</span>
+    <a href="./"><span data-en>Home</span><span data-zh>首页</span></a>
+    <a href="./#terms"><span data-en>Terms</span><span data-zh>条款</span></a>
+    <a href="./#support"><span data-en>Support</span><span data-zh>支持</span></a>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var KEY = "startkind-lang";
+    var button = document.getElementById("lang");
+
+    function apply(lang) {
+      document.documentElement.lang = lang;
+      button.textContent = lang === "zh-Hans" ? "EN“ : ”中文";
+      button.setAttribute("aria-label", lang === "zh-Hans" ? "Switch to English“ : ”切换到中文");
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) { /* private mode */ }
+    var initial = saved || ((navigator.language || "en").toLowerCase().indexOf("zh") === 0 ? "zh-Hans" : "en");
+    apply(initial);
+
+    button.addEventListener("click", function () {
+      var next = document.documentElement.lang === "zh-Hans" ? "en" : "zh-Hans";
+      apply(next);
+      try { localStorage.setItem(KEY, next); } catch (e) { /* ignore */ }
+    });
+  })();
+</script>
+
 </body>
 </html>

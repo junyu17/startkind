@@ -3,6 +3,7 @@ import SwiftUI
 struct StartView: View {
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
+    @Environment(\.openURL) private var openURL
 
     @State private var inputText = ""
     @State private var joinRoomCode = ""
@@ -17,16 +18,18 @@ struct StartView: View {
     @State private var rescheduleMessage: String?
     @State private var proofMessage: String?
     @State private var showPlan = false
-    @State private var showAdminReader = false
+    @State private var adminReaderInitialMode: AdminQuickReaderView.InitialMode?
     @State private var showTemplates = false
     @State private var showVault = false
     @State private var vaultMessage: String?
     @State private var adminInboxText = ""
     @State private var calendarEventTitle = ""
     @State private var calendarDaysFromNow = 1
+    @State private var dailyOneThing: DailyOneThing?
 
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
+    @State private var moreWaysExpanded = false
 
     @State private var timerSession: TimerSessionModel?
     @State private var showCoStart = false
@@ -46,14 +49,8 @@ struct StartView: View {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
                     headerBand
-                    todayKindStartPanel
-                    composerPanel
-                    categoryChips
-                    dayPartAndEmergencyPanel
-                    energyMatchChips
-                    frictionPresetChips
-                    memoryAndScriptsPanel
-                    calendarSoftLandingPanel
+                    primaryStartPanel
+                    moreWaysPanel
                     usageLine
 
                     if isLoading {
@@ -65,6 +62,14 @@ struct StartView: View {
                             onStart: { startTimer(for: step) },
                             onShrink: { shrink(step) },
                             onSkip: { skip(step) },
+                            actionPrep: env.actionPrep(for: step),
+                            onPrepare: { plan in
+                                if let url = plan.url { openURL(url) }
+                            },
+                            onUseStartLadder: { minutes in
+                                currentStep = env.createStartLadderStep(from: step, minutes: minutes)
+                                showPlan = false
+                            },
                             onCoStart: {
                                 currentStep = step
                                 coStartInitialMode = nil
@@ -125,8 +130,8 @@ struct StartView: View {
             PaywallView(trigger: paywallReason)
                 .environmentObject(env)
         }
-        .sheet(isPresented: $showAdminReader) {
-            AdminQuickReaderView()
+        .sheet(item: $adminReaderInitialMode) { mode in
+            AdminQuickReaderView(initialMode: mode)
                 .environmentObject(env)
         }
         .sheet(isPresented: $showTemplates) {
@@ -141,7 +146,15 @@ struct StartView: View {
         }
         .sheet(isPresented: $showCoStart) {
             if let step = currentStep {
-                CoStartView(step: step, initialMode: coStartInitialMode)
+                CoStartView(
+                    step: step,
+                    initialMode: coStartInitialMode,
+                    onFriendLimitReached: {
+                        paywallReason = .friendCoStartLimit
+                        showCoStart = false
+                        showPaywall = true
+                    }
+                )
                     .environmentObject(env)
             }
         }
@@ -173,15 +186,13 @@ struct StartView: View {
             runAutopilot()
             env.pendingRescueRestart = false
         }
-        .onChange(of: env.pendingStuckRestart) { _, value in
-            guard value else { return }
-            handleStuck()
-            env.pendingStuckRestart = false
-        }
         .onChange(of: env.pendingQuickAction) { _, value in
             guard let value else { return }
             handleQuickAction(value)
             env.pendingQuickAction = nil
+        }
+        .onAppear {
+            refreshDailyOneThing()
         }
     }
 
@@ -214,21 +225,18 @@ struct StartView: View {
         )
     }
 
-    private var todayKindStartPanel: some View {
-        VStack(alignment: .leading, spacing: Theme.spacing12) {
-            HStack {
-                SectionLabel("start.kindStart.title")
-                    .accessibilityIdentifier("start.kindStart")
-                Spacer()
-                if !env.isPlus {
-                    Text(verbatim: L("start.kindStart.adminLeft", env.usageState.adminQuickStartsRemaining))
-                        .font(.caption2)
-                        .foregroundStyle(Theme.accent)
-                }
+    private var primaryStartPanel: some View {
+        VStack(spacing: Theme.spacing12) {
+            voiceButton
+            captureField
+            stuckButton
+
+            if dailyOneThing != nil {
+                dailyOneThingPanel
             }
 
-            kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
-                runAutopilot()
+            if let capsule = env.activeCapsule() {
+                resumePanel(capsule)
             }
 
             if env.yesterdayRescueProposal() != nil {
@@ -237,60 +245,99 @@ struct StartView: View {
                 }
             }
 
-            HStack(spacing: Theme.spacing8) {
-                kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
-                    showAdminReader = true
-                }
-                kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
-                    showAdminReader = true
-                }
-            }
-            HStack(spacing: Theme.spacing8) {
-                kindStartButton("template.open", systemImage: "square.grid.2x2.fill", id: "start.templates") {
-                    showTemplates = true
-                }
-                kindStartButton("vault.open", systemImage: "tray.full.fill", id: "start.vault") {
-                    showVault = true
-                }
-            }
-
-            if let capsule = env.activeCapsule() {
-                Button {
-                    resume(capsule)
-                } label: {
-                    HStack(spacing: Theme.spacing10) {
-                        Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .foregroundStyle(Theme.accent)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(verbatim: L("start.kindStart.resume"))
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Theme.ink)
-                            Text(verbatim: capsule.resumeTitle)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            if let note = capsule.returnNote {
-                                Text(verbatim: L("returnNote.resume", note))
-                                    .font(.caption2)
-                                    .foregroundStyle(Theme.accent)
-                                    .lineLimit(1)
-                            }
-                        }
-                        Spacer()
-                        Image(systemName: "play.fill")
-                            .font(.caption)
-                            .foregroundStyle(Theme.accent)
-                    }
-                    .padding(Theme.spacing12)
-                    .background(Theme.softAccent.opacity(0.72))
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("start.kind.resume")
+            kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
+                runAutopilot()
             }
         }
-        .startKindCard()
+    }
+
+    private func resumePanel(_ capsule: RecoveryCapsuleModel) -> some View {
+        let context = env.resumeCardContext()
+        return Button {
+            resume(capsule)
+        } label: {
+            HStack(spacing: Theme.spacing10) {
+                Image(systemName: "arrow.uturn.backward.circle.fill")
+                    .foregroundStyle(Theme.accent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: L("start.kindStart.resume"))
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Theme.ink)
+                    Text(verbatim: context?.title ?? capsule.resumeTitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(verbatim: context?.action ?? capsule.resumeStepText)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.ink)
+                        .lineLimit(2)
+                    if let note = context?.returnNote {
+                        Text(verbatim: L("returnNote.resume", note))
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                Image(systemName: "play.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+            }
+            .padding(Theme.spacing12)
+            .background(Theme.softAccent.opacity(0.72))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("start.kind.resume")
+    }
+
+    @ViewBuilder
+    private var dailyOneThingPanel: some View {
+        if let dailyOneThing {
+            VStack(alignment: .leading, spacing: Theme.spacing10) {
+                HStack {
+                    SectionLabel("dailyOne.title")
+                    Spacer()
+                    Text(verbatim: L("dailyOne.source.\(dailyOneThing.source.rawValue)"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Text(verbatim: dailyOneThing.proposal.title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Theme.ink)
+                Text(verbatim: dailyOneThing.proposal.step)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                PrimaryButton("dailyOne.start", systemImage: "play.fill", accessibilityId: "dailyOne.start") {
+                    currentStep = env.createDailyOneThingStep()
+                    rescheduleMessage = L("dailyOne.loaded")
+                }
+                HStack(spacing: Theme.spacing12) {
+                    Button(L("dailyOne.replace")) {
+                        env.replaceDailyOneThing()
+                        refreshDailyOneThing()
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(Theme.accent)
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("dailyOne.replace")
+
+                    Button(L("dailyOne.dismiss")) {
+                        env.dismissDailyOneThing()
+                        self.dailyOneThing = nil
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("dailyOne.dismiss")
+                }
+            }
+            .startKindCard()
+            .accessibilityIdentifier("dailyOne.card")
+        }
     }
 
     private func kindStartButton(_ key: String, systemImage: String, id: String, action: @escaping () -> Void) -> some View {
@@ -317,22 +364,62 @@ struct StartView: View {
                     .stroke(Theme.line, lineWidth: 1)
             )
             .accessibilityElement(children: .combine)
-            .accessibilityIdentifier(id)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(verbatim: L(key)))
         .accessibilityIdentifier(id)
     }
 
-    private var composerPanel: some View {
-        VStack(spacing: Theme.spacing12) {
-            voiceButton
-            captureField
-            tinyAdminInboxField
-            quickFriendCoStartButton
-            roomCodeJoinField
+    private var moreWaysPanel: some View {
+        DisclosureGroup(isExpanded: $moreWaysExpanded) {
+            VStack(spacing: Theme.spacing12) {
+                VStack(alignment: .leading, spacing: Theme.spacing8) {
+                    SectionLabel("start.kindStart.title")
+                        .accessibilityIdentifier("start.kindStart")
+                    HStack(spacing: Theme.spacing8) {
+                        kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
+                            adminReaderInitialMode = .text
+                        }
+                        kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
+                            adminReaderInitialMode = .photo
+                        }
+                    }
+                    HStack(spacing: Theme.spacing8) {
+                        kindStartButton("template.open", systemImage: "square.grid.2x2.fill", id: "start.templates") {
+                            showTemplates = true
+                        }
+                        kindStartButton("vault.open", systemImage: "tray.full.fill", id: "start.vault") {
+                            showVault = true
+                        }
+                    }
+                }
+                if !env.isPlus {
+                    Text(verbatim: L("start.kindStart.adminLeft", env.usageState.adminQuickStartsRemaining))
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                quickFriendCoStartButton
+                roomCodeJoinField
+                tinyAdminInboxField
+                categoryChips
+                energyMatchChips
+                frictionPresetChips
+                frictionForecastPanel
+                dayPartAndEmergencyPanel
+                calendarSoftLandingPanel
+                memoryAndScriptsPanel
+            }
+            .padding(.top, Theme.spacing8)
+        } label: {
+            Label(L("start.moreWays"), systemImage: moreWaysExpanded ? "chevron.up" : "chevron.right")
+                .font(.headline)
+                .foregroundStyle(Theme.ink)
+                .accessibilityIdentifier("start.moreWays")
         }
-        .startKindCard()
+        .padding(.vertical, Theme.spacing12)
+        .overlay(alignment: .top) { Divider().background(Theme.line) }
+        .overlay(alignment: .bottom) { Divider().background(Theme.line) }
     }
 
     private var voiceButton: some View {
@@ -391,6 +478,26 @@ struct StartView: View {
             .accessibilityLabel(Text(verbatim: L("start.text.submit")))
             .accessibilityIdentifier("start.submit")
         }
+    }
+
+    private var stuckButton: some View {
+        Button {
+            handleStuck()
+        } label: {
+            Label(L("stuck.button"), systemImage: "lifepreserver.fill")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(Theme.accent)
+                .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                .background(Theme.softAccent)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                        .stroke(Theme.accent.opacity(0.22), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("global.stuck")
     }
 
     private var quickFriendCoStartButton: some View {
@@ -507,6 +614,58 @@ struct StartView: View {
 
     private var quickCategories: [TaskCategory] {
         [.bills, .email, .appointments, .household, .workAdmin]
+    }
+
+    private var frictionForecastPanel: some View {
+        Group {
+            if let forecast = currentFrictionForecast {
+                Button {
+                    applyFrictionForecast()
+                } label: {
+                    HStack(alignment: .top, spacing: Theme.spacing12) {
+                        Image(systemName: "sparkle.magnifyingglass")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 36, height: 36)
+                            .background(Theme.softAccent)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                        VStack(alignment: .leading, spacing: Theme.spacing4) {
+                            Text(verbatim: L("frictionForecast.title"))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Theme.accent)
+                            Text(verbatim: forecast.proposal.title)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Theme.ink)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(verbatim: forecast.reason)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: Theme.spacing8)
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .padding(Theme.spacing12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.softAccent.opacity(0.72))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                            .stroke(Theme.accent.opacity(0.22), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("frictionForecast.apply")
+            }
+        }
+    }
+
+    private var currentFrictionForecast: FrictionForecast? {
+        env.frictionForecast(text: inputText.trimmingCharacters(in: .whitespacesAndNewlines), category: selectedCategory)
     }
 
     private var energyMatchChips: some View {
@@ -776,6 +935,10 @@ struct StartView: View {
 
     // MARK: - Actions
 
+    private func refreshDailyOneThing() {
+        dailyOneThing = env.dailyOneThingSelection()
+    }
+
     private func toggleVoice() {
         if env.speech.isListening {
             env.speech.stop()
@@ -793,6 +956,11 @@ struct StartView: View {
     private func startFriendCoStart() async {
         focusedField = nil
         if let step = currentStep {
+            guard env.canCreateFriendCoStart else {
+                paywallReason = .friendCoStartLimit
+                showPaywall = true
+                return
+            }
             coStartInitialMode = .friendLink
             currentStep = step
             showCoStart = true
@@ -809,6 +977,17 @@ struct StartView: View {
         errorMessage = nil
         do {
             let step = try await env.generateNextStep(input: captureInput(raw: raw), energy: selectedEnergy)
+            guard env.canCreateFriendCoStart else {
+                paywallReason = .friendCoStartLimit
+                showPaywall = true
+                currentStep = step
+                rescheduleMessage = nil
+                vaultMessage = nil
+                showPlan = false
+                showCoStart = false
+                isLoading = false
+                return
+            }
             currentStep = step
             rescheduleMessage = nil
             vaultMessage = nil
@@ -998,6 +1177,20 @@ struct StartView: View {
         showPlan = false
     }
 
+    private func applyFrictionForecast() {
+        focusedField = nil
+        guard let step = env.createFrictionForecastStep(
+            text: inputText.trimmingCharacters(in: .whitespacesAndNewlines),
+            category: selectedCategory
+        ) else { return }
+        currentStep = step
+        selectedCategory = step.category
+        rescheduleMessage = L("frictionForecast.loaded")
+        vaultMessage = nil
+        proofMessage = nil
+        showPlan = false
+    }
+
     private func applyStartScript(_ script: StartScript) {
         focusedField = nil
         let step = env.createStartScriptStep(script)
@@ -1029,6 +1222,8 @@ struct StartView: View {
 
     private func handleQuickAction(_ kind: QuickActionKind) {
         switch kind {
+        case .emergencyTiny:
+            applyEmergencyTiny()
         case .stuck:
             handleStuck()
         case .startFive:
@@ -1109,10 +1304,10 @@ struct StartView: View {
     }
 
     private func shrink(_ step: NextStepModel) {
-        let proposal = env.shrinkCurrentStep(step)
-        if proposal.shrinkLevel == step.shrinkLevel {
-            rescheduleMessage = nil
-        }
+        // shrinkCurrentStep persists the new level onto step, so the previous
+        // level comparison here was always true.
+        env.shrinkCurrentStep(step)
+        rescheduleMessage = nil
     }
 
     private func skip(_ step: NextStepModel) {
@@ -1198,42 +1393,57 @@ struct FlexibleHStack<Content: View>: View {
 }
 
 /// Flow layout for chips. Uses iOS 16+ Layout protocol.
+///
+/// Sizing and placement share one row calculation so the reported height always
+/// matches what is drawn, and each row is as tall as its tallest chip.
 struct FlowLayout: Layout {
     let spacing: CGFloat
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let maxWidth = proposal.width ?? .infinity
-        var rows: [[LayoutSubviews.Element]] = [[]]
-        var rowWidth: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if rowWidth + size.width + spacing > maxWidth && !rows[rows.count - 1].isEmpty {
-                rows.append([subview])
-                rowWidth = size.width
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func rows(for subviews: Subviews, maxWidth: CGFloat) -> [Row] {
+        var rows: [Row] = []
+        var current = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let width = current.indices.isEmpty ? size.width : current.width + spacing + size.width
+            if !current.indices.isEmpty && width > maxWidth {
+                rows.append(current)
+                current = Row(indices: [index], width: size.width, height: size.height)
             } else {
-                rows[rows.count - 1].append(subview)
-                rowWidth += size.width + spacing
+                current.indices.append(index)
+                current.width = width
+                current.height = max(current.height, size.height)
             }
         }
-        let height = rows.reduce(0) { $0 + ($1.first?.sizeThatFits(.unspecified).height ?? 0) + spacing } - spacing
-        return CGSize(width: maxWidth, height: max(0, height))
+        if !current.indices.isEmpty { rows.append(current) }
+        return rows
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard !subviews.isEmpty else { return .zero }
+        let laidOut = rows(for: subviews, maxWidth: proposal.width ?? .infinity)
+        let height = laidOut.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, laidOut.count - 1))
+        // Never report an infinite width: an unspecified proposal should resolve
+        // to the widest row, not to the proposal itself.
+        let width = proposal.width ?? laidOut.map(\.width).max() ?? 0
+        return CGSize(width: width, height: max(0, height))
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let maxWidth = bounds.width
-        var x: CGFloat = bounds.minX
-        var y: CGFloat = bounds.minY
-        var rowHeight: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > bounds.minX + maxWidth {
-                x = bounds.minX
-                y += rowHeight + spacing
-                rowHeight = 0
+        var y = bounds.minY
+        for row in rows(for: subviews, maxWidth: bounds.width) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+                x += size.width + spacing
             }
-            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
-            x += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+            y += row.height + spacing
         }
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Abstraction over AI generation. Free uses deterministic local templates;
-/// Plus routes through a cloud proxy (Supabase Edge Function) when configured
+/// Plus routes through the StartKind backend proxy when configured
 /// and authenticated, degrading gracefully to local when offline or unconfigured.
 protocol AIClient: Sendable {
     func generateNextStep(
@@ -34,66 +34,61 @@ struct LocalAIClient: AIClient {
     }
 }
 
-/// Cloud implementation. Calls Supabase Edge Functions when a configured,
-/// authenticated client is available; otherwise falls back to local so the app
-/// stays fully usable offline (per the architecture's graceful-degradation rule).
+/// Cloud implementation. Calls the StartKind backend when one is configured;
+/// otherwise falls back to the on-device engine so the app stays fully usable
+/// offline (per the architecture's graceful-degradation rule).
 final class CloudAIClient: AIClient {
     private let fallback = LocalAIClient()
-    private let supabase: SupabaseClient?
+    private let api: StartKindAPI?
 
-    init(supabase: SupabaseClient? = nil) {
-        self.supabase = supabase
+    init(api: StartKindAPI? = StartKindAPI()) {
+        self.api = api
     }
 
     func generateNextStep(
         input: CaptureInput,
         calibrationMultiplier: Double
     ) async throws -> NextStepProposal {
-        guard let supabase, supabase.isAuthenticated else {
+        guard let api else {
             return try await fallback.generateNextStep(input: input, calibrationMultiplier: calibrationMultiplier)
         }
         do {
-            let body: [String: Any] = [
-                "input": input.rawText,
-                "language": input.language,
-                "calibrationMultiplier": calibrationMultiplier
-            ]
-            let json = try await supabase.invokeFunction("one_next_step", body: body)
-            if let error = json["error"] as? String {
-                if error == "limit_reached" { throw UsageError.stepLimitReached }
-                // Other server errors: degrade to local.
-                return try await fallback.generateNextStep(input: input, calibrationMultiplier: calibrationMultiplier)
-            }
-            if let proposal = Self.parseNextStep(json) { return proposal }
+            let data = try await api.nextStep(
+                input: input.rawText,
+                language: input.language,
+                calibrationMultiplier: calibrationMultiplier
+            )
+            if let json = Self.json(from: data), let proposal = Self.parseNextStep(json) { return proposal }
             return try await fallback.generateNextStep(input: input, calibrationMultiplier: calibrationMultiplier)
-        } catch let usageError as UsageError {
-            throw usageError
+        } catch APIError.limitReached {
+            // The daily allowance is a product rule, not a failure: surface it
+            // so the paywall can explain it.
+            throw UsageError.stepLimitReached
         } catch {
             return try await fallback.generateNextStep(input: input, calibrationMultiplier: calibrationMultiplier)
         }
     }
 
     func parseAdmin(text: String, language: String) async throws -> AdminParseResult {
-        guard let supabase, supabase.isAuthenticated else {
+        guard let api else {
             return try await fallback.parseAdmin(text: text, language: language)
         }
         do {
-            let body: [String: Any] = ["text": text, "language": language]
-            let json = try await supabase.invokeFunction("admin_task_reader", body: body)
-            if let error = json["error"] as? String {
-                if error == "plus_required" { throw UsageError.adminLimitReached }
-                return try await fallback.parseAdmin(text: text, language: language)
-            }
-            if let result = Self.parseAdminResult(json) { return result }
+            let data = try await api.adminParse(text: text, language: language)
+            if let json = Self.json(from: data), let result = Self.parseAdminResult(json) { return result }
             return try await fallback.parseAdmin(text: text, language: language)
-        } catch let usageError as UsageError {
-            throw usageError
         } catch {
+            // `plusRequired` means only the cloud parse is Plus-gated, not the
+            // feature. Free users still get their documented one-per-day Admin
+            // Quick Start from the local reader; the paywall is raised by
+            // `canUseAdminQuickStart` once that allowance is spent.
             return try await fallback.parseAdmin(text: text, language: language)
         }
     }
 
-    // MARK: - JSON parsing
+    private static func json(from data: Data) -> [String: Any]? {
+        (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+    }
 
     private static func parseNextStep(_ json: [String: Any]) -> NextStepProposal? {
         guard let title = json["title"] as? String,

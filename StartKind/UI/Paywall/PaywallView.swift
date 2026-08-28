@@ -1,7 +1,7 @@
 import SwiftUI
 import StoreKit
 
-enum PaywallTrigger { case stepLimit, adminLimit, feature }
+enum PaywallTrigger { case stepLimit, adminLimit, friendCoStartLimit, feature }
 
 struct PaywallView: View {
     let trigger: PaywallTrigger
@@ -19,15 +19,16 @@ struct PaywallView: View {
                         limitMessage
                     }
 
-                    planComparison
-                    featuresList
                     planPicker
-
+                    contextLine
                     PrimaryButton(
-                        ctaTitle,
+                        verbatim: ctaTitle,
                         enabled: selectedProduct != nil && !purchasing,
                         action: { purchase() }
                     )
+                    .accessibilityIdentifier("paywall.subscribe")
+                    Divider().background(Theme.line)
+                    planComparison
 
                     Button(L("paywall.restore")) {
                         Task { await env.entitlement.restore() }
@@ -45,15 +46,14 @@ struct PaywallView: View {
         }
         .task {
             await env.entitlement.load()
-            if env.entitlement.annualProduct != nil { selected = SubscriptionProductID.annual }
         }
     }
 
     private var limitMessage: some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
-            Text(verbatim: L("paywall.limit.title"))
+            Text(verbatim: limitTitle)
                 .font(.headline)
-            Text(verbatim: L("paywall.limit.body"))
+            Text(verbatim: limitBody)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text(verbatim: L("paywall.limit.keepFree"))
@@ -63,17 +63,22 @@ struct PaywallView: View {
         .startKindCard()
     }
 
-    private var featuresList: some View {
-        VStack(alignment: .leading, spacing: Theme.spacing8) {
-            featureRow("paywall.feature.unlimited")
-            featureRow("paywall.feature.admin")
-            featureRow("paywall.feature.calibration")
-            featureRow("paywall.feature.recovery")
-            featureRow("paywall.feature.costart")
-            featureRow("paywall.feature.sync")
-            featureRow("paywall.feature.model")
+    private var contextLine: some View {
+        HStack(spacing: Theme.spacing8) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(Theme.accent)
+            Text(verbatim: L("paywall.value.statement"))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
-        .startKindCard()
+        .padding(.horizontal, Theme.spacing12)
+        .padding(.vertical, Theme.spacing10)
+        .background(Theme.softAccent.opacity(0.7))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                .stroke(Theme.line, lineWidth: 1)
+        )
     }
 
     private var planComparison: some View {
@@ -97,12 +102,12 @@ struct PaywallView: View {
                     L("paywall.plus.unlimited"),
                     L("paywall.plus.admin"),
                     L("paywall.plus.calibration"),
-                    L("paywall.plus.sync")
+                    L("paywall.plus.sync"),
+                    L("paywall.plus.coStart")
                 ],
                 highlighted: true
             )
         }
-        .startKindCard()
     }
 
     private func comparisonCard(title: String, price: String, points: [String], highlighted: Bool) -> some View {
@@ -142,14 +147,6 @@ struct PaywallView: View {
         )
     }
 
-    private func featureRow(_ key: String) -> some View {
-        HStack(spacing: Theme.spacing8) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Theme.accent)
-            Text(verbatim: L(key)).font(.subheadline)
-        }
-    }
-
     private var planPicker: some View {
         VStack(spacing: Theme.spacing8) {
             planButton(id: SubscriptionProductID.annual)
@@ -160,23 +157,27 @@ struct PaywallView: View {
     private func planButton(id: String) -> some View {
         let product = env.entitlement.products.first { $0.id == id }
         let isSelected = selected == id
+        let isAnnual = id == SubscriptionProductID.annual
         return Button {
             selected = id
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: L(id == SubscriptionProductID.annual ? "paywall.annual" : "paywall.monthly"))
+                    Text(verbatim: L(isAnnual ? "paywall.annual" : "paywall.monthly"))
                         .fontWeight(.semibold)
                     if let product {
                         Text(verbatim: product.displayPrice)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text(verbatim: id == SubscriptionProductID.annual ? L("paywall.annual.price") : L("paywall.monthly.price"))
+                        Text(verbatim: isAnnual ? L("paywall.annual.price") : L("paywall.monthly.price"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if id == SubscriptionProductID.annual {
+                    if isAnnual {
+                        Text(verbatim: L("paywall.annual.monthlyEquivalent"))
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent)
                         Text(verbatim: L("paywall.annual.save"))
                             .font(.caption2)
                             .foregroundStyle(Theme.accent)
@@ -196,6 +197,7 @@ struct PaywallView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier(isAnnual ? "paywall.annual" : "paywall.monthly")
     }
 
     private var selectedProduct: Product? {
@@ -217,6 +219,32 @@ struct PaywallView: View {
                 await env.syncEntitlementToBackend()
                 dismiss()
             }
+        }
+    }
+
+    private var limitTitle: String {
+        switch trigger {
+        case .friendCoStartLimit:
+            return L("paywall.limit.title.friend")
+        case .adminLimit:
+            return L("paywall.limit.title.admin")
+        case .stepLimit:
+            return L("paywall.limit.title")
+        case .feature:
+            return L("paywall.limit.title")
+        }
+    }
+
+    private var limitBody: String {
+        switch trigger {
+        case .friendCoStartLimit:
+            return L("paywall.limit.body.friend")
+        case .adminLimit:
+            return L("paywall.limit.body.admin")
+        case .stepLimit:
+            return L("paywall.limit.body")
+        case .feature:
+            return L("paywall.limit.body")
         }
     }
 }

@@ -38,6 +38,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>StartKind lets you scan bills, letters, or appointment notes so it can turn them into one small next step.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>StartKind uses the microphone to capture your spoken thoughts and turn them into one small next step.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -89,7 +91,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string></string>
+		<string>BackgroundColor</string>
 	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>

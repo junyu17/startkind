@@ -6,6 +6,9 @@ struct NextStepCard: View {
     let onStart: () -> Void
     let onShrink: () -> Void
     let onSkip: () -> Void
+    var actionPrep: ActionPrepPlan?
+    var onPrepare: (ActionPrepPlan) -> Void = { _ in }
+    var onUseStartLadder: (Int) -> Void = { _ in }
     var onCoStart: () -> Void = {}
     var onSaveToVault: () -> Void = {}
     @EnvironmentObject private var loc: LocalizationManager
@@ -27,6 +30,8 @@ struct NextStepCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             stopRow
+            actionPrepRow
+            startLadderRow
 
             if showPlan, let why = proposal.whyThisStep {
                 Text(verbatim: why)
@@ -154,5 +159,64 @@ struct NextStepCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.warmWash.opacity(0.65))
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+    }
+
+    @ViewBuilder
+    private var actionPrepRow: some View {
+        if let actionPrep {
+            VStack(alignment: .leading, spacing: Theme.spacing8) {
+                Label(actionPrep.label, systemImage: actionPrep.url == nil ? "rectangle.and.pencil.and.ellipsis" : "arrow.up.right.square")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Theme.ink)
+                Text(verbatim: actionPrep.instruction)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if actionPrep.url != nil {
+                    Button {
+                        onPrepare(actionPrep)
+                    } label: {
+                        Text(verbatim: actionPrep.label)
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Theme.accent)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("nextstep.prepare")
+                }
+            }
+            .padding(Theme.spacing12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.softAccent.opacity(0.55))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        }
+    }
+
+    private var startLadderRow: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            Text(verbatim: L("ladder.title"))
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+            HStack(spacing: Theme.spacing8) {
+                ForEach(StartLadderPlanner.minutes, id: \.self) { minutes in
+                    Button {
+                        onUseStartLadder(minutes)
+                    } label: {
+                        Text(verbatim: L("ladder.minutes", minutes))
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                            .foregroundStyle(Theme.accent)
+                            .background(Theme.softAccent)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("nextstep.ladder.\(minutes)")
+                }
+            }
+        }
     }
 }

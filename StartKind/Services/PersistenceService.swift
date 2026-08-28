@@ -9,32 +9,86 @@ final class PersistenceService: ObservableObject {
 
     var context: ModelContext { container.mainContext }
 
+    /// Private data that follows the person across their devices via their own
+    /// iCloud account. No server of ours ever sees it.
+    private static let syncedModels: [any PersistentModel.Type] = [
+        UserProfileModel.self,
+        CaptureModel.self,
+        TaskItemModel.self,
+        NextStepModel.self,
+        TimerSessionModel.self,
+        TimeCalibrationProfileModel.self,
+        RecoveryCapsuleModel.self,
+        AdminArtifactModel.self
+    ]
+
+    /// Co-start rooms are shared, short-lived server state, not personal
+    /// history. They stay on this device and are never pushed to CloudKit.
+    private static let localOnlyModels: [any PersistentModel.Type] = [
+        CoStartRoomModel.self,
+        CoStartParticipantModel.self
+    ]
+
+    private static var fullSchema: Schema { Schema(syncedModels + localOnlyModels) }
+
+    private static let cloudKitContainerID = "iCloud.ren.startkind"
+
     init(inMemory: Bool = false) throws {
-        let schema = Schema([
-            UserProfileModel.self,
-            CaptureModel.self,
-            TaskItemModel.self,
-            NextStepModel.self,
-            TimerSessionModel.self,
-            TimeCalibrationProfileModel.self,
-            RecoveryCapsuleModel.self,
-            AdminArtifactModel.self,
-            CoStartRoomModel.self,
-            CoStartParticipantModel.self
-        ])
-        let config: ModelConfiguration
+        let schema = Self.fullSchema
         if inMemory {
-            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            // Tests and UI-test runs must never touch a real iCloud account.
+            let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            container = try ModelContainer(for: schema, configurations: [config])
         } else {
             let dir = FileManager.default
                 .urls(for: .applicationSupportDirectory, in: .userDomainMask)
                 .first ?? URL.temporaryDirectory
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            let url = dir.appendingPathComponent("StartKind.store")
-            config = ModelConfiguration(schema: schema, url: url)
+            container = try Self.diskContainer(in: dir)
         }
-        container = try ModelContainer(for: schema, configurations: [config])
         profile = ensureProfile()
+    }
+
+    /// A store that cannot be opened - corrupted on disk, or written by an
+    /// incompatible schema - must not make the app unlaunchable forever. Move
+    /// the unreadable files aside once and start clean instead.
+    private static func diskContainer(in dir: URL) throws -> ModelContainer {
+        do {
+            return try makeContainer(in: dir)
+        } catch {
+            quarantineStore(at: dir.appendingPathComponent("StartKind.store"))
+            quarantineStore(at: dir.appendingPathComponent("StartKindCoStart.store"))
+            return try makeContainer(in: dir)
+        }
+    }
+
+    private static func makeContainer(in dir: URL) throws -> ModelContainer {
+        let synced = ModelConfiguration(
+            "StartKindSynced",
+            schema: Schema(syncedModels),
+            url: dir.appendingPathComponent("StartKind.store"),
+            cloudKitDatabase: .private(cloudKitContainerID)
+        )
+        let localOnly = ModelConfiguration(
+            "StartKindLocal",
+            schema: Schema(localOnlyModels),
+            url: dir.appendingPathComponent("StartKindCoStart.store"),
+            cloudKitDatabase: .none
+        )
+        return try ModelContainer(for: fullSchema, configurations: [synced, localOnly])
+    }
+
+    private static func quarantineStore(at url: URL) {
+        let manager = FileManager.default
+        let quarantined = url.deletingLastPathComponent().appendingPathComponent("StartKind-unreadable.store")
+        // SwiftData keeps -shm/-wal sidecars next to the store; move them together.
+        for suffix in ["", "-shm", "-wal"] {
+            let source = URL(fileURLWithPath: url.path + suffix)
+            guard manager.fileExists(atPath: source.path) else { continue }
+            let destination = URL(fileURLWithPath: quarantined.path + suffix)
+            try? manager.removeItem(at: destination)
+            try? manager.moveItem(at: source, to: destination)
+        }
     }
 
     // MARK: - Profile

@@ -12,37 +12,40 @@
 "start.voice.button" = "按住说话";
 "start.voice.listening" = "正在聆听…";
 "start.voice.tap" = "点按说话";
-"start.text.placeholder" = "脑子里一团乱?随便打几个字就好。";
+"start.text.placeholder" = "脑子里一团乱？随便打几个字就好。";
 "start.text.submit" = "给我一步";
 "start.category.section" = "再选一个分类";
-"start.category.selected" = "已加入分类:%@";
-"start.empty.hint" = "说出或写下让你发愁的事,你会得到一个小步骤。";
+"start.category.selected" = "已加入分类：%@";
+"start.empty.hint" = "说出或写下让你发愁的事，你会得到一个小步骤。";
 "start.kindStart.title" = "今天先这样开始";
 "start.kindStart.admin" = "粘贴账单、邮件或预约";
-"start.kindStart.photo" = "照片变成一步";
+"start.kindStart.photo" = "扫描照片或截图";
 "start.kindStart.resume" = "从上次继续";
 "start.kindStart.adminLeft" = "剩 %d 次事务";
+"start.moreWays" = "更多开始方式";
+"frictionForecast.title" = "可能卡点";
+"frictionForecast.loaded" = "StartKind 已把这个卡点缩小。";
 
 /* MARK: - 自动驾驶 */
 "autopilot.open" = "现在告诉我先做什么";
 "autopilot.loaded" = "自动驾驶已选出一个小启动。";
 "autopilot.source" = "自动驾驶";
-"autopilot.why.recovery" = "回到上次未完成的线头,通常比重新选择更容易。";
-"autopilot.why.note" = "你的返回备注写着:%@";
+"autopilot.why.recovery" = "回到上次未完成的线头，通常比重新选择更容易。";
+"autopilot.why.note" = "你的返回备注写着：%@";
 "autopilot.why.vault" = "保存过的启动可以省掉决定成本。";
-"autopilot.why.default" = "一个看得见的小动作,足够重新启动。";
+"autopilot.why.default" = "一个看得见的小动作，足够重新启动。";
 "autopilot.stop.saved" = "碰一下这个保存启动就停。";
 "autopilot.default.title" = "极小重启";
-"autopilot.default.step" = "把一样东西放到面前,说出下一步极小动作。";
+"autopilot.default.step" = "把一样东西放到面前，说出下一步极小动作。";
 "autopilot.default.stop" = "说出下一步极小动作后就停。";
 
 /* MARK: - 返回备注与救援 */
 "returnNote.title" = "返回备注";
-"returnNote.placeholder" = "下次从哪里继续?";
+"returnNote.placeholder" = "下次从哪里继续？";
 "returnNote.hint" = "可选。一句短线索就够。";
-"returnNote.resume" = "备注:%@";
-"rescue.notification.title" = "要不要最小重启?";
-"rescue.notification.body" = "StartKind 可以直接打开一个极小下一步,没有补任务清单。";
+"returnNote.resume" = "备注：%@";
+"rescue.notification.title" = "要不要最小重启？";
+"rescue.notification.body" = "StartKind 可以直接打开一个极小下一步，没有补任务清单。";
 
 /* MARK: - 微模板与保险箱 */
 "template.open" = "极小模板";
@@ -51,7 +54,7 @@
 "template.bill.title" = "账单启动";
 "template.bill.subtitle" = "只找金额、截止日或付款入口。";
 "template.email.title" = "回复启动";
-"template.email.subtitle" = "只写一句,不是整封回复。";
+"template.email.subtitle" = "只写一句，不是整封回复。";
 "template.appointment.title" = "预约启动";
 "template.appointment.subtitle" = "只找一个预约入口。";
 "template.document.title" = "文件启动";
@@ -59,15 +62,16 @@
 "template.home.title" = "家里重置";
 "template.home.subtitle" = "从一个位置拿走三样东西。";
 "template.badDay.title" = "糟糕日重置";
-"template.badDay.subtitle" = "5 分钟,先让身体进入状态。";
+"template.badDay.subtitle" = "5 分钟，先让身体进入状态。";
 "vault.open" = "个人保险箱";
 "vault.title" = "个人保险箱";
+"vault.defaultTitle" = "已保存的开始";
 "vault.saved" = "已保存到本地个人保险箱。";
 "vault.applied" = "已载入保存的步骤。从小处开始。";
 "vault.stop" = "碰一下这个保存步骤就停。";
 "vault.why" = "保存好的启动步骤可以省掉再次决定的力气。";
 "vault.empty.title" = "还没有保存的启动";
-"vault.empty.body" = "在下一步卡片里保存有用步骤,之后会出现在这里。";
+"vault.empty.body" = "在下一步卡片里保存有用步骤，之后会出现在这里。";
 
 /* 分类 */
 "category.bills" = "账单";
@@ -112,15 +116,15 @@
 "timer.interrupted" = "我被打断了";
 "timer.continueFive" = "再加 5 分钟";
 "timer.step" = "你的步骤";
-"timer.stopHint" = "停在这里:%@";
-"timer.finished.title" = "很好,你已经开始了。";
-"timer.finished.subtitle" = "感觉怎么样?";
+"timer.stopHint" = "停在这里：%@";
+"timer.finished.title" = "很好，你已经开始了。";
+"timer.finished.subtitle" = "感觉怎么样？";
 "timer.outcome.completed" = "完成了";
 "timer.outcome.partial" = "做了一部分";
 "timer.outcome.paused" = "先暂停";
 "timer.outcome.skipped" = "换一个";
-"timer.afterPartial" = "要不要来个更小的版本接着做?";
-"timer.afterDone" = "真棒。要不要再开始一个?";
+"timer.afterPartial" = "要不要来个更小的版本接着做？";
+"timer.afterDone" = "真棒。要不要再开始一个？";
 "timer.afterSkipped" = "没关系。稍后可以试更小的版本。";
 
 /* MARK: - 恢复 */
@@ -129,13 +133,13 @@
 "recover.lastStep" = "从上次的地方继续";
 "recover.resume" = "从这里继续";
 "recover.startTimer" = "开始计时";
-"recover.related" = "备注";
-"recover.blocker" = "卡点:%@";
+"recover.related" = "备注：%@";
+"recover.blocker" = "卡点：%@";
 "recover.clear" = "清掉这个胶囊";
 
 /* MARK: - 卡点 */
-"blocker.title.pause" = "刚才卡在哪里?";
-"blocker.title.skip" = "是什么挡住了?";
+"blocker.title.pause" = "刚才卡在哪里？";
+"blocker.title.skip" = "是什么挡住了？";
 "blocker.subtitle" = "这不是打分。只是帮 StartKind 下次把重新开始做得更小。";
 "blocker.skip" = "不确定";
 "blocker.need_login" = "需要登录";
@@ -147,12 +151,12 @@
 
 /* MARK: - 规律 */
 "patterns.title" = "规律";
-"patterns.empty" = "做过几个步骤后,温和的规律会出现在这里。";
-"patterns.noShame" = "这只是观察,不是打分。";
+"patterns.empty" = "做过几个步骤后，温和的规律会出现在这里。";
+"patterns.noShame" = "这只是观察，不是打分。";
 "patterns.sample.count" = "%d 个步骤";
 "patterns.model.title" = "个人执行模型";
 "patterns.model.samples" = "%d 个样本";
-"patterns.model.empty" = "开始几个计时器后,StartKind 会学习你的最佳启动时段、预估偏差、步长和陪伴启动效果。";
+"patterns.model.empty" = "开始几个计时器后，StartKind 会学习你的最佳启动时段、预估偏差、步长和陪伴启动效果。";
 "patterns.model.stepSize" = "建议步长";
 "patterns.model.stepSize.default" = "5-10 分钟";
 "patterns.model.stepSize.tiny" = "先做 2-5 分钟";
@@ -160,11 +164,11 @@
 "patterns.model.stepSize.steady" = "10 分钟可行";
 "patterns.model.bestWindow" = "最佳时段";
 "patterns.model.bestWindow.pending" = "学习中";
-"patterns.model.summary.longer" = "%@ 通常需要你预估的 %@ 左右,所以 StartKind 会先给更小一步。";
+"patterns.model.summary.longer" = "%@ 通常需要你预估的 %@ 左右，所以 StartKind 会先给更小一步。";
 "patterns.model.summary.tiny" = "%@ 先切得很小时更容易开始。";
 "patterns.model.summary.window" = "%@ 在 %@ 更容易启动。";
-"patterns.model.summary.steady" = "%@ 已逐渐稳定,适合普通 10 分钟启动。";
-"patterns.model.blocker" = "当前重启卡点:%@";
+"patterns.model.summary.steady" = "%@ 已逐渐稳定，适合普通 10 分钟启动。";
+"patterns.model.blocker" = "当前重启卡点：%@";
 "window.morning" = "上午";
 "window.afternoon" = "下午";
 "window.evening" = "晚上";
@@ -172,37 +176,37 @@
 "patterns.insight.window" = "你在中午前更容易开始 %@ 类事务。";
 "patterns.insight.costart" = "陪伴启动帮你完成了最近 %d 个事务步骤。";
 "patterns.medianActual" = "实际用时约 %@";
-"patterns.estimateMultiplier" = "预估校正:%@";
-"patterns.bestWindow" = "最佳启动时段:%@";
+"patterns.estimateMultiplier" = "预估校正：%@";
+"patterns.bestWindow" = "最佳启动时段：%@";
 "patterns.completion" = "这个分类你开始了 %d / %d 个步骤。";
-"patterns.recommendation.buffer" = "下次 StartKind 会按 %@ 左右留时间,并先给更小动作。";
+"patterns.recommendation.buffer" = "下次 StartKind 会按 %@ 左右留时间，并先给更小动作。";
 "patterns.recommendation.tiny" = "下次先从 2-5 分钟版本开始。";
 "patterns.recommendation.window" = "这个分类适合放在%@。";
-"patterns.recommendation.keep" = "继续用计时器,校准会更准。";
+"patterns.recommendation.keep" = "继续用计时器，校准会更准。";
 "patterns.unlock.title" = "个人执行模型";
 "patterns.unlock.body" = "StartKind Plus 会学习你的最佳启动时段、回避规律和陪伴启动的效果。";
 
 /* MARK: - 摩擦地图 */
 "friction.title" = "摩擦地图";
-"friction.empty" = "几次被打断或暂停后,卡点规律会出现在这里。";
-"friction.blocker.title" = "常见卡点:%@";
-"friction.blocker.body" = "这里显示的是摩擦点,不是性格问题。";
+"friction.empty" = "几次被打断或暂停后，卡点规律会出现在这里。";
+"friction.blocker.title" = "常见卡点：%@";
+"friction.blocker.body" = "这里显示的是摩擦点，不是性格问题。";
 "friction.category.title" = "%@ 需要更小入口";
-"friction.category.body" = "这个分类完成起来更难,StartKind 应该先给更小的入口。";
-"friction.category.step" = "先做一个 5 分钟入口步骤,再碰真正任务。";
-"friction.step.login" = "只找到登录页面,先不要输入信息。";
-"friction.step.document" = "只找一个可能放文件的位置,然后停止。";
+"friction.category.body" = "这个分类完成起来更难，StartKind 应该先给更小的入口。";
+"friction.category.step" = "先做一个 5 分钟入口步骤，再碰真正任务。";
+"friction.step.login" = "只找到登录页面，先不要输入信息。";
+"friction.step.document" = "只找一个可能放文件的位置，然后停止。";
 "friction.step.vague" = "把任务改写成一个看得见的动词和一个对象。";
-"friction.step.big" = "只碰第一层:打开、展开,或搜索一个词。";
-"friction.step.emotion" = "设 5 分钟计时,只看任务标题。";
-"friction.step.person" = "先写一句话,向对方要缺失的信息。";
+"friction.step.big" = "只碰第一层：打开、展开，或搜索一个词。";
+"friction.step.emotion" = "设 5 分钟计时，只看任务标题。";
+"friction.step.person" = "先写一句话，向对方要缺失的信息。";
 
 /* MARK: - 事务阅读器 */
 "admin.title" = "事务阅读器";
 "admin.kicker" = "账单、邮件、预约、表格";
-"admin.subtitle" = "粘贴文字或选择截图。StartKind 提取关键事实,只给一个能开始的小步骤。";
+"admin.subtitle" = "粘贴文字或选择截图。StartKind 提取关键事实，只给一个能开始的小步骤。";
 "admin.freeAllowance" = "今天剩余 %d / %d 次免费事务快速启动";
-"admin.input.placeholder" = "把凌乱信息粘贴到这里,或选择截图/照片。";
+"admin.input.placeholder" = "把凌乱信息粘贴到这里，或选择截图/照片。";
 "admin.paste" = "粘贴";
 "admin.photo" = "照片";
 "admin.parse" = "找出一步";
@@ -210,6 +214,11 @@
 "admin.parse.loading" = "正在找下一步...";
 "admin.ocr.empty" = "没有识别到可读文字。可以手动输入几个字。";
 "admin.ocr.error" = "无法读取这张图片。请换清晰截图或粘贴文字。";
+"admin.scan.title" = "扫描账单、信件或截图";
+"admin.scan.body" = "选择一个图片来源。这个页面随时可以关闭。";
+"admin.camera" = "使用相机";
+"admin.photoLibrary" = "选择照片";
+"admin.cameraUnavailable" = "这台设备没有可用相机。可以选择照片或粘贴文字。";
 "admin.result.title" = "关键信息";
 "admin.confidence" = "%d%% 可信度";
 "admin.fact.type" = "类型";
@@ -244,13 +253,13 @@
 "settings.privacy" = "隐私";
 "settings.dataExport" = "导出我的数据";
 "settings.deleteAccount" = "删除账号和数据";
-"settings.deleteConfirm.body" = "这将清除你的本地历史、恢复胶囊和校准数据,且无法撤销。";
+"settings.deleteConfirm.body" = "这将永久删除你的 StartKind 账号，以及云端所有同步的历史、恢复胶囊和校准数据，同时清空本机并退出登录，且无法撤销。";
 "settings.contact" = "联系";
 "settings.contactEmail" = "billy.yu@me.com";
 "settings.about" = "关于";
 "settings.version" = "版本 %@";
 "settings.medical" = "医疗提示";
-"settings.medical.body" = "StartKind 可以帮你整理和开始任务,但不能诊断或治疗注意缺陷多动障碍(ADHD)。如需诊断、用药或治疗决定,请咨询合格的临床医生。";
+"settings.medical.body" = "StartKind 可以帮你整理和开始任务，但不能诊断或治疗注意缺陷多动障碍(ADHD)。如需诊断、用药或治疗决定，请咨询合格的临床医生。";
 
 /* MARK: - 付费墙 */
 "paywall.title" = "StartKind Plus";
@@ -268,26 +277,26 @@
 "paywall.compare.title" = "免费版 / Plus";
 "paywall.free.title" = "免费版";
 "paywall.free.price" = "$0";
-"paywall.free.stepLimit" = "每天有足够的「下一步」次数,先建立使用习惯。";
-"paywall.free.adminLimit" = "每天少量事务快速启动额度。";
+"paywall.free.stepLimit" = "每天有足够的「下一步」次数，先建立使用习惯。";
+"paywall.free.adminLimit" = "每天 1 次事务快速启动。";
 "paywall.free.recovery" = "恢复胶囊和计时器可继续使用。";
-"paywall.free.costart" = "需要陪伴时可加入或试用安静陪做。";
+"paywall.free.costart" = "每 7 天可创建 1 个好友房间；加入房间和安静陪做始终免费。";
 "paywall.plus.title" = "Plus";
 "paywall.plus.price" = "$9.99 / 月或 $89.99 / 年";
 "paywall.plus.unlimited" = "无限生成「下一步」。";
 "paywall.plus.admin" = "无限解析账单、邮件、预约和事务。";
 "paywall.plus.calibration" = "个人时间校准和执行规律。";
 "paywall.plus.sync" = "多设备同步和完整个人执行模型。";
-"paywall.feature.unlimited" = "无限「下一步」";
-"paywall.feature.admin" = "账单邮件事务解析";
-"paywall.feature.calibration" = "个人时间校准";
-"paywall.feature.recovery" = "无限恢复胶囊";
-"paywall.feature.costart" = "好友陪伴启动";
-"paywall.feature.sync" = "多设备同步";
-"paywall.feature.model" = "个人执行模型";
 "paywall.limit.title" = "今天的免费步骤已用完";
+"paywall.limit.title.admin" = "今天事务快速启动已用完";
+"paywall.limit.title.friend" = "好友陪伴启动属于每周一次免费额度";
 "paywall.limit.body" = "计时器和恢复胶囊仍可使用。升级 Plus 可解锁无限步骤。";
+"paywall.limit.body.admin" = "你仍可用计时器与恢复胶囊。升级 Plus 可不限量使用事务解析和陪伴启动。";
+"paywall.limit.body.friend" = "你在过去 7 天内已创建过免费好友房间。加入仍免费，也可升级为无限邀请。";
 "paywall.limit.keepFree" = "继续用免费版";
+"paywall.value.statement" = "Plus 帮你把启动门槛降下来：少一次决策，更容易开始。";
+"paywall.annual.monthlyEquivalent" = "按月等效约 $7.50";
+"paywall.plus.coStart" = "无限好友陪伴启动";
 
 /* MARK: - 用量 */
 "usage.stepsLeft" = "今天剩余 %d / %d 个免费步骤";
@@ -306,12 +315,12 @@
 
 /* MARK: - 引导 */
 "onboard.title" = "迈出温和的一小步。";
-"onboard.body" = "StartKind 把一团乱变成一个小动作。没有清单,没有连续打卡,没有羞耻。";
+"onboard.body" = "StartKind 把一团乱变成一个小动作。没有清单，没有连续打卡，没有羞耻。";
 "onboard.cta" = "开始";
 
 /* MARK: - 捕获反馈 */
 "capture.generating" = "正在整理一个小步骤…";
-"capture.fallback" = "这是一个温和的开头:";
+"capture.fallback" = "这是一个温和的开头：";
 
 /* MARK: - 登录 */
 "auth.title" = "StartKind";
@@ -320,10 +329,10 @@
 "auth.password" = "密码";
 "auth.signIn" = "登录";
 "auth.signUp" = "注册";
-"auth.switchToSignUp" = "没有账号?注册";
-"auth.switchToSignIn" = "已有账号?登录";
-"auth.error" = "登录失败,请检查邮箱和密码。";
-"auth.continueLocal" = "不登录,继续使用";
+"auth.switchToSignUp" = "没有账号？注册";
+"auth.switchToSignIn" = "已有账号？登录";
+"auth.error" = "登录失败，请检查邮箱和密码。";
+"auth.continueLocal" = "不登录，继续使用";
 "settings.account" = "账号";
 "settings.signedIn" = "已登录";
 "settings.signedOutLocal" = "本地使用(未登录)";
@@ -332,7 +341,7 @@
 
 /* MARK: - 陪伴启动 */
 "costart.title" = "陪伴启动";
-"costart.subtitle" = "一个人太难时,一起开始。";
+"costart.subtitle" = "一个人太难时，一起开始。";
 "costart.cta" = "陪伴启动";
 "costart.aiQuiet" = "AI 静默陪伴";
 "costart.friend" = "邀请好友(25 分钟)";
@@ -350,12 +359,13 @@
 "costart.share" = "分享";
 "costart.copy" = "复制";
 "costart.copied" = "已复制";
-"costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤,加入。";
+"costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤，加入。";
 "costart.yourName" = "你的名字(可选)";
 "costart.yourStep.optional" = "你的步骤(可选)";
 "costart.defaultGuestStep" = "现在开始";
 "costart.join" = "加入";
-"costart.roomNotFound" = "找不到那个房间,可能已结束。";
+"costart.roomNotFound" = "找不到那个房间，可能已结束。";
+"costart.createError" = "房间暂时没能启动。你的免费邀请额度仍保留，可以再试一次。";
 
 /* MARK: - 留存辅助 */
 "stuck.button" = "我卡住了";
@@ -414,10 +424,10 @@
 "privacy.title" = "隐私";
 "privacy.principlesTitle" = "原则";
 "privacy.principle1" = "StartKind 只收集帮你迈出一小步所需的最少数据。";
-"privacy.principle2" = "免费模式无需账号,历史记录保存在你的设备上。";
+"privacy.principle2" = "免费模式无需账号，历史记录保存在你的设备上。";
 "privacy.principle3" = "云端功能(Plus)仅在登录后同步或处理数据。";
 "privacy.dataTitle" = "可能存储的数据";
-"privacy.data1" = "你输入或说出的任务文本,以及计时历史。";
+"privacy.data1" = "你输入或说出的任务文本，以及计时历史。";
 "privacy.data2" = "订阅权益(来自 Apple)和设备诊断。";
 "privacy.data3" = "Plus:你选择解析的日历、邮件或照片内容。";
 "privacy.controlsTitle" = "你的控制";
@@ -425,6 +435,45 @@
 "privacy.control2" = "删除你的云账号和数据。";
 "privacy.control3" = "导出你的数据。";
 "privacy.sensitiveTitle" = "敏感内容";
-"privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息;生产环境不记录。";
-"privacy.sensitive2" = "服务端密钥仅存服务器;app 只持有你的公开密钥。";
+"privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息；生产环境不记录。";
+"privacy.sensitive2" = "服务端密钥仅存服务器；app 只持有你的公开密钥。";
 "privacy.contactTitle" = "联系";
+
+/* MARK: - Fifth retention release */
+"ladder.title" = "选择开始时长";
+"ladder.minutes" = "%d 分钟";
+"dailyOne.title" = "今天温和地只做一件";
+"dailyOne.source.recovery" = "继续";
+"dailyOne.source.admin" = "事务";
+"dailyOne.source.vault" = "已保存";
+"dailyOne.start" = "就做这一件";
+"dailyOne.replace" = "换一件";
+"dailyOne.dismiss" = "今天先不做";
+"dailyOne.stop" = "完成最小的有用开头就停。";
+"dailyOne.why" = "这是你之前保存过的启动方式。";
+"dailyOne.source" = "今日一件事";
+"dailyOne.loaded" = "今天温和的一件事已经准备好。";
+"urgentAdmin.start" = "找到联系入口";
+"startProfile.title" = "你的启动画像";
+"startProfile.empty" = "它会从真实开始中学习，不要求你完美规划。";
+"startProfile.summary" = "这是关于何时、以何种方式更容易开始的安静总结。";
+"startProfile.window" = "时段";
+"startProfile.duration" = "时长";
+"startProfile.category" = "常见";
+"startProfile.learning" = "学习中";
+"startProfile.minutes" = "%d 分钟";
+"costart.again" = "再和 %@ 共做 25 分钟";
+"costart.saveFriend" = "保存这位朋友";
+"costart.friendSaved" = "已保存，之后可快速再约";
+
+/* Error messages surfaced from LocalizedError types */
+"error.usage.stepLimit" = "今天的免费步骤已经用完了。";
+"error.usage.adminLimit" = "今天的免费事务快速开始已经用完了。";
+"error.speech.notAuthorized" = "还没有获得语音识别权限。";
+"error.speech.microphoneNotAuthorized" = "还没有获得麦克风权限。";
+"error.speech.notAvailable" = "现在无法使用语音识别。";
+"error.speech.engineFailure" = "无法启动音频引擎。";
+"error.api.notConfigured" = "还没有配置云端功能。";
+"error.auth.notConfigured" = "还没有配置云端登录。";
+"error.auth.invalidCredentials" = "登录失败，请检查邮箱和密码。";
+"error.auth.network" = "无法连接服务器，请稍后再试。";

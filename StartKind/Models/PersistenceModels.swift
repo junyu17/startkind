@@ -3,16 +3,17 @@ import SwiftData
 
 // MARK: - UserProfile
 
-/// Local user profile. Singleton-per-device; mirrored to Supabase for Plus sync.
+/// Local user profile. Singleton-per-device; synced across the user's own
+/// devices via CloudKit.
 @Model
 final class UserProfileModel {
-    @Attribute(.unique) var id: UUID
-    var locale: String
-    var timezone: String
-    var entitlementState: String
-    var preferredTone: String
-    var createdAt: Date
-    var updatedAt: Date
+    var id: UUID = UUID()
+    var locale: String = ""
+    var timezone: String = ""
+    var entitlementState: String = ""
+    var preferredTone: String = ""
+    var createdAt: Date = Date.now
+    var updatedAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -47,12 +48,12 @@ final class UserProfileModel {
 
 @Model
 final class CaptureModel {
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
-    var sourceType: String
-    var rawText: String
-    var language: String
-    var createdAt: Date
+    var id: UUID = UUID()
+    var userId: UUID = UUID()
+    var sourceType: String = ""
+    var rawText: String = ""
+    var language: String = ""
+    var createdAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -80,15 +81,15 @@ final class CaptureModel {
 
 @Model
 final class TaskItemModel {
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
+    var id: UUID = UUID()
+    var userId: UUID = UUID()
     var captureId: UUID?
-    var title: String
-    var categoryValue: String
-    var emotionalLoadValue: String
-    var statusValue: String
-    var createdAt: Date
-    var updatedAt: Date
+    var title: String = ""
+    var categoryValue: String = ""
+    var emotionalLoadValue: String = ""
+    var statusValue: String = ""
+    var createdAt: Date = Date.now
+    var updatedAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -132,20 +133,20 @@ final class TaskItemModel {
 
 @Model
 final class NextStepModel {
-    @Attribute(.unique) var id: UUID
+    var id: UUID = UUID()
     var taskId: UUID?
-    var userId: UUID
-    var title: String
-    var stepText: String
-    var stopCondition: String
-    var categoryValue: String
-    var shrinkLevelValue: Int
-    var estimatedMinutes: Int
-    var targetMinutes: Int
-    var statusValue: String
-    var generatedByValue: String
+    var userId: UUID = UUID()
+    var title: String = ""
+    var stepText: String = ""
+    var stopCondition: String = ""
+    var categoryValue: String = ""
+    var shrinkLevelValue: Int = 0
+    var estimatedMinutes: Int = 0
+    var targetMinutes: Int = 0
+    var statusValue: String = ""
+    var generatedByValue: String = ""
     var whyThisStep: String?
-    var createdAt: Date
+    var createdAt: Date = Date.now
     var startedAt: Date?
     var completedAt: Date?
     var updatedAt: Date?
@@ -220,16 +221,16 @@ final class NextStepModel {
 
 @Model
 final class TimerSessionModel: Identifiable {
-    @Attribute(.unique) var id: UUID
+    var id: UUID = UUID()
     var nextStepId: UUID?
-    var userId: UUID
-    var plannedMinutes: Int
-    var actualSeconds: Int
-    var outcomeValue: String
-    var coStartModeValue: String
-    var categoryValue: String
-    var estimatedMinutes: Int
-    var createdAt: Date
+    var userId: UUID = UUID()
+    var plannedMinutes: Int = 0
+    var actualSeconds: Int = 0
+    var outcomeValue: String = ""
+    var coStartModeValue: String = ""
+    var categoryValue: String = ""
+    var estimatedMinutes: Int = 0
+    var createdAt: Date = Date.now
     var endedAt: Date?
 
     init(
@@ -278,15 +279,15 @@ final class TimerSessionModel: Identifiable {
 
 @Model
 final class TimeCalibrationProfileModel {
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
-    var categoryValue: String
-    var estimateMultiplier: Double
+    var id: UUID = UUID()
+    var userId: UUID = UUID()
+    var categoryValue: String = ""
+    var estimateMultiplier: Double = 0
     var medianActualMinutes: Double?
-    var completionRate: Double
+    var completionRate: Double = 0
     var bestStartWindow: String?
-    var sampleCount: Int
-    var updatedAt: Date
+    var sampleCount: Int = 0
+    var updatedAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -332,22 +333,22 @@ final class TimeCalibrationProfileModel {
 
 @Model
 final class RecoveryCapsuleModel {
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
+    var id: UUID = UUID()
+    var userId: UUID = UUID()
     var taskId: UUID?
     var lastStepId: UUID?
-    var stateSummary: String
-    var resumeStepText: String
-    var resumeTitle: String
-    var resumeStopCondition: String
-    var resumeTimerMinutes: Int
-    var resumeCategoryValue: String
+    var stateSummary: String = ""
+    var resumeStepText: String = ""
+    var resumeTitle: String = ""
+    var resumeStopCondition: String = ""
+    var resumeTimerMinutes: Int = 0
+    var resumeCategoryValue: String = ""
     var resumeShrinkLevelValue: Int = 0
     var relatedLink: String?
     var relatedDraft: String?
-    var active: Bool
-    var createdAt: Date
-    var updatedAt: Date
+    var active: Bool = false
+    var createdAt: Date = Date.now
+    var updatedAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -418,7 +419,7 @@ final class RecoveryCapsuleModel {
     }
 
     static func blockerDraft(_ reason: BlockerReason) -> String {
-        metadataDraft(blocker: reason, note: nil)!
+        metadataDraft(blocker: reason, note: nil) ?? "recovery:\(reason.rawValue)|"
     }
 
     static func metadataDraft(blocker: BlockerReason?, note: String?) -> String? {
@@ -462,23 +463,23 @@ final class RecoveryCapsuleModel {
 
 @Model
 final class AdminArtifactModel {
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
+    var id: UUID = UUID()
+    var userId: UUID = UUID()
     var taskId: UUID?
-    var artifactTypeValue: String
+    var artifactTypeValue: String = ""
     var extractedDueDate: Date?
     var extractedAmount: String?
     var extractedContact: String?
     var extractedURL: String?
-    var requiredDocuments: [String]
-    var oneNextStepTitle: String
-    var oneNextStepText: String
-    var oneNextStepStop: String
-    var oneNextStepTimer: Int
+    var requiredDocuments: [String] = []
+    var oneNextStepTitle: String = ""
+    var oneNextStepText: String = ""
+    var oneNextStepStop: String = ""
+    var oneNextStepTimer: Int = 0
     var oneNextStepCategoryValue: String = TaskCategory.other.rawValue
     var oneNextStepShrinkLevelValue: Int = 0
-    var confidence: Double
-    var createdAt: Date
+    var confidence: Double = 0
+    var createdAt: Date = Date.now
 
     init(
         id: UUID = UUID(),
@@ -528,14 +529,14 @@ final class AdminArtifactModel {
 
 @Model
 final class CoStartRoomModel {
-    @Attribute(.unique) var id: UUID
-    var hostUserId: UUID
-    var roomTypeValue: String
-    var durationMinutes: Int
-    var statusValue: String
+    var id: UUID = UUID()
+    var hostUserId: UUID = UUID()
+    var roomTypeValue: String = ""
+    var durationMinutes: Int = 0
+    var statusValue: String = ""
     var inviteTokenHash: String?
     var roomCode: String?
-    var createdAt: Date
+    var createdAt: Date = Date.now
     var startsAt: Date?
     var endedAt: Date?
 
@@ -576,13 +577,13 @@ final class CoStartRoomModel {
 
 @Model
 final class CoStartParticipantModel {
-    @Attribute(.unique) var id: UUID
-    var roomId: UUID
+    var id: UUID = UUID()
+    var roomId: UUID = UUID()
     var userIdNullable: UUID?
-    var displayName: String
-    var statedStep: String
+    var displayName: String = ""
+    var statedStep: String = ""
     var outcomeValue: String?
-    var joinedAt: Date
+    var joinedAt: Date = Date.now
     var leftAt: Date?
 
     init(

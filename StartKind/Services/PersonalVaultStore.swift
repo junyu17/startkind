@@ -33,7 +33,7 @@ final class PersonalVaultStore: ObservableObject {
     @discardableResult
     func add(title: String, body: String, category: TaskCategory?) -> VaultItem {
         let item = VaultItem(
-            title: normalized(title, fallback: "Saved start"),
+            title: normalized(title, fallback: L("vault.defaultTitle")),
             body: normalized(body, fallback: title),
             category: category
         )

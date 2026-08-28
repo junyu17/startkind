@@ -53,15 +53,26 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 @main
 struct StartKindApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var env: AppEnvironment
 
     init() {
         let args = ProcessInfo.processInfo.arguments
         let isUITest = args.contains("-UITEST") || args.contains("-UITEST_AUTH")
+        let usageDefaults: UserDefaults
         if isUITest {
             UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
+            let suiteName = "ren.startkind.uitests.usage"
+            usageDefaults = UserDefaults(suiteName: suiteName) ?? .standard
+            usageDefaults.removePersistentDomain(forName: suiteName)
+        } else {
+            usageDefaults = .standard
         }
-        _env = StateObject(wrappedValue: MainActor.assumeIsolated { AppEnvironment(inMemory: isUITest) })
+        _env = StateObject(
+            wrappedValue: MainActor.assumeIsolated {
+                AppEnvironment(inMemory: isUITest, usageDefaults: usageDefaults)
+            }
+        )
     }
 
     var body: some Scene {
@@ -75,6 +86,13 @@ struct StartKindApp: App {
                     if let type = AppDelegate.pendingShortcutType {
                         AppDelegate.pendingShortcutType = nil
                         env.handleQuickAction(type: type)
+                    }
+                    env.consumePendingAppIntentAction()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active {
+                        env.refreshUsage()
+                        env.consumePendingAppIntentAction()
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .startKindShortcutAction)) { notification in

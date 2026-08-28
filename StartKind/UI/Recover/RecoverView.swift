@@ -24,7 +24,7 @@ struct RecoverView: View {
         }
         .onAppear { capsule = env.activeCapsule() }
         .sheet(isPresented: $showTimer) {
-            if let session, let step = env.persistence.fetchNextStep(id: session.nextStepId ?? UUID()) {
+            if let session, let stepId = session.nextStepId, let step = env.persistence.fetchNextStep(id: stepId) {
                 TimerView(session: session, step: step) { outcome, blocker, returnNote in
                     let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
                     if outcome == .partial || outcome == .paused {
@@ -59,7 +59,7 @@ struct RecoverView: View {
             }
 
             if let link = model.relatedLink, !link.isEmpty {
-                Text(verbatim: L("recover.related") + ": " + link)
+                Text(verbatim: L("recover.related", link))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

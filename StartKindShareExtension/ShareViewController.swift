@@ -8,7 +8,7 @@ final class ShareViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         let label = UILabel()
-        label.text = "Opening StartKind..."
+        label.text = NSLocalizedString("share.opening", value: "Opening StartKind...", comment: "")
         label.font = .preferredFont(forTextStyle: .headline)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false

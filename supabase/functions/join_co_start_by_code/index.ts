@@ -1,4 +1,4 @@
-import { corsHeaders, handleOptions, json } from "../_shared/cors.ts";
+import { handleOptions, json } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type JoinBody = {

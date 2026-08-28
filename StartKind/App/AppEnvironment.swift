@@ -6,22 +6,15 @@ enum UsageError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .stepLimitReached: return "Today's free steps are used up."
-        case .adminLimitReached: return "Today's free Admin Quick Start is used up."
+        case .stepLimitReached: return L("error.usage.stepLimit")
+        case .adminLimitReached: return L("error.usage.adminLimit")
         }
     }
 }
 
-enum AuthError: LocalizedError {
-    case notConfigured, invalidCredentials, network
-
-    var errorDescription: String? {
-        switch self {
-        case .notConfigured: return "Cloud sign-in isn't configured."
-        case .invalidCredentials: return "Sign-in failed. Check your email and password."
-        case .network: return "Couldn't reach the server. Try again."
-        }
-    }
+enum CoStartError: Error {
+    case friendLimitReached
+    case friendRoomPublishFailed
 }
 
 /// The composition root. Holds all services and domain components, and exposes
@@ -38,10 +31,7 @@ final class AppEnvironment: ObservableObject {
     let tinyAdminInbox: TinyAdminInboxStore
     let speech: SpeechService
     let ai: AIClient
-    let sync: SyncService
-    let supabase: SupabaseClient?
-    @Published private(set) var isSignedIn: Bool = false
-    @Published private(set) var hasStarted: Bool
+    let api: StartKindAPI?
 
     let engine: NextStepEngine
     let shrinker: TaskShrinker
@@ -56,39 +46,49 @@ final class AppEnvironment: ObservableObject {
     let dayPartPlanner: DayPartPlanner
     let calendarSoftLandingPlanner: CalendarSoftLandingPlanner
     let gentleReviewPlanner: GentleReviewPlanner
+    let frictionForecastPlanner: FrictionForecastPlanner
     let frictionMemory: FrictionMemoryStore
     let startScripts: StartScriptStore
     let widgetNextStepStore: WidgetNextStepStore
+    let dailyOneThing: DailyOneThingStore
+    let coStartContinuity: CoStartContinuityStore
+    let resumeCardPlanner: ResumeCardPlanner
+    let startLadderPlanner: StartLadderPlanner
+    let actionPrepPlanner: ActionPrepPlanner
+    let dailyOneThingPlanner: DailyOneThingPlanner
+    let startProfilePlanner: StartProfilePlanner
+    let urgentAdminPlanner: UrgentAdminPlanner
 
+    private var friendCoStartCreationInFlight = false
     private var cancellables = Set<AnyCancellable>()
 
-    init(inMemory: Bool = false) {
+    init(
+        inMemory: Bool = false,
+        usageDefaults: UserDefaults = .standard
+    ) {
         let persistence: PersistenceService
-        do {
-            persistence = try PersistenceService(inMemory: inMemory)
-        } catch {
-            fatalError("StartKind storage could not be initialized: \(error)")
+        if let stored = try? PersistenceService(inMemory: inMemory) {
+            persistence = stored
+        } else if let ephemeral = try? PersistenceService(inMemory: true) {
+            // Last resort: this session runs on an in-memory store rather than
+            // crashing on launch. Nothing persists, but the app stays usable.
+            persistence = ephemeral
+        } else {
+            fatalError("StartKind storage could not be initialized")
         }
         self.persistence = persistence
         self.entitlement = EntitlementService()
-        self.usage = UsageTracker()
+        self.usage = UsageTracker(defaults: usageDefaults)
         self.vault = PersonalVaultStore()
         self.liveActivity = LiveTimerActivityService()
         self.rescueNotifications = RescueNotificationService()
         self.proofOfStart = ProofOfStartStore()
         self.tinyAdminInbox = TinyAdminInboxStore()
         self.speech = SpeechService()
-        let supabase: SupabaseClient? = {
-            if let endpoint = SupabaseConfig.endpoint, let anonKey = SupabaseConfig.anonKey {
-                return SupabaseClient(endpoint: endpoint, anonKey: anonKey)
-            }
-            return nil
-        }()
         let launchArgs = ProcessInfo.processInfo.arguments
         let uiTestMode = launchArgs.contains("-UITEST") || launchArgs.contains("-UITEST_AUTH")
-        self.supabase = supabase
-        self.ai = uiTestMode ? LocalAIClient() : CloudAIClient(supabase: supabase)
-        self.sync = SupabaseSync(supabase: supabase)
+        self.ai = uiTestMode ? LocalAIClient() : CloudAIClient()
+        self.api = StartKindAPI()
         self.engine = NextStepEngine()
         self.shrinker = TaskShrinker()
         self.rescheduler = Rescheduler()
@@ -102,9 +102,18 @@ final class AppEnvironment: ObservableObject {
         self.dayPartPlanner = DayPartPlanner()
         self.calendarSoftLandingPlanner = CalendarSoftLandingPlanner()
         self.gentleReviewPlanner = GentleReviewPlanner()
+        self.frictionForecastPlanner = FrictionForecastPlanner()
         self.frictionMemory = FrictionMemoryStore()
         self.startScripts = StartScriptStore()
         self.widgetNextStepStore = WidgetNextStepStore()
+        self.dailyOneThing = DailyOneThingStore()
+        self.coStartContinuity = CoStartContinuityStore()
+        self.resumeCardPlanner = ResumeCardPlanner()
+        self.startLadderPlanner = StartLadderPlanner()
+        self.actionPrepPlanner = ActionPrepPlanner()
+        self.dailyOneThingPlanner = DailyOneThingPlanner()
+        self.startProfilePlanner = StartProfilePlanner()
+        self.urgentAdminPlanner = UrgentAdminPlanner()
         if uiTestMode {
             self.vault.clear()
             self.proofOfStart.clear()
@@ -112,8 +121,9 @@ final class AppEnvironment: ObservableObject {
             self.frictionMemory.clear()
             self.startScripts.clear()
             self.widgetNextStepStore.clear()
+            self.dailyOneThing.clear()
+            self.coStartContinuity.clear()
         }
-        self.hasStarted = !launchArgs.contains("-UITEST_AUTH")
 
         // Keep the persisted profile entitlement in sync with StoreKit.
         entitlement.$state
@@ -121,6 +131,13 @@ final class AppEnvironment: ObservableObject {
             .sink { [weak persistence] state in
                 persistence?.updateProfile(entitlement: state)
             }
+            .store(in: &cancellables)
+
+        entitlement.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        usage.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
     }
 
@@ -130,7 +147,6 @@ final class AppEnvironment: ObservableObject {
         let args = ProcessInfo.processInfo.arguments
         let skipStoreKit = args.contains("-UITEST") || args.contains("-UITEST_AUTH")
         LocalizationManager.shared.setLanguage(persistence.profile?.locale ?? "en")
-        isSignedIn = supabase?.isAuthenticated ?? false
         if !skipStoreKit {
             await entitlement.load()
         }
@@ -138,95 +154,71 @@ final class AppEnvironment: ObservableObject {
         if !skipStoreKit {
             persistence.updateProfile(entitlement: entitlement.state)
         }
+        refreshUsage()
+        consumePendingAppIntentAction()
     }
 
-    // MARK: - Auth
-
-    func signIn(email: String, password: String) async throws {
-        guard let supabase else { throw AuthError.notConfigured }
-        do {
-            try await supabase.signIn(email: email, password: password)
-        } catch let SupabaseError.http(code, _) where code == 400 || code == 401 {
-            throw AuthError.invalidCredentials
-        } catch is SupabaseError {
-            throw AuthError.network
-        }
-        isSignedIn = true
-        markStarted()
-        Task { await runSync() }
+    func refreshUsage() {
+        _ = usage.currentUsage()
     }
 
-    func signUp(email: String, password: String) async throws {
-        guard let supabase else { throw AuthError.notConfigured }
-        do {
-            try await supabase.signUp(email: email, password: password)
-        } catch let SupabaseError.http(code, _) where code == 400 || code == 422 {
-            throw AuthError.invalidCredentials
-        } catch is SupabaseError {
-            throw AuthError.network
-        }
-        isSignedIn = supabase.isAuthenticated
-        markStarted()
-        Task { await runSync() }
-    }
-
-    /// Skip cloud sign-in and use the app locally (Free, no account).
-    func skipAuth() {
-        isSignedIn = false
-        markStarted()
-    }
-
-    func signOut() {
-        supabase?.signOut()
-        isSignedIn = false
-    }
-
-    /// Return to the sign-in screen (e.g. user chose to sign in from Settings).
-    func resetToAuth() {
-        hasStarted = false
-        UserDefaults.standard.set(false, forKey: "sk_has_started")
+    func consumePendingAppIntentAction() {
+        guard let kind = StartKindIntentActionStore.consume() else { return }
+        pendingQuickAction = kind
     }
 
     // MARK: - Entitlement sync
 
-    /// Send the App Store receipt to the backend for server-side verification,
-    /// mirroring the Plus entitlement into the `entitlements` table (the
-    /// cross-device source of truth the Edge Functions check).
+    /// Hand the backend Apple's signed proof of the entitlement so it can gate
+    /// the AI proxy. The backend verifies the signature itself; it never takes
+    /// the app's word for what tier this device is on.
     func syncEntitlementToBackend() async {
-        guard let supabase, supabase.isAuthenticated else { return }
-        guard let receiptURL = Bundle.main.appStoreReceiptURL,
-              let data = try? Data(contentsOf: receiptURL) else { return }
-        let receipt = data.base64EncodedString()
-        _ = try? await supabase.invokeFunction("verify_receipt", body: ["receipt": receipt])
+        guard let api, let signed = entitlement.signedTransaction else { return }
+        _ = try? await api.verifyTransaction(signed)
     }
 
     // MARK: - Co-Start
 
-    @discardableResult
-    private func createCoStartRoom(type: CoStartRoomType, stepText: String) -> CoStartRoomModel {
+    private func makeCoStartRoom(type: CoStartRoomType, roomCode: String? = nil) -> CoStartRoomModel {
         let hostId = persistence.userId
-        let roomCode = type == .friendLink ? Self.makeRoomCode() : nil
-        let room = CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .active, roomCode: roomCode, startsAt: .now)
+        return CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .active, roomCode: roomCode, startsAt: .now)
+    }
+
+    private func persistCoStartRoom(_ room: CoStartRoomModel, stepText: String) {
         persistence.context.insert(room)
-        let me = CoStartParticipantModel(roomId: room.id, userId: hostId, displayName: L("costart.you"), statedStep: stepText)
+        let me = CoStartParticipantModel(roomId: room.id, userId: persistence.userId, displayName: L("costart.you"), statedStep: stepText)
         persistence.context.insert(me)
-        if type == .aiQuiet {
+        if room.roomType == .aiQuiet {
             let ai = CoStartParticipantModel(roomId: room.id, userId: nil, displayName: L("costart.ai"), statedStep: L("costart.aiQuietPresence"))
             persistence.context.insert(ai)
         }
         try? persistence.context.save()
-        return room
     }
 
     /// Start a co-start room + a 25-min timer session for the given step.
     @discardableResult
-    func startCoStart(type: CoStartRoomType, step: NextStepModel, stepText: String) -> (room: CoStartRoomModel, session: TimerSessionModel) {
-        let room = createCoStartRoom(type: type, stepText: stepText)
+    func startCoStart(type: CoStartRoomType, step: NextStepModel, stepText: String) async throws -> (room: CoStartRoomModel, session: TimerSessionModel) {
+        if type == .friendLink {
+            guard canCreateFriendCoStart else { throw CoStartError.friendLimitReached }
+            guard !friendCoStartCreationInFlight else { throw CoStartError.friendRoomPublishFailed }
+            friendCoStartCreationInFlight = true
+            defer { friendCoStartCreationInFlight = false }
+
+            guard let api else { throw CoStartError.friendRoomPublishFailed }
+            let serverRoom = try await api.createRoom()
+            guard let code = serverRoom.code else { throw CoStartError.friendRoomPublishFailed }
+            let room = makeCoStartRoom(type: type, roomCode: code)
+            room.id = serverRoom.id
+            persistCoStartRoom(room, stepText: stepText)
+            let session = persistence.startTimer(for: step, plannedMinutes: 25, coStart: .friend)
+            usage.recordFriendCoStart(isPlus: isPlus)
+            return (room, session)
+        }
+
+        let room = makeCoStartRoom(type: type)
+        persistCoStartRoom(room, stepText: stepText)
         let coStart: CoStartMode = (type == .aiQuiet) ? .ai : .friend
         let session = persistence.startTimer(for: step, plannedMinutes: 25, coStart: coStart)
-        if type == .friendLink {
-            Task { await publishCoStartRoom(room: room, stepText: stepText) }
-        }
         return (room, session)
     }
 
@@ -237,7 +229,7 @@ final class AppEnvironment: ObservableObject {
         persistence.recordTimerOutcome(session: session, actualSeconds: elapsed, outcome: outcome, step: step, isPlus: isPlus)
         try? persistence.context.save()
         if room.roomType == .friendLink {
-            Task { await endRemoteCoStartRoom(room: room) }
+            Task { await endRemoteCoStartRoom(roomID: room.id.uuidString) }
         }
     }
 
@@ -249,149 +241,59 @@ final class AppEnvironment: ObservableObject {
         return components?.url
     }
 
-    private func publishCoStartRoom(room: CoStartRoomModel, stepText: String) async {
-        guard let supabase else { return }
-        if !supabase.isAuthenticated {
-            try? await supabase.anonymousSignIn()
-            isSignedIn = supabase.isAuthenticated
-        }
-        guard supabase.isAuthenticated,
-              let userIdString = try? await supabase.getCurrentUserId() else { return }
-        try? await supabase.upsert(table: "co_start_rooms", rows: [[
-            "id": room.id.uuidString,
-            "host_user_id": userIdString,
-            "room_type": room.roomType.rawValue,
-            "duration_minutes": room.durationMinutes,
-            "status": room.status.rawValue,
-            "invite_token_hash": room.inviteTokenHash ?? NSNull(),
-            "room_code": room.roomCode ?? NSNull(),
-            "created_at": SyncCoding.encode(room.createdAt) as Any,
-            "starts_at": SyncCoding.encode(room.startsAt) as Any,
-            "ended_at": SyncCoding.encode(room.endedAt) as Any
-        ]])
-        try? await supabase.upsert(table: "co_start_participants", rows: [[
-            "id": UUID().uuidString,
-            "room_id": room.id.uuidString,
-            "user_id": userIdString,
-            "display_name": L("costart.you"),
-            "stated_step": stepText,
-            "joined_at": SyncCoding.encode(Date()) as Any
-        ]])
-    }
-
-    private func endRemoteCoStartRoom(room: CoStartRoomModel) async {
-        guard let supabase, supabase.isAuthenticated else { return }
-        try? await supabase.patch(
-            table: "co_start_rooms",
-            query: ["id": "eq.\(room.id.uuidString)"],
-            values: [
-                "status": CoStartRoomStatus.ended.rawValue,
-                "ended_at": SyncCoding.encode(Date()) as Any
-            ]
-        )
+    private func endRemoteCoStartRoom(roomID: String) async {
+        guard let api else { return }
+        try? await api.endRoom(roomID: roomID)
     }
 
     // MARK: - Co-Start guest join
 
     /// Set by an incoming join deep link; the UI presents the guest join flow.
-    @Published var pendingJoinRoomId: UUID?
     @Published var pendingJoinRoomCode: String?
     @Published var pendingCaptureText: String?
     @Published var pendingRescueRestart = false
-    @Published var pendingStuckRestart = false
     @Published var pendingQuickAction: QuickActionKind?
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
         if components.host == "capture" {
             pendingCaptureText = components.queryItems?.first(where: { $0.name == "text" })?.value
-            markStarted()
             return
         }
         if components.host == "start" {
-            markStarted()
             return
         }
         if components.host == "rescue" {
             pendingRescueRestart = true
-            markStarted()
             return
         }
         if components.host == "quick",
            let kindValue = components.queryItems?.first(where: { $0.name == "kind" })?.value,
            let kind = QuickActionKind(rawValue: kindValue) {
             pendingQuickAction = kind
-            markStarted()
             return
         }
         if let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
            Self.isValidRoomCode(code) {
             pendingJoinRoomCode = code
-            markStarted()
             return
         }
-        guard let roomIdString = components.queryItems?.first(where: { $0.name == "room" })?.value,
-              let roomId = UUID(uuidString: roomIdString) else { return }
-        pendingJoinRoomId = roomId
-        markStarted()
-    }
-
-    /// Join a co-start room as a guest (anonymous auth, no account required).
-    func joinCoStartRoom(roomId: UUID, stepText: String, displayName: String) async throws -> CoStartRoomModel? {
-        guard let supabase else { return nil }
-        if !supabase.isAuthenticated {
-            try await supabase.anonymousSignIn()
-            isSignedIn = supabase.isAuthenticated
-        }
-        guard let userIdString = try? await supabase.getCurrentUserId() else { return nil }
-        try await supabase.upsert(table: "co_start_participants", rows: [[
-            "id": UUID().uuidString,
-            "room_id": roomId.uuidString,
-            "user_id": userIdString,
-            "display_name": displayName,
-            "stated_step": stepText,
-            "joined_at": SyncCoding.encode(Date()) as Any
-        ]])
-        let rooms = (try? await supabase.fetch(table: "co_start_rooms", query: ["id": "eq.\(roomId.uuidString)"])) ?? []
-        guard let row = rooms.first else { return nil }
-        let room = CoStartRoomModel(
-            id: roomId,
-            hostUserId: SyncCoding.uuid(row, "host_user_id") ?? UUID(),
-            roomType: CoStartRoomType(rawValue: SyncCoding.str(row, "room_type") ?? "quiet_room") ?? .quietRoom,
-            durationMinutes: SyncCoding.int(row, "duration_minutes") ?? 25,
-            status: CoStartRoomStatus(rawValue: SyncCoding.str(row, "status") ?? "active") ?? .active,
-            roomCode: SyncCoding.str(row, "room_code"),
-            startsAt: SyncCoding.date(row, "starts_at")
-        )
-        persistence.context.insert(room)
-        try? persistence.context.save()
-        return room
     }
 
     /// Join a co-start room with the 6-digit code a friend reads or shares.
     func joinCoStartRoom(code: String, stepText: String, displayName: String) async throws -> CoStartRoomModel? {
-        guard let supabase else { return nil }
+        guard let api else { return nil }
         let normalizedCode = Self.normalizedRoomCode(code)
         guard Self.isValidRoomCode(normalizedCode) else { return nil }
-        if !supabase.isAuthenticated {
-            try await supabase.anonymousSignIn()
-            isSignedIn = supabase.isAuthenticated
-        }
-        let response = try await supabase.invokeFunction("join_co_start_by_code", body: [
-            "room_code": normalizedCode,
-            "step_text": stepText,
-            "display_name": displayName
-        ])
-        guard let row = response["room"] as? [String: Any],
-              let id = SyncCoding.uuid(row, "id") else { return nil }
+        let serverRoom = try await api.joinRoom(code: normalizedCode, stepText: stepText, displayName: displayName)
         let room = CoStartRoomModel(
-            id: id,
-            hostUserId: SyncCoding.uuid(row, "host_user_id") ?? UUID(),
-            roomType: CoStartRoomType(rawValue: SyncCoding.str(row, "room_type") ?? "quiet_room") ?? .quietRoom,
-            durationMinutes: SyncCoding.int(row, "duration_minutes") ?? 25,
-            status: CoStartRoomStatus(rawValue: SyncCoding.str(row, "status") ?? "active") ?? .active,
-            roomCode: SyncCoding.str(row, "room_code") ?? normalizedCode,
-            startsAt: SyncCoding.date(row, "starts_at")
+            id: serverRoom.id,
+            hostUserId: persistence.userId,
+            roomType: .friendLink,
+            durationMinutes: serverRoom.durationMinutes,
+            status: CoStartRoomStatus(rawValue: serverRoom.status) ?? .active,
+            roomCode: serverRoom.code ?? normalizedCode,
+            startsAt: serverRoom.startsAt
         )
         persistence.context.insert(room)
         try? persistence.context.save()
@@ -407,56 +309,27 @@ final class AppEnvironment: ObservableObject {
 
     /// Poll room participants (near-real-time via periodic polling).
     func fetchCoStartParticipants(roomId: UUID) async -> [CoStartParticipantInfo] {
-        guard let supabase, supabase.isAuthenticated else { return [] }
-        let rows = (try? await supabase.fetch(table: "co_start_participants", query: ["room_id": "eq.\(roomId.uuidString)"])) ?? []
-        return rows.compactMap { row in
-            guard let name = row["display_name"] as? String else { return nil }
-            return CoStartParticipantInfo(
-                id: (row["id"] as? String) ?? UUID().uuidString,
-                displayName: name,
-                statedStep: (row["stated_step"] as? String) ?? "",
-                outcome: row["outcome"] as? String
+        guard let api else { return [] }
+        let participants = (try? await api.participants(roomID: roomId.uuidString)) ?? []
+        return participants.map { participant in
+            CoStartParticipantInfo(
+                id: participant.id,
+                displayName: participant.displayName,
+                statedStep: participant.statedStep,
+                outcome: participant.outcome
             )
         }
     }
 
     /// Guest ends: update own participant outcome.
     func endCoStartGuest(roomId: UUID, outcome: TimerOutcome) async {
-        guard let supabase, supabase.isAuthenticated,
-              let userIdString = try? await supabase.getCurrentUserId() else { return }
-        try? await supabase.patch(
-            table: "co_start_participants",
-            query: ["room_id": "eq.\(roomId.uuidString)", "user_id": "eq.\(userIdString)"],
-            values: ["outcome": outcome.rawValue, "left_at": SyncCoding.encode(Date()) as Any]
-        )
+        guard let api else { return }
+        try? await api.setOutcome(roomID: roomId.uuidString, outcome: outcome.rawValue)
     }
 
     func handleQuickAction(type: String) {
         guard let kind = QuickActionKind(shortcutType: type) else { return }
         pendingQuickAction = kind
-        markStarted()
-    }
-
-    // MARK: - Sync
-
-    /// Full bidirectional sync (push local -> upsert, pull remote -> merge LWW).
-    /// Non-fatal: on failure the app continues on local data.
-    func runSync() async {
-        guard let supabase, supabase.isAuthenticated else { return }
-        guard let idString = try? await supabase.getCurrentUserId(),
-              let authUserId = UUID(uuidString: idString) else { return }
-        let export = persistence.syncExport(authUserId: authUserId)
-        do {
-            let remote = try await sync.syncAll(export: export, tables: PersistenceService.syncTables)
-            persistence.syncImport(remote)
-        } catch {
-            // Sync failure is non-fatal; app stays usable on local data.
-        }
-    }
-
-    private func markStarted() {
-        hasStarted = true
-        UserDefaults.standard.set(true, forKey: "sk_has_started")
     }
 
     // MARK: - Language
@@ -486,11 +359,15 @@ final class AppEnvironment: ObservableObject {
 
     var canGenerateStep: Bool {
         if isUITestMode { return true }
-        return isPlus || usage.usage.canGenerateStep
+        return usage.canGenerateStep(isPlus: isPlus)
     }
     var canUseAdminQuickStart: Bool {
         if isUITestMode { return true }
-        return isPlus || usage.usage.canUseAdminQuickStart
+        return usage.canUseAdminQuickStart(isPlus: isPlus)
+    }
+    var canCreateFriendCoStart: Bool {
+        if isUITestMode { return true }
+        return usage.canCreateFriendCoStart(isPlus: isPlus)
     }
     var usageState: UsageState { usage.usage }
 
@@ -523,6 +400,16 @@ final class AppEnvironment: ObservableObject {
         let step = persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
         widgetNextStepStore.save(proposal: proposal)
         return step
+    }
+
+    @discardableResult
+    func createStartLadderStep(from step: NextStepModel, minutes: Int) -> NextStepModel {
+        let proposal = startLadderPlanner.proposal(from: step.proposal, minutes: minutes, language: currentLanguage)
+        return createLocalNextStep(proposal: proposal, sourceText: step.proposal.step, source: .manual)
+    }
+
+    func actionPrep(for step: NextStepModel) -> ActionPrepPlan? {
+        actionPrepPlanner.plan(for: step.proposal, language: currentLanguage)
     }
 
     @discardableResult
@@ -590,6 +477,21 @@ final class AppEnvironment: ObservableObject {
         frictionMemory.proposal(for: category ?? .other, language: currentLanguage)
     }
 
+    func frictionForecast(text: String, category: TaskCategory?) -> FrictionForecast? {
+        frictionForecastPlanner.forecast(
+            text: text,
+            category: category,
+            memory: frictionMemory.signals,
+            language: currentLanguage
+        )
+    }
+
+    @discardableResult
+    func createFrictionForecastStep(text: String, category: TaskCategory?) -> NextStepModel? {
+        guard let forecast = frictionForecast(text: text, category: category) else { return nil }
+        return createLocalNextStep(proposal: forecast.proposal, sourceText: "frictionForecast:\(forecast.preset.rawValue)", source: .manual)
+    }
+
     @discardableResult
     func createFrictionMemoryStep(category: TaskCategory?) -> NextStepModel? {
         guard let proposal = frictionMemoryProposal(category: category) else { return nil }
@@ -631,6 +533,16 @@ final class AppEnvironment: ObservableObject {
         let result = try await parseAdmin(text: text)
         tinyAdminInbox.add(rawText: text, proposal: result.oneNextStep)
         return createLocalNextStep(proposal: result.oneNextStep, sourceText: text, source: .text)
+    }
+
+    func urgentAdminSignal(for text: String, category: TaskCategory? = nil) -> UrgentAdminSignal? {
+        urgentAdminPlanner.signal(in: text, category: category, language: currentLanguage)
+    }
+
+    @discardableResult
+    func createUrgentAdminStep(from text: String, category: TaskCategory? = nil) -> NextStepModel? {
+        guard let signal = urgentAdminSignal(for: text, category: category) else { return nil }
+        return createLocalNextStep(proposal: signal.proposal, sourceText: text, source: .text)
     }
 
     /// Shrink the given step to the next level and persist the change.
@@ -692,6 +604,70 @@ final class AppEnvironment: ObservableObject {
 
     func activeCapsule() -> RecoveryCapsuleModel? { persistence.activeRecoveryCapsule() }
     func clearActiveCapsule() { persistence.clearActiveRecoveryCapsule() }
+    func resumeCardContext() -> ResumeCardContext? {
+        activeCapsule().map { resumeCardPlanner.context(for: $0) }
+    }
+
+    // MARK: - Daily one thing
+
+    func dailyOneThingCandidates() -> [DailyOneThingCandidate] {
+        var candidates: [DailyOneThingCandidate] = []
+        if let capsule = activeCapsule() {
+            candidates.append(DailyOneThingCandidate(id: capsule.id, proposal: capsule.resumeProposal, source: .recovery))
+        }
+        candidates.append(contentsOf: tinyAdminInbox.items.map {
+            DailyOneThingCandidate(id: $0.id, proposal: $0.proposal, source: .admin)
+        })
+        candidates.append(contentsOf: vault.items.map {
+            DailyOneThingCandidate(
+                id: $0.id,
+                proposal: NextStepProposal(
+                    title: $0.title,
+                    step: $0.body,
+                    timerMinutes: 5,
+                    stopCondition: L("dailyOne.stop"),
+                    category: $0.category ?? .other,
+                    shrinkLevel: .two,
+                    generatedBy: .user,
+                    whyThisStep: L("dailyOne.why")
+                ),
+                source: .vault
+            )
+        })
+        return candidates
+    }
+
+    func dailyOneThingSelection() -> DailyOneThing? {
+        dailyOneThing.select(from: dailyOneThingCandidates(), planner: dailyOneThingPlanner)
+    }
+
+    @discardableResult
+    func createDailyOneThingStep() -> NextStepModel? {
+        guard let item = dailyOneThingSelection() else { return nil }
+        return createLocalNextStep(proposal: item.proposal, sourceText: L("dailyOne.source"), source: .manual)
+    }
+
+    func replaceDailyOneThing() {
+        _ = dailyOneThing.replace(from: dailyOneThingCandidates(), planner: dailyOneThingPlanner)
+        objectWillChange.send()
+    }
+
+    func dismissDailyOneThing() {
+        dailyOneThing.dismiss()
+        objectWillChange.send()
+    }
+
+    // MARK: - Start profile
+
+    func startProfile() -> StartProfile {
+        startProfilePlanner.profile(samples: persistence.calibrationSamples())
+    }
+
+    // MARK: - Co-start continuity
+
+    func savePreferredCoStarter(displayName: String, roomCode: String?) {
+        coStartContinuity.save(displayName: displayName, roomCode: roomCode)
+    }
 
     // MARK: - Patterns
 
@@ -727,12 +703,11 @@ final class AppEnvironment: ObservableObject {
         frictionMemory.clear()
         startScripts.clear()
         widgetNextStepStore.clear()
+        dailyOneThing.clear()
+        coStartContinuity.clear()
     }
-    func exportJSON() -> String { persistence.exportJSON() }
 
-    private static func makeRoomCode() -> String {
-        String(format: "%06d", Int.random(in: 0...999_999))
-    }
+    func exportJSON() -> String { persistence.exportJSON() }
 
     static func normalizedRoomCode(_ value: String) -> String {
         String(value.filter(\.isNumber).prefix(6))

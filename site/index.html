@@ -1,74 +1,257 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>StartKind - One kind step to start</title>
-  <meta name="description" content="StartKind helps adults with ADHD turn overwhelm into one small first step, without shame, streaks, or long lists.">
-  <link rel="stylesheet" href="./styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StartKind — One kind step to start</title>
+<meta name="description" content="StartKind turns overwhelm into one small first step. Built for adults with ADHD: no streaks, no shame, no long lists. iPhone, English and Simplified Chinese.">
+<meta name="theme-color" content="#1c7349">
+<meta property="og:title" content="StartKind — One kind step to start">
+<meta property="og:description" content="An execution assistant for adults with ADHD. One small next step, a timer, and a kind way back when you stop.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://startk.livepet.ren/">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">iOS first · English default · Simplified Chinese optional</p>
-        <h1>StartKind</h1>
-        <p class="lead">An execution assistant for adults with ADHD: one kind, tiny next step when starting feels harder than knowing.</p>
-        <div class="actions">
-          <a class="button" href="mailto:billy.yu@me.com">Contact</a>
-          <a class="button secondary" href="./privacy.html">Privacy</a>
-        </div>
-      </div>
-      <div class="phone" aria-label="StartKind app preview">
-        <div class="screen">
-          <p class="status">Today feels like too much.</p>
-          <div class="step">
-            <span>First step</span>
-            <strong>Open the bill and find the due date.</strong>
-            <small>Stop when the date is visible.</small>
-          </div>
-          <div class="timer">10:00</div>
-        </div>
-      </div>
-    </section>
 
-    <section class="band">
-      <div class="grid">
-        <article>
-          <h2>Voice to one step</h2>
-          <p>Say the messy sentence. StartKind returns a first action that can begin in 5-15 minutes.</p>
-        </article>
-        <article>
-          <h2>Time calibration</h2>
-          <p>The app learns from real completion time and adjusts estimates instead of asking for perfect planning.</p>
-        </article>
-        <article>
-          <h2>Gentle recovery</h2>
-          <p>After delay or interruption, StartKind resumes with a smaller next step, not streak pressure.</p>
-        </article>
-        <article>
-          <h2>Quiet co-start</h2>
-          <p>Start a 25-minute quiet room or invite a friend when doing it alone is the blocker.</p>
-        </article>
-      </div>
-    </section>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./">
+      <span class="mark" aria-hidden="true">↗</span>
+      StartKind
+    </a>
+    <nav>
+      <a href="#features"><span data-en>Features</span><span data-zh>功能</span></a>
+      <a href="#pricing"><span data-en>Pricing</span><span data-zh>价格</span></a>
+      <a href="#support"><span data-en>Support</span><span data-zh>支持</span></a>
+      <a href="#terms"><span data-en>Terms</span><span data-zh>条款</span></a>
+    </nav>
+    <button class="lang" id="lang" type="button">中文</button>
+  </div>
+</header>
 
-    <section class="icons">
+<main>
+
+  <div class="wrap">
+    <section class="hero" style="border-top:none">
       <div>
-        <h2>Selected icon</h2>
-        <p>The selected StartKind icon uses the first direction with a larger center arrow for a clearer App Store read.</p>
+        <p class="eyebrow"><span data-en>iPhone · Apple Watch · Widgets</span><span data-zh>iPhone · Apple Watch · 小组件</span></p>
+        <h1>
+          <span data-en>One kind step to start.</span>
+          <span data-zh>一个温和的小步骤，让你开始。</span>
+        </h1>
+        <p class="lead">
+          <span data-en>For adults with ADHD, knowing what to do is rarely the problem — starting is. Say the messy sentence out loud and StartKind gives you one action small enough to begin right now.</span>
+          <span data-zh>对成人 ADHD 来说，难的往往不是“知道要做什么”，而是“开始”。把那句乱糟糟的话说出来，StartKind 会给你一个小到可以立刻开始的动作。</span>
+        </p>
+        <div class="actions">
+          <a class="button" href="#pricing"><span data-en>See what's included</span><span data-zh>看看包含什么</span></a>
+          <a class="button secondary" href="./privacy.html"><span data-en>Privacy</span><span data-zh>隐私政策</span></a>
+        </div>
       </div>
-      <div class="icon-gallery">
-        <img class="selected-icon" src="./assets/startkind-app-icon.png" alt="Selected StartKind app icon">
-        <img src="./assets/startkind-icon-concepts.png" alt="Five StartKind app icon concepts labeled A through E">
+
+      <figure>
+        <img src="./assets/shots/start.png" width="414" height="900"
+             alt="StartKind Start screen: voice capture, a text field, an I'm stuck button, and one autopilot suggestion."
+             loading="eager" decoding="async">
+      </figure>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="screens" style="border-top:none;padding-top:0">
+      <h2><span data-en>What it looks like</span><span data-zh>实际界面</span></h2>
+      <p class="sub"><span data-en>Screenshots from the current build.</span><span data-zh>取自当前版本的真实截图。</span></p>
+      <div class="shots">
+        <figure>
+          <img src="./assets/shots/start.png" width="414" height="900" loading="lazy" decoding="async"
+               alt="Start screen with voice capture and a stuck button.">
+          <figcaption><span data-en>Start — speak or type, one field, one button.</span><span data-zh>开始 — 说或写，一个输入框，一个按钮。</span></figcaption>
+        </figure>
+        <figure>
+          <img src="./assets/shots/step.png" width="414" height="900" loading="lazy" decoding="async"
+               alt="A next step card reading Find the bill entry point, with a stop condition.">
+          <figcaption><span data-en>One next step — with a clear place to stop.</span><span data-zh>一个下一步 — 并且写清楚在哪里停。</span></figcaption>
+        </figure>
+        <figure>
+          <img src="./assets/shots/patterns.png" width="414" height="900" loading="lazy" decoding="async"
+               alt="Patterns screen showing gentle review, start profile and personal execution model.">
+          <figcaption><span data-en>Patterns — observations, never a score.</span><span data-zh>规律 — 只是观察，不是打分。</span></figcaption>
+        </figure>
       </div>
     </section>
-  </main>
 
-  <footer>
+    <section id="features">
+      <h2><span data-en>What StartKind does</span><span data-zh>StartKind 能做什么</span></h2>
+      <p class="sub"><span data-en>The whole loop: capture, one step, a timer, and a kind way back.</span><span data-zh>完整闭环：捕捉、一个步骤、计时、以及温和地回来。</span></p>
+      <div class="grid">
+        <article class="card">
+          <div class="icon" aria-hidden="true">🎙</div>
+          <h3><span data-en>Voice to one step</span><span data-zh>说一句话，得到一步</span></h3>
+          <p><span data-en>Say it however it comes out. You get one concrete action that fits in 5–15 minutes, with a stop condition.</span><span data-zh>怎么想的就怎么说。你会得到一个 5–15 分钟内能做完的具体动作，并且写明在哪里停。</span></p>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">⏱</div>
+          <h3><span data-en>A timer that forgives</span><span data-zh>不会责怪你的计时器</span></h3>
+          <p><span data-en>5, 10, 15 or 25 minutes. Stop early and the step shrinks instead of failing. Live Activity keeps it on the Lock Screen.</span><span data-zh>5、10、15 或 25 分钟。提前停下时，步骤会自动变小，而不是判定失败。实时活动让它留在锁屏上。</span></p>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">🛟</div>
+          <h3><span data-en>"I'm stuck" always works</span><span data-zh>“我卡住了”随时可用</span></h3>
+          <p><span data-en>One tap turns whatever you were doing into something smaller. No explanation required.</span><span data-zh>一次点击，把手上的事变得更小。不需要解释理由。</span></p>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">↩︎</div>
+          <h3><span data-en>A way back in</span><span data-zh>回来的入口</span></h3>
+          <p><span data-en>Interrupted work becomes a Recovery Capsule with your own return note, so tomorrow you resume instead of restarting.</span><span data-zh>被打断的工作会变成“恢复胶囊”，带着你自己写的返回备注，第二天是继续，而不是重来。</span></p>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">📄</div>
+          <h3><span data-en>Admin, defused</span><span data-zh>把事务拆开</span></h3>
+          <p><span data-en>Paste or scan a bill, letter or appointment. StartKind pulls out the facts and hands back one startable step.</span><span data-zh>粘贴或扫描账单、信件、预约通知。StartKind 提取关键信息，只给一个能开始的步骤。</span></p>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">👥</div>
+          <h3><span data-en>Start alongside someone</span><span data-zh>和别人一起开始</span></h3>
+          <p><span data-en>A quiet 25-minute room. Share a six-digit code; joining is always free and needs no account.</span><span data-zh>一个安静的 25 分钟房间。分享六位数字码即可，加入永远免费且不需要账号。</span></p>
+        </article>
+      </div>
+
+      <p class="note" style="margin-top:22px">
+        <span data-en><strong>No streaks. No overdue pile. No shame.</strong> StartKind never scores you, and it never shows a backlog of everything you did not do.</span>
+        <span data-zh><strong>没有连续打卡，没有逾期堆积，没有羞耻感。</strong>StartKind 不给你打分，也不会把你没做完的事堆在你面前。</span>
+      </p>
+    </section>
+
+    <section id="pricing">
+      <h2><span data-en>Free and Plus</span><span data-zh>免费版与 Plus</span></h2>
+      <p class="sub"><span data-en>The core loop is free forever. Plus removes the daily ceilings.</span><span data-zh>核心闭环永久免费。Plus 去掉每日上限。</span></p>
+      <div class="plans">
+        <div class="plan">
+          <h3><span data-en>Free</span><span data-zh>免费版</span></h3>
+          <div class="price"><span data-en>$0</span><span data-zh>免费</span></div>
+          <ul>
+            <li><span data-en>5 generated steps per day</span><span data-zh>每天 5 个生成步骤</span></li>
+            <li><span data-en>All timers, recovery and patterns</span><span data-zh>全部计时器、恢复与规律功能</span></li>
+            <li><span data-en>1 Admin Quick Start per day</span><span data-zh>每天 1 次事务快速开始</span></li>
+            <li><span data-en>1 friend co-start invite per 7 days — joining is always free</span><span data-zh>每 7 天 1 次好友陪伴邀请 — 加入永远免费</span></li>
+            <li><span data-en>Widgets, Apple Watch, Siri shortcuts</span><span data-zh>小组件、Apple Watch、Siri 快捷指令</span></li>
+          </ul>
+        </div>
+        <div class="plan highlight">
+          <h3><span data-en>Plus</span><span data-zh>Plus</span></h3>
+          <div class="price">
+            <span data-en>$9.99<span style="font-size:15px;font-weight:500"> / month · $89.99 / year</span></span>
+            <span data-zh>$9.99<span style="font-size:15px;font-weight:500"> / 月 · $89.99 / 年</span></span>
+          </div>
+          <ul>
+            <li><span data-en>Unlimited steps</span><span data-zh>无限步骤</span></li>
+            <li><span data-en>Unlimited Admin Task Reader and photo scanning</span><span data-zh>无限事务解析与照片扫描</span></li>
+            <li><span data-en>Unlimited friend co-start invites, plus AI quiet co-start</span><span data-zh>无限好友陪伴邀请，以及 AI 安静陪伴</span></li>
+            <li><span data-en>Unlimited recovery history</span><span data-zh>无限恢复历史</span></li>
+            <li><span data-en>Full Personal Execution Model</span><span data-zh>完整个人执行模型</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="note" style="margin-top:18px">
+        <span data-en>Subscriptions are billed through your Apple ID and renew automatically unless cancelled at least 24 hours before the period ends. Manage or cancel any time in <strong>Settings › Apple ID › Subscriptions</strong>.</span>
+        <span data-zh>订阅通过你的 Apple ID 扣费，除非在当期结束前至少 24 小时取消，否则会自动续订。你可以随时在<strong>「设置 › Apple ID › 订阅」</strong>中管理或取消。</span>
+      </p>
+    </section>
+
+    <section id="support">
+      <h2><span data-en>Support</span><span data-zh>支持</span></h2>
+      <p class="sub"><span data-en>A real person reads these. Expect a reply within two business days.</span><span data-zh>回信的是真人。通常两个工作日内回复。</span></p>
+      <div class="grid">
+        <article class="card">
+          <h3><span data-en>Email us</span><span data-zh>邮件联系</span></h3>
+          <p>
+            <a href="mailto:billy.yu@me.com?subject=StartKind%20support" style="color:var(--accent)">billy.yu@me.com</a><br>
+            <span data-en>Please mention your iOS version and what you were doing when it happened.</span>
+            <span data-zh>请附上你的 iOS 版本，以及问题发生时你在做什么。</span>
+          </p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Restore a purchase</span><span data-zh>恢复购买</span></h3>
+          <p><span data-en>Open Settings inside the app and tap Restore purchases. Plus follows your Apple ID across your devices.</span><span data-zh>打开 App 内的「设置」，点「恢复购买」。Plus 会跟随你的 Apple ID 在各设备生效。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Delete your data</span><span data-zh>删除你的数据</span></h3>
+          <p><span data-en>Settings › Delete data removes everything from the device. Your history lives in your own iCloud, so removing the app removes it with you in control.</span><span data-zh>「设置 › 删除数据」会清除本机上的一切。你的历史保存在你自己的 iCloud 中，主动权始终在你手上。</span></p>
+        </article>
+      </div>
+      <p class="note" style="margin-top:22px">
+        <span data-en><strong>StartKind is not a medical device.</strong> It helps you organise and begin tasks. It does not diagnose or treat ADHD, and it gives no medication advice. For diagnosis, medication or treatment decisions, please talk to a qualified clinician.</span>
+        <span data-zh><strong>StartKind 不是医疗设备。</strong>它帮助你整理和开始任务，但不能诊断或治疗注意缺陷多动障碍（ADHD），也不提供任何用药建议。如需诊断、用药或治疗决定，请咨询合格的临床医生。</span>
+      </p>
+    </section>
+
+    <section id="terms">
+      <h2><span data-en>Terms of use</span><span data-zh>使用条款</span></h2>
+      <p class="sub"><span data-en>Last updated 27 August 2026.</span><span data-zh>最后更新：2026 年 8 月 27 日。</span></p>
+      <div class="grid">
+        <article class="card">
+          <h3><span data-en>Using the app</span><span data-zh>关于使用</span></h3>
+          <p><span data-en>StartKind is licensed to you for personal, non-commercial use on devices you own. Please do not resell it, or try to break, overload or reverse-engineer the service.</span><span data-zh>StartKind 以个人非商业用途授权给你，在你拥有的设备上使用。请勿转售，也请勿破坏、过载或逆向该服务。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Subscriptions</span><span data-zh>关于订阅</span></h3>
+          <p><span data-en>Plus is an auto-renewing subscription billed by Apple. Payment is charged to your Apple ID at confirmation. Refunds are handled by Apple, not by us.</span><span data-zh>Plus 是通过 Apple 扣费的自动续订订阅，确认购买时从你的 Apple ID 扣款。退款由 Apple 处理，不由我们经手。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>What we promise</span><span data-zh>我们承诺什么</span></h3>
+          <p><span data-en>The app is provided as is. We work to keep it available and correct, but we cannot guarantee uninterrupted service, and StartKind is not responsible for decisions you make about your own tasks.</span><span data-zh>App 按现状提供。我们会努力保持可用与正确，但无法保证服务永不中断；对于你就自己任务所做的决定，StartKind 不承担责任。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Your content</span><span data-zh>你的内容</span></h3>
+          <p><span data-en>What you write stays yours. It is stored in your own iCloud account, not on our servers. See the <a href="./privacy.html" style="color:var(--accent)">privacy policy</a> for the detail.</span><span data-zh>你写下的内容归你所有，保存在你自己的 iCloud 账户中，而不是我们的服务器上。细节见<a href="./privacy.html" style="color:var(--accent)">隐私政策</a>。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Changes</span><span data-zh>条款变更</span></h3>
+          <p><span data-en>If these terms change materially, the updated date above changes and the new version is published here before it takes effect.</span><span data-zh>如条款有实质性变更，上方的更新日期会随之变化，新版本会在生效前发布于此。</span></p>
+        </article>
+        <article class="card">
+          <h3><span data-en>Contact</span><span data-zh>联系方式</span></h3>
+          <p><span data-en>Questions about these terms: </span><span data-zh>关于本条款的疑问：</span><a href="mailto:billy.yu@me.com" style="color:var(--accent)">billy.yu@me.com</a></p>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
     <span>© 2026 StartKind</span>
-    <a href="./privacy.html">Privacy Policy</a>
-    <a href="mailto:billy.yu@me.com">billy.yu@me.com</a>
-  </footer>
+    <a href="./privacy.html"><span data-en>Privacy</span><span data-zh>隐私政策</span></a>
+    <a href="#terms"><span data-en>Terms</span><span data-zh>条款</span></a>
+    <a href="#support"><span data-en>Support</span><span data-zh>支持</span></a>
+    <span class="spacer"><span data-en>Made for people who want to begin.</span><span data-zh>为想要开始的人而做。</span></span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var KEY = "startkind-lang";
+    var button = document.getElementById("lang");
+
+    function apply(lang) {
+      document.documentElement.lang = lang;
+      button.textContent = lang === "zh-Hans" ? "EN“ : ”中文";
+      button.setAttribute("aria-label", lang === "zh-Hans" ? "Switch to English“ : ”切换到中文");
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) { /* private mode */ }
+    var initial = saved || ((navigator.language || "en").toLowerCase().indexOf("zh") === 0 ? "zh-Hans" : "en");
+    apply(initial);
+
+    button.addEventListener("click", function () {
+      var next = document.documentElement.lang === "zh-Hans" ? "en" : "zh-Hans";
+      apply(next);
+      try { localStorage.setItem(KEY, next); } catch (e) { /* ignore */ }
+    });
+  })();
+</script>
+
 </body>
 </html>

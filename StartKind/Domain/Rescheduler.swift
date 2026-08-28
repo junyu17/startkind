@@ -33,7 +33,7 @@ struct Rescheduler: Sendable {
         switch reason {
         case .skipped:
             return zh
-                ? "没关系。这里有个更轻的版本,留着以后。"
+                ? "没关系。这里有个更轻的版本，留着以后。"
                 : "No problem. Here's a lighter version for later."
         case .paused:
             return zh

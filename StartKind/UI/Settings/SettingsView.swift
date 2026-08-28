@@ -13,18 +13,6 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    if env.isSignedIn {
-                        Label(L("settings.signedIn"), systemImage: "checkmark.seal.fill")
-                        Button(L("settings.signOut"), role: .destructive) { env.signOut() }
-                    } else {
-                        Label(L("settings.signedOutLocal"), systemImage: "iphone")
-                        Button(L("settings.signIn")) { env.resetToAuth() }
-                    }
-                } header: {
-                    Text(verbatim: L("settings.account"))
-                }
-
-                Section {
                     Picker(L("settings.language"), selection: Binding(
                         get: { env.currentLanguage },
                         set: { env.setLanguage($0) }
@@ -82,7 +70,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    LabeledContent(L("settings.contact"), value: "billy.yu@me.com")
+                    LabeledContent(L("settings.contact"), value: L("settings.contactEmail"))
                     medicalRow
                     versionRow
                 } header: {
@@ -171,11 +159,18 @@ struct ExportView: View {
             ScrollView {
                 Text(verbatim: text)
                     .font(.system(.caption, design: .monospaced))
+                    .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
             }
             .navigationTitle(L("settings.dataExport"))
             .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    ShareLink(item: text) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("settings.dataExport.share")
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L("common.close")) { dismiss() }
                 }

@@ -133,7 +133,21 @@ The iOS suite should cover:
 - Proof of Start persists and counts starts without completion.
 - Tiny Admin Inbox stores only one next-step card from pasted admin text.
 - Yesterday Rescue returns a 3-minute restart.
-- Global Stuck button remains available from the tab shell.
+- Start Ladder creates 2-, 5-, and 15-minute versions without mutating the source step.
+- Action Prep recognizes email, telephone, and website destinations without performing an action automatically.
+- Daily One Thing persists one selection for the day and can be replaced or dismissed.
+- Start Profile only uses observed timer samples and does not output a score or diagnosis.
+- Urgent Admin Mode stays neutral and directs the user to the original sender or provider.
+- Co-Start Continuity persists only an optional local display label and room code.
+- Stuck button remains in the Start screen's first viewport, above the More ways to start disclosure.
+- Free friend co-start invite path is one successful invite per rolling 7-day window; Plus is unlimited.
+- Joining by six-digit room code remains free and does not require registration.
+
+### Co-Start Boundary Manual Checks
+
+- Open Start with an existing generated step and create one friend co-start in free mode.
+- Confirm second free attempt presents paywall without creating a room.
+- Fast-forward the stored co-start window start by 8+ days and confirm another free create is allowed.
 
 ## Manual Smoke Test Script
 
@@ -150,7 +164,7 @@ Run this before any milestone delivery:
 9. Switch language to Simplified Chinese.
 10. Repeat one text capture.
 11. Confirm UI remains readable and uncluttered.
-12. Tap "I'm stuck" from another tab and confirm a smaller start is ready.
+12. Tap "I'm stuck" in the Start first viewport and confirm a smaller start is ready.
 13. Tap a friction preset and confirm one startable step appears.
 14. Tap "I started" and confirm the proof counter updates without requiring completion.
 

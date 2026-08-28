@@ -32,9 +32,9 @@ struct PrivacyView: View {
                 VStack(alignment: .leading, spacing: Theme.spacing8) {
                     Text(verbatim: L("privacy.contactTitle")).font(.headline)
                     Button {
-                        if let url = URL(string: "mailto:billy.yu@me.com") { openURL(url) }
+                        if let url = URL(string: "mailto:" + L("settings.contactEmail")) { openURL(url) }
                     } label: {
-                        Text(verbatim: "billy.yu@me.com")
+                        Text(verbatim: L("settings.contactEmail"))
                             .foregroundStyle(Theme.accent)
                             .accessibilityIdentifier("privacy.email")
                     }

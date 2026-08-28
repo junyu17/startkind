@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import StartKind
 
 @MainActor
@@ -6,6 +7,10 @@ final class CoStartTests: XCTestCase {
     private func makeService() throws -> PersistenceService { try PersistenceService(inMemory: true) }
     private func proposal(_ c: TaskCategory = .bills) -> NextStepProposal {
         NextStepProposal(title: "t", step: "s", timerMinutes: 10, stopCondition: "stop", category: c)
+    }
+
+    private func makeStep(in env: AppEnvironment) -> NextStepModel {
+        env.persistence.saveNextStep(proposal: proposal(), capture: nil, taskTitle: "T")
     }
 
     func testCoStartTimerRecordsCoStartMode() throws {
@@ -34,4 +39,5 @@ final class CoStartTests: XCTestCase {
         let sessions = svc.recentSessions()
         XCTAssertTrue(sessions.contains { $0.coStartMode == .ai })
     }
+
 }

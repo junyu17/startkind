@@ -1,4 +1,4 @@
-import { json } from "../_shared/cors.ts";
+import { handleOptions, json } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Verifies an App Store receipt server-side and mirrors the resulting
@@ -14,7 +14,7 @@ const PROD_URL = "https://buy.itunes.apple.com/verifyReceipt";
 const SANDBOX_URL = "https://sandbox.itunes.apple.com/verifyReceipt";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: { "Access-Control-Allow-Origin": "*" } });
+  if (req.method === "OPTIONS") return handleOptions();
   try {
     const authHeader = req.headers.get("Authorization") ?? "";
     const userClient = createClient(
@@ -40,6 +40,9 @@ Deno.serve(async (req) => {
     if (result.status !== 0) {
       return json({ error: "verification_failed", apple_status: result.status }, 400);
     }
+    if (result.receipt?.bundle_id !== "ren.startkind") {
+      return json({ error: "bundle_mismatch" }, 400);
+    }
 
     const state = deriveEntitlement(result);
 
@@ -47,10 +50,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-    await admin.from("entitlements").upsert(
+    const { error: writeError } = await admin.from("entitlements").upsert(
       { user_id: user.id, state, updated_at: new Date().toISOString() },
       { onConflict: "user_id" }
     );
+    if (writeError) return json({ error: "entitlement_write_failed" }, 500);
 
     return json({ state }, 200);
   } catch (e) {
@@ -82,7 +86,7 @@ function deriveEntitlement(result: any): string {
     const expiry = parseInt(info.expires_date_ms ?? "0", 10);
     if (expiry > latestExpiry) latestExpiry = expiry;
     if (expiry > now) active = true;
-    if (info.is_in_intro_offer_period === "true") inIntro = true;
+    if (info.is_trial_period === "true" || info.is_in_intro_offer_period === "true") inIntro = true;
   }
   if (active) return inIntro ? "plus_trial" : "plus_active";
   if (latestExpiry > 0) return "plus_expired";

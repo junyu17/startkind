@@ -12,7 +12,7 @@ struct EnergyMatcher: Sendable {
         case .low:
             result.timerMinutes = min(result.timerMinutes, 5)
             result.shrinkLevel = max(result.shrinkLevel, .two)
-            result.title = zh ? "低能量:只开始一点" : "Low energy: start tiny"
+            result.title = zh ? "低能量：只开始一点" : "Low energy: start tiny"
             result.step = zh ? "只打开需要的地方，看到第一项就停。" : "Open only the needed place and stop when you see the first item."
             result.stopCondition = zh ? "看到第一项就停。" : "Stop when the first item is visible."
             result.whyThisStep = zh ? "按低能量版本处理。" : "Matched to low energy."
@@ -21,13 +21,13 @@ struct EnergyMatcher: Sendable {
             result.whyThisStep = zh ? "按普通能量版本处理。" : "Matched to steady energy."
         case .wired:
             result.timerMinutes = min(max(result.timerMinutes, 5), 10)
-            result.step = zh ? "先设一个清楚边界，然后做: \(proposal.step)" : "Set one clear boundary, then do: \(proposal.step)"
+            result.step = zh ? "先设一个清楚边界，然后做：\(proposal.step)" : "Set one clear boundary, then do: \(proposal.step)"
             result.stopCondition = zh ? "边界到了就停。" : "Stop when the boundary is reached."
             result.whyThisStep = zh ? "把高能量限制在一个小动作里。" : "Channels high energy into one bounded action."
         case .overwhelmed:
             result.timerMinutes = 5
             result.shrinkLevel = max(result.shrinkLevel, .three)
-            result.title = zh ? "过载:只降低阻力" : "Overwhelmed: lower friction"
+            result.title = zh ? "过载：只降低阻力" : "Overwhelmed: lower friction"
             result.step = zh ? "呼气一次，把需要的东西放到手边，然后停。" : "Take one exhale, put the needed item within reach, then stop."
             result.stopCondition = zh ? "东西到手边就停。" : "Stop when the item is within reach."
             result.whyThisStep = zh ? "过载时先减少阻力，不要求完成。" : "When overwhelmed, reduce friction before asking for progress."
@@ -173,8 +173,8 @@ struct YesterdayRescuePlanner: Sendable {
 
     private func restart(from proposal: NextStepProposal, zh: Bool) -> NextStepProposal {
         NextStepProposal(
-            title: zh ? "昨天那件事:3 分钟版本" : "Yesterday's thing: 3-minute version",
-            step: zh ? "只做这一步的最小开头: \(proposal.step)" : "Do only the smallest start of this step: \(proposal.step)",
+            title: zh ? "昨天那件事：3 分钟版本" : "Yesterday's thing: 3-minute version",
+            step: zh ? "只做这一步的最小开头：\(proposal.step)" : "Do only the smallest start of this step: \(proposal.step)",
             timerMinutes: 3,
             stopCondition: zh ? "3 分钟到就停，开始过就算。" : "Stop at 3 minutes. Starting counts.",
             category: proposal.category,

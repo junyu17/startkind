@@ -13,7 +13,7 @@ enum TaskCategory: String, Codable, CaseIterable, Sendable, Identifiable {
     /// The localization key, e.g. "category.bills".
     var localizationKey: String { "category.\(rawValue)" }
 
-    var displayName: String { NSLocalizedString(localizationKey, comment: "task category") }
+    var displayName: String { L(localizationKey) }
 
     var systemImage: String {
         switch self {
@@ -65,8 +65,8 @@ enum EntitlementState: String, Codable, CaseIterable, Sendable {
 
     var displayName: String {
         switch self {
-        case .free: return NSLocalizedString("settings.subscription.free", comment: "")
-        default: return NSLocalizedString("settings.subscription.plus", comment: "")
+        case .free: return L("settings.subscription.free")
+        default: return L("settings.subscription.plus")
         }
     }
 }

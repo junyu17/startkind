@@ -1,0 +1,11 @@
+/* Permission prompts */
+"NSMicrophoneUsageDescription" = "StartKind uses the microphone to capture your spoken thoughts and turn them into one small next step.";
+"NSSpeechRecognitionUsageDescription" = "StartKind uses speech recognition to turn your spoken thoughts into one small next step.";
+"NSCameraUsageDescription" = "StartKind lets you scan bills, letters, or appointment notes so it can turn them into one small next step.";
+"NSPhotoLibraryUsageDescription" = "StartKind lets you choose screenshots or photos so it can extract text and turn admin tasks into one small next step.";
+
+/* Home Screen quick action titles */
+"I'm stuck" = "I'm stuck";
+"Start 5 minutes" = "Start 5 minutes";
+"Rescue yesterday" = "Rescue yesterday";
+"Paste admin text" = "Paste admin text";

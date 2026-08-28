@@ -13,11 +13,20 @@ final class FourthRetentionFeatureTests: XCTestCase {
     }
 
     func testQuickActionKindMapsTypesAndProposals() {
+        XCTAssertEqual(QuickActionKind(shortcutType: "ren.startkind.shortcut.emergencyTiny"), .emergencyTiny)
+        XCTAssertEqual(QuickActionKind.emergencyTiny.proposal(language: "en")?.timerMinutes, 3)
         XCTAssertEqual(QuickActionKind(shortcutType: "ren.startkind.shortcut.stuck"), .stuck)
         XCTAssertEqual(QuickActionKind.startFive.shortcutType, "ren.startkind.shortcut.startFive")
         XCTAssertEqual(QuickActionKind.startFive.proposal(language: "en")?.timerMinutes, 5)
         XCTAssertEqual(QuickActionKind.rescueYesterday.proposal(language: "en")?.timerMinutes, 3)
         XCTAssertNil(QuickActionKind.pasteAdmin.proposal(language: "en"))
+    }
+
+    func testAppIntentActionStoreConsumesPendingAction() {
+        XCTAssertNil(StartKindIntentActionStore.consume())
+        StartKindIntentActionStore.save(.startFive)
+        XCTAssertEqual(StartKindIntentActionStore.consume(), .startFive)
+        XCTAssertNil(StartKindIntentActionStore.consume())
     }
 
     func testFrictionMemoryPersistsAndReturnsTopPreset() {
@@ -106,5 +115,55 @@ final class FourthRetentionFeatureTests: XCTestCase {
         let proposal = planner.proposal(now: evening, calendar: calendar, activeCapsule: nil, recentSteps: [], language: "en")
         XCTAssertEqual(proposal.timerMinutes, 3)
         XCTAssertEqual(proposal.shrinkLevel, .three)
+    }
+
+    func testFrictionForecastTextHintPriority() {
+        let planner = FrictionForecastPlanner()
+        XCTAssertEqual(planner.forecast(text: "I need the password", category: .banking, memory: [], language: "en")?.preset, .needLogin)
+        XCTAssertEqual(planner.forecast(text: "This is too big and I'm overwhelmed", memory: [], language: "en")?.preset, .tooManyTabs)
+        XCTAssertEqual(planner.forecast(text: "I don't know where to start, it feels vague", memory: [], language: "en")?.preset, .tooVague)
+        XCTAssertEqual(planner.forecast(text: "Waiting for the bank to reply", memory: [], language: "en")?.preset, .needAnotherPerson)
+        XCTAssertEqual(planner.forecast(text: "I'm tired and have no energy", memory: [], language: "en")?.preset, .tooManyTabs)
+    }
+
+    func testFrictionForecastEarlierHintWinsAndBeatsMemory() {
+        let memory = [
+            FrictionMemorySignal(category: .bills, preset: .needAnotherPerson, createdAt: .now),
+            FrictionMemorySignal(category: .bills, preset: .needAnotherPerson, createdAt: .now)
+        ]
+        let planner = FrictionForecastPlanner()
+        XCTAssertEqual(planner.forecast(text: "I don't know where the password is", category: .bills, memory: memory, language: "en")?.preset, .needLogin)
+        XCTAssertEqual(planner.forecast(text: "Tired and don't know where to start", memory: [], language: "en")?.preset, .tooVague)
+    }
+
+    func testFrictionForecastMemoryFallbackWhenNoTextHint() {
+        let signal = FrictionMemorySignal(category: .email, preset: .needDocument, createdAt: .now)
+        let planner = FrictionForecastPlanner()
+        let forecast = planner.forecast(text: "The insurance thing from last week", category: .email, memory: [signal], language: "en")
+        XCTAssertEqual(forecast?.preset, .needDocument)
+        XCTAssertEqual(forecast?.category, .email)
+        XCTAssertTrue(forecast?.reason.contains("restarted") ?? false)
+        XCTAssertEqual(forecast?.proposal.generatedBy, .localTemplate)
+        XCTAssertEqual(planner.forecast(text: "The insurance thing", category: .bills, memory: [signal], language: "en")?.preset, .needDocument)
+    }
+
+    func testFrictionForecastEmptyInputWithoutMemoryIsNil() {
+        let planner = FrictionForecastPlanner()
+        XCTAssertNil(planner.forecast(text: "", memory: [], language: "en"))
+        XCTAssertNil(planner.forecast(text: "   ", memory: [], language: "en"))
+        XCTAssertNil(planner.forecast(text: "Just a random note", memory: [], language: "en"))
+        let signal = FrictionMemorySignal(category: .bills, preset: .needDocument, createdAt: .now)
+        XCTAssertEqual(planner.forecast(text: "", memory: [signal], language: "en")?.preset, .needDocument)
+    }
+
+    func testFrictionForecastLocalizesCopy() {
+        let en = FrictionForecastPlanner().forecast(text: "I can't login", category: .banking, memory: [], language: "en")
+        let zh = FrictionForecastPlanner().forecast(text: "我登录不进去", category: .banking, memory: [], language: "zh-Hans")
+        XCTAssertEqual(en?.preset, .needLogin)
+        XCTAssertEqual(zh?.preset, .needLogin)
+        XCTAssertTrue(en?.reason.contains("password") ?? false)
+        XCTAssertTrue(zh?.reason.contains("登录") ?? false)
+        XCTAssertTrue(zh?.proposal.title.contains("登录") ?? false)
+        XCTAssertEqual(zh?.proposal.generatedBy, .localTemplate)
     }
 }

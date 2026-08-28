@@ -1,0 +1,14 @@
+/* StartKind watchOS quick starts */
+"watch.stop" = "Stop";
+
+"watch.emergency.title" = "Emergency 3";
+"watch.emergency.step" = "Exhale. Put one needed thing within reach.";
+
+"watch.startFive.title" = "Start 5";
+"watch.startFive.step" = "Open the easiest doorway and work for 5 minutes.";
+
+"watch.stuck.title" = "I'm stuck";
+"watch.stuck.step" = "Rewrite it as one tiny visible action.";
+
+"watch.rescue.title" = "Rescue";
+"watch.rescue.step" = "Do the smallest start of yesterday's thing.";

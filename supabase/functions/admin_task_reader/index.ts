@@ -1,4 +1,4 @@
-import { corsHeaders, handleOptions, json } from "../_shared/cors.ts";
+import { handleOptions, json } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // System prompt mirrors prompts/admin_task_reader_system.md
@@ -56,11 +56,12 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { text, language } = body ?? {};
     if (!text || typeof text !== "string") return json({ error: "bad_request" }, 400);
+    const safeText = text.slice(0, 4000);
 
     const aiKey = Deno.env.get("OPENAI_API_KEY");
     if (!aiKey) return json({ error: "ai_not_configured" }, 503);
 
-    const userPrompt = `Language: ${language ?? "en"}\nText to parse:\n${text}`;
+    const userPrompt = `Language: ${language ?? "en"}\nText to parse:\n${safeText}`;
     const result = await callAI(aiKey, SYSTEM_PROMPT, userPrompt);
     return json(result, 200);
   } catch (e) {

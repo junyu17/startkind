@@ -33,17 +33,17 @@ Free limits:
 
 - 5 One Next Step generations per day
 - One Admin Quick Start per day
+- One Friend co-start invite per rolling 7 days
 - 14 days local history
 - One active Recovery Capsule
 
-Free must not include:
+Free limits and exclusions:
 
 - Cloud sync
 - Email/calendar connection
-- Screenshot/photo analysis
+- Unlimited screenshot/photo analysis (the daily Admin Quick Start allowance applies)
 - Unlimited AI calls
-- Friend co-start links
-- AI room hosting
+- Unlimited Friend co-start room creation (1 per rolling 7 days)
 
 ## Plus Strategy
 

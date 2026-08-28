@@ -1,26 +1,41 @@
-import PhotosUI
 import SwiftUI
 import UIKit
 @preconcurrency import Vision
 
 struct AdminQuickReaderView: View {
+    enum InitialMode: String, Identifiable {
+        case text, photo
+        var id: String { rawValue }
+    }
+
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
     @Environment(\.dismiss) private var dismiss
 
+    let initialMode: InitialMode
+
     @State private var inputText = ""
     @State private var result: AdminParseResult?
-    @State private var selectedPhoto: PhotosPickerItem?
     @State private var isReadingPhoto = false
     @State private var isParsing = false
     @State private var errorMessage: String?
     @State private var timerSession: TimerSessionModel?
     @State private var activeStep: NextStepModel?
     @State private var showPaywall = false
+    @State private var showCameraPicker = false
+    @State private var showPhotoLibraryPicker = false
     @FocusState private var inputFocused: Bool
+
+    init(initialMode: InitialMode = .text) {
+        self.initialMode = initialMode
+    }
 
     private var canParse: Bool {
         !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isParsing && !isReadingPhoto
+    }
+
+    private var urgentSignal: UrgentAdminSignal? {
+        env.urgentAdminSignal(for: inputText)
     }
 
     var body: some View {
@@ -28,7 +43,9 @@ struct AdminQuickReaderView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.spacing16) {
                     header
+                    if initialMode == .photo { scanCard }
                     inputCard
+                    if let signal = urgentSignal { urgentCard(signal) }
                     if isParsing || isReadingPhoto { loadingRow }
                     if let result { resultCard(result) }
                     if let errorMessage {
@@ -57,15 +74,24 @@ struct AdminQuickReaderView: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView(trigger: .adminLimit).environmentObject(env)
         }
+        .sheet(isPresented: $showCameraPicker) {
+            ImagePicker(sourceType: .camera) { image in
+                Task { await readImage(image) }
+            }
+            .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showPhotoLibraryPicker) {
+            ImagePicker(sourceType: .photoLibrary) { image in
+                Task { await readImage(image) }
+            }
+            .ignoresSafeArea()
+        }
         .sheet(item: $timerSession) { session in
             if let activeStep {
                 TimerView(session: session, step: activeStep) { outcome, blocker, returnNote in
                     handleTimerOutcome(outcome, session: session, step: activeStep, blocker: blocker, returnNote: returnNote)
                 }
             }
-        }
-        .onChange(of: selectedPhoto) { _, newValue in
-            Task { await readPhoto(newValue) }
         }
     }
 
@@ -80,6 +106,26 @@ struct AdminQuickReaderView: View {
                 Text(verbatim: L("admin.freeAllowance", env.usageState.adminQuickStartsRemaining, env.usageState.adminQuickStartLimit))
                     .font(.caption)
                     .foregroundStyle(Theme.accent)
+            }
+        }
+        .startKindCard()
+    }
+
+    private var scanCard: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            SectionLabel("admin.scan.title")
+            Text(verbatim: L("admin.scan.body"))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: Theme.spacing8) {
+                QuietButton("admin.camera", systemImage: "camera.viewfinder", accessibilityId: "admin.camera") {
+                    openCamera()
+                }
+                QuietButton("admin.photoLibrary", systemImage: "photo.on.rectangle", accessibilityId: "admin.photoLibrary") {
+                    showPhotoLibraryPicker = true
+                }
             }
         }
         .startKindCard()
@@ -117,24 +163,9 @@ struct AdminQuickReaderView: View {
                     pasteText()
                 }
 
-                PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    HStack(spacing: Theme.spacing4) {
-                        Image(systemName: "photo.on.rectangle")
-                        Text(verbatim: L("admin.photo"))
-                    }
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
-                    .padding(.horizontal, Theme.spacing12)
-                    .foregroundStyle(Theme.ink)
-                    .background(Theme.surfaceRaised)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
-                            .stroke(Theme.line, lineWidth: 1)
-                    )
+                QuietButton("admin.photo", systemImage: "photo.on.rectangle", accessibilityId: "admin.photo") {
+                    showPhotoLibraryPicker = true
                 }
-                .accessibilityIdentifier("admin.photo")
             }
 
             PrimaryButton("admin.parse", systemImage: "wand.and.stars", enabled: canParse, accessibilityId: "admin.parse") {
@@ -155,6 +186,28 @@ struct AdminQuickReaderView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.softAccent.opacity(0.75))
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+    }
+
+    private func urgentCard(_ signal: UrgentAdminSignal) -> some View {
+        VStack(alignment: .leading, spacing: Theme.spacing10) {
+            Label(signal.title, systemImage: "exclamationmark.clock")
+                .font(.headline)
+                .foregroundStyle(Theme.ink)
+            Text(verbatim: signal.detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(verbatim: signal.proposal.step)
+                .font(.footnote)
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            PrimaryButton("urgentAdmin.start", systemImage: "play.fill", accessibilityId: "urgentAdmin.start") {
+                guard let step = env.createUrgentAdminStep(from: inputText) else { return }
+                activeStep = step
+                timerSession = env.startTimer(step: step, minutes: signal.proposal.timerMinutes)
+            }
+        }
+        .startKindCard()
     }
 
     private func resultCard(_ result: AdminParseResult) -> some View {
@@ -267,15 +320,20 @@ struct AdminQuickReaderView: View {
         }
     }
 
-    private func readPhoto(_ item: PhotosPickerItem?) async {
-        guard let item else { return }
+    private func openCamera() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            errorMessage = L("admin.cameraUnavailable")
+            return
+        }
+        showCameraPicker = true
+    }
+
+    private func readImage(_ image: UIImage?) async {
+        guard let image else { return }
         isReadingPhoto = true
         errorMessage = nil
         do {
-            guard let data = try await item.loadTransferable(type: Data.self) else {
-                throw AdminReaderError.emptyPhoto
-            }
-            let text = try await Self.recognizeText(from: data, language: env.currentLanguage)
+            let text = try await Self.recognizeText(from: image, language: env.currentLanguage)
             inputText = text.trimmingCharacters(in: .whitespacesAndNewlines)
             if inputText.isEmpty { errorMessage = L("admin.ocr.empty") }
         } catch {
@@ -341,8 +399,12 @@ struct AdminQuickReaderView: View {
         L("admin.artifact.\(type.rawValue)")
     }
 
-    private static func recognizeText(from data: Data, language: String) async throws -> String {
-        guard let image = UIImage(data: data)?.cgImage else { throw AdminReaderError.emptyPhoto }
+    private static func recognizeText(from image: UIImage, language: String) async throws -> String {
+        guard let cgImage = image.cgImage else { throw AdminReaderError.emptyPhoto }
+        return try await recognizeText(from: cgImage, language: language)
+    }
+
+    private static func recognizeText(from image: CGImage, language: String) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
                 if let error {
@@ -371,4 +433,44 @@ struct AdminQuickReaderView: View {
 
 private enum AdminReaderError: Error {
     case emptyPhoto
+}
+
+private struct ImagePicker: UIViewControllerRepresentable {
+    let sourceType: UIImagePickerController.SourceType
+    let onImage: (UIImage?) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.delegate = context.coordinator
+        picker.allowsEditing = false
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImage: onImage, dismiss: dismiss)
+    }
+
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        private let onImage: (UIImage?) -> Void
+        private let dismiss: DismissAction
+
+        init(onImage: @escaping (UIImage?) -> Void, dismiss: DismissAction) {
+            self.onImage = onImage
+            self.dismiss = dismiss
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            onImage(info[.originalImage] as? UIImage)
+            dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            onImage(nil)
+            dismiss()
+        }
+    }
 }

@@ -4,12 +4,16 @@ import StoreKit
 /// StoreKit 2 entitlement management.
 ///
 /// Treats the App Store as the source of truth for entitlements. Plus cloud
-/// features mirror this state to Supabase (see SyncService). Never hardcodes
-/// shared secrets; only uses official StoreKit flows.
+/// features mirror this state to the backend so it can gate the AI proxy.
+/// Never hardcodes shared secrets; only uses official StoreKit flows.
 @MainActor
 final class EntitlementService: ObservableObject {
     @Published private(set) var state: EntitlementState = .free
     @Published private(set) var products: [Product] = []
+    /// Apple-signed proof of the current Plus entitlement (StoreKit 2 JWS).
+    /// The backend verifies this signature locally, so nothing here is trusted
+    /// on the client's word.
+    @Published private(set) var signedTransaction: String?
     @Published var lastError: String?
 
     private var updatesListener: Task<Void, Never>?
@@ -51,11 +55,13 @@ final class EntitlementService: ObservableObject {
 
     func refreshEntitlements() async {
         var highest: EntitlementState = .free
+        var proof: String?
         for await result in Transaction.currentEntitlements {
             guard case .verified(let txn) = result else { continue }
             guard SubscriptionProductID.all.contains(txn.productID) else { continue }
             let now = Date()
             let expires = txn.expirationDate ?? .distantFuture
+            let previous = highest
             if txn.offerType == .introductory {
                 if expires > now {
                     highest = EntitlementService.highest(highest, .plusTrial)
@@ -65,8 +71,13 @@ final class EntitlementService: ObservableObject {
             } else {
                 highest = EntitlementService.highest(highest, .plusExpired)
             }
+            // Keep the signature belonging to the entitlement we actually report.
+            if highest != previous || proof == nil {
+                proof = result.jwsRepresentation
+            }
         }
         state = highest
+        signedTransaction = proof
     }
 
     // MARK: - Purchase
@@ -107,6 +118,9 @@ final class EntitlementService: ObservableObject {
     // MARK: - Transaction listener
 
     private func startListening() {
+        // `load()` runs on every paywall presentation; without this guard each
+        // one would leak another `Transaction.updates` listener.
+        guard updatesListener == nil else { return }
         updatesListener = Task { @MainActor [weak self] in
             guard let self else { return }
             for await result in Transaction.updates {

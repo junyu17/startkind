@@ -113,21 +113,21 @@ struct AdminTaskReader: Sendable {
         if hasMissing {
             title = zh ? "先找到缺失的信息" : "Find the missing info"
             let list = missingInfo.joined(separator: zh ? "、" : " and ")
-            step = zh ? "打开这条信息,找到\(list)。" : "Open this message and find the \(list)."
-            stop = zh ? "找到后就停,不用做别的。" : "Stop once you see it - no action needed yet."
+            step = zh ? "打开这条信息，找到\(list)。" : "Open this message and find the \(list)."
+            stop = zh ? "找到后就停，不用做别的。" : "Stop once you see it - no action needed yet."
         } else {
             switch type {
             case .bill:
                 title = zh ? "确认金额和截止日" : "Confirm amount and due date"
-                step = zh ? "打开账单,看清金额和截止日期。" : "Open the bill and read the amount and due date."
+                step = zh ? "打开账单，看清金额和截止日期。" : "Open the bill and read the amount and due date."
                 stop = zh ? "看清两者就停。" : "Stop when you can see both."
             case .appointment:
                 title = zh ? "看清预约时间" : "See the appointment time"
-                step = zh ? "打开预约信息,看清日期和时间。" : "Open the appointment and see the date and time."
+                step = zh ? "打开预约信息，看清日期和时间。" : "Open the appointment and see the date and time."
                 stop = zh ? "看清就停。" : "Stop once you can see it."
             default:
                 title = zh ? "读一遍关键信息" : "Read the key info"
-                step = zh ? "打开这条信息,读一遍关键部分。" : "Open this and read the key part once."
+                step = zh ? "打开这条信息，读一遍关键部分。" : "Open this and read the key part once."
                 stop = zh ? "读一遍就停。" : "Stop after one read-through."
             }
         }

@@ -19,12 +19,12 @@ enum MicroTemplateLibrary {
                 systemImage: "doc.text.fill",
                 proposal: NextStepProposal(
                     title: zh ? "账单先只找入口" : "Find the bill entry point",
-                    step: zh ? "打开一个可能有账单的地方,只找付款入口或金额。" : "Open one place where the bill might be, and only look for the amount or pay button.",
+                    step: zh ? "打开一个可能有账单的地方，只找付款入口或金额。" : "Open one place where the bill might be, and only look for the amount or pay button.",
                     timerMinutes: 5,
                     stopCondition: zh ? "看到金额、付款入口或卡住点就停。" : "Stop when you see the amount, the pay button, or the blocker.",
                     category: .bills,
                     shrinkLevel: .one,
-                    whyThisStep: zh ? "先找到入口,不用一次完成付款。" : "Finding the entry point is enough to create movement."
+                    whyThisStep: zh ? "先找到入口，不用一次完成付款。" : "Finding the entry point is enough to create movement."
                 )
             ),
             MicroTemplate(
@@ -34,12 +34,12 @@ enum MicroTemplateLibrary {
                 systemImage: "envelope.fill",
                 proposal: NextStepProposal(
                     title: zh ? "只写一句回复" : "Write one reply sentence",
-                    step: zh ? "打开那封邮件,只写第一句回复草稿。" : "Open the email and write only the first sentence of a reply draft.",
+                    step: zh ? "打开那封邮件，只写第一句回复草稿。" : "Open the email and write only the first sentence of a reply draft.",
                     timerMinutes: 5,
-                    stopCondition: zh ? "写完第一句就停,不用发送。" : "Stop after one sentence. Sending can wait.",
+                    stopCondition: zh ? "写完第一句就停，不用发送。" : "Stop after one sentence. Sending can wait.",
                     category: .email,
                     shrinkLevel: .one,
-                    whyThisStep: zh ? "草稿比发送轻很多,更容易开始。" : "A draft is lighter than sending, which makes starting easier."
+                    whyThisStep: zh ? "草稿比发送轻很多，更容易开始。" : "A draft is lighter than sending, which makes starting easier."
                 )
             ),
             MicroTemplate(
@@ -54,7 +54,7 @@ enum MicroTemplateLibrary {
                     stopCondition: zh ? "找到一个联系方式就停。" : "Stop when you have one way to contact them.",
                     category: .appointments,
                     shrinkLevel: .one,
-                    whyThisStep: zh ? "把预约拆成找入口,不要求马上预约成功。" : "Booking starts with finding the doorway, not finishing the appointment."
+                    whyThisStep: zh ? "把预约拆成找入口，不要求马上预约成功。" : "Booking starts with finding the doorway, not finishing the appointment."
                 )
             ),
             MicroTemplate(
@@ -64,12 +64,12 @@ enum MicroTemplateLibrary {
                 systemImage: "folder.fill",
                 proposal: NextStepProposal(
                     title: zh ? "找一个文件线索" : "Find one document clue",
-                    step: zh ? "打开一个文件夹、邮箱或照片相册,只找一个相关线索。" : "Open one folder, inbox, or photo album and look for one related clue.",
+                    step: zh ? "打开一个文件夹、邮箱或照片相册，只找一个相关线索。" : "Open one folder, inbox, or photo album and look for one related clue.",
                     timerMinutes: 5,
                     stopCondition: zh ? "找到线索或确认不在这里就停。" : "Stop when you find a clue or confirm it is not there.",
                     category: .workAdmin,
                     shrinkLevel: .one,
-                    whyThisStep: zh ? "文件任务通常卡在搜索范围太大,先缩小一个地方。" : "Document tasks often stall because the search area is too wide."
+                    whyThisStep: zh ? "文件任务通常卡在搜索范围太大，先缩小一个地方。" : "Document tasks often stall because the search area is too wide."
                 )
             ),
             MicroTemplate(
@@ -79,7 +79,7 @@ enum MicroTemplateLibrary {
                 systemImage: "house.fill",
                 proposal: NextStepProposal(
                     title: zh ? "清出一个小表面" : "Clear one small surface",
-                    step: zh ? "选一个手掌大的区域,只拿走三样东西。" : "Pick a hand-sized area and move only three things away.",
+                    step: zh ? "选一个手掌大的区域，只拿走三样东西。" : "Pick a hand-sized area and move only three things away.",
                     timerMinutes: 5,
                     stopCondition: zh ? "三样东西离开那个区域就停。" : "Stop when three things leave that spot.",
                     category: .household,

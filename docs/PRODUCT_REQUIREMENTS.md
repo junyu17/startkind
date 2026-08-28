@@ -157,6 +157,7 @@ Room flow:
 4. End check-in asks: done, continue, or make smaller.
 
 Friend invite must work from a link without forcing registration before joining.
+Free users can create one Friend co-start invite per rolling 7-day window; Plus users can create unlimited invites.
 
 ### 8. Personal Execution Model
 
@@ -195,12 +196,20 @@ Free includes:
 - Shareable Start Card
 - Start widget and iOS share extension entry points
 - One Admin Quick Start per day
-- Global Stuck Button that creates a smaller restart from anywhere
+- One Friend co-start invite per rolling 7-day window
+- Stuck Button in the Start first viewport that creates a smaller restart
 - Energy Match selection for low, medium, wired, or overwhelmed states
 - Friction Presets for login, document, vague task, too many tabs, and needing another person
 - Proof of Start counter that records "I started" without requiring completion
 - Tiny Admin Inbox that saves one next-step card from pasted admin text
 - Yesterday Rescue that offers a 3-minute restart without streak pressure
+- Resume Card that keeps the prior task, return clue, and one explicit way back in.
+- Start Ladder with 2-, 5-, and 15-minute versions that preserve the original step.
+- Action Prep that opens only a user-chosen email draft, phone screen, or website, and otherwise states the first setup action.
+- Daily One Thing that selects one local recovery, admin, or saved-start candidate without showing a queue.
+- Start Profile that learns time window, helpful duration, and category from completed or partial sessions without diagnosis or scoring.
+- Urgent Admin Mode that recognizes time-sensitive wording and only helps the user find the original sender's contact path.
+- Co-Start Continuity that stores an optional local display label for a preferred co-starter; it never accesses contacts or sends invitations automatically.
 - Default English and optional Simplified Chinese
 
 Free excludes:
@@ -210,7 +219,7 @@ Free excludes:
 - Email or calendar integration
 - Cross-device cloud sync
 - Unlimited recovery history
-- Friend co-start links
+- Friend co-start links (7-day free rolling limit)
 - Advanced Personal Execution Model
 
 ## Plus Feature Scope
@@ -227,7 +236,7 @@ StartKind Plus includes:
 - Personal Execution Model
 - Unlimited Recovery Capsules
 - AI quiet co-start
-- Friend co-start links
+- Unlimited Friend co-start links
 - Cross-device sync
 - Advanced insights
 - Family or partner shared support controls
@@ -257,7 +266,7 @@ The first iOS release includes these non-MVP retention features:
 11. Friction Map: blocker and timing history become non-shaming restart insights.
 12. Live Activity: the active timer can stay visible on the Lock Screen where supported.
 13. One-Tap Rescue Notification: a no-shame notification opens the smallest restart.
-14. Global Stuck Button: a persistent escape hatch creates a smaller next step from any tab.
+14. Stuck Button: an always-visible escape hatch in the Start first viewport creates a smaller next step.
 15. Yesterday Rescue: yesterday's unfinished work returns as a 3-minute restart, not a missed streak.
 16. Energy Match: low/medium/wired/overwhelmed changes the step size and framing.
 17. Friction Presets: common blockers immediately become startable micro-steps.

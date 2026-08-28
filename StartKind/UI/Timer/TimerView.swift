@@ -82,6 +82,7 @@ struct TimerView: View {
                 HStack(spacing: Theme.spacing12) {
                     QuietButton("timer.continueFive", systemImage: "plus", accessibilityId: "timer.continue5") {
                         remaining += 300
+                        env.liveActivity.update(remainingSeconds: remaining, isPaused: isPaused)
                     }
                     QuietButton("timer.makeSmaller", systemImage: "arrow.down.right", accessibilityId: "timer.makesmaller") {
                         askBlocker(for: .paused)
@@ -93,6 +94,7 @@ struct TimerView: View {
                     }
                     Button {
                         isPaused.toggle()
+                        env.liveActivity.update(remainingSeconds: remaining, isPaused: isPaused)
                     } label: {
                         Text(verbatim: L(isPaused ? "timer.resume" : "timer.pause"))
                             .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
@@ -112,7 +114,7 @@ struct TimerView: View {
         }
         .sheet(isPresented: $showBlockerPicker) {
             BlockerPickerView(
-                titleKey: pendingOutcome == .abandoned ? "blocker.title.skip" : "blocker.title.pause",
+                titleKey: "blocker.title.pause",
                 onSelect: { blocker, note in
                     showBlockerPicker = false
                     onOutcome(pendingOutcome, blocker, note)
