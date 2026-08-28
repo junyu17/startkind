@@ -365,6 +365,7 @@
 "costart.defaultGuestStep" = "现在开始";
 "costart.join" = "加入";
 "costart.roomNotFound" = "找不到那个房间，可能已结束。";
+"costart.offline" = "现在连不上 StartKind。请检查网络后再试。";
 "costart.createError" = "房间暂时没能启动。你的免费邀请额度仍保留，可以再试一次。";
 
 /* MARK: - 留存辅助 */
@@ -477,3 +478,16 @@
 "error.auth.notConfigured" = "还没有配置云端登录。";
 "error.auth.invalidCredentials" = "登录失败，请检查邮箱和密码。";
 "error.auth.network" = "无法连接服务器，请稍后再试。";
+
+/* Display preferences */
+"settings.display" = "显示";
+"settings.theme" = "主题";
+"settings.theme.system" = "跟随系统";
+"settings.theme.light" = "浅色";
+"settings.theme.dark" = "深色";
+"settings.textSize" = "字体大小";
+"settings.textSize.standard" = "标准";
+"settings.textSize.large" = "大";
+"settings.textSize.larger" = "更大";
+"settings.textSize.largest" = "最大";
+"settings.textSize.sample" = "打开账单，找到截止日期。";

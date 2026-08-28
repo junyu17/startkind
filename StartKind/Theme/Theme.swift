@@ -33,6 +33,12 @@ struct Theme {
         dark: UIColor(red: 0.275, green: 0.220, blue: 0.145, alpha: 1)
     )
     static let ink = Color.primary
+    /// Warm, high-contrast highlight reserved for the annual saving. It is the
+    /// one place the UI is allowed to shout.
+    static let savingHighlight = adaptiveColor(
+        light: UIColor(red: 0.788, green: 0.361, blue: 0.106, alpha: 1),
+        dark: UIColor(red: 0.929, green: 0.494, blue: 0.192, alpha: 1)
+    )
 
     // MARK: Spacing
     static let spacing4: CGFloat = 4

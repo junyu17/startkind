@@ -55,6 +55,7 @@ struct StartKindApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var env: AppEnvironment
+    @StateObject private var appearance = MainActor.assumeIsolated { AppearanceSettings() }
 
     init() {
         let args = ProcessInfo.processInfo.arguments
@@ -80,6 +81,11 @@ struct StartKindApp: App {
             RootView()
                 .environmentObject(env)
                 .environmentObject(LocalizationManager.shared)
+                .environmentObject(appearance)
+                // Applied at the root so the choice reaches every screen,
+                // sheet and alert.
+                .preferredColorScheme(appearance.theme.colorScheme)
+                .environment(\.dynamicTypeSize, appearance.textSize.dynamicTypeSize)
                 .task { await env.bootstrap() }
                 .onOpenURL { env.handleJoinURL($0) }
                 .onAppear {

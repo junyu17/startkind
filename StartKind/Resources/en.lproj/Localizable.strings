@@ -365,6 +365,7 @@
 "costart.defaultGuestStep" = "Starting now";
 "costart.join" = "Join";
 "costart.roomNotFound" = "Couldn't find that room. It may have ended.";
+"costart.offline" = "Can't reach StartKind right now. Check your connection and try again.";
 "costart.createError" = "That room couldn't start right now. Your free invite is still available. Please try again.";
 
 /* MARK: - Retention assists */
@@ -477,3 +478,16 @@
 "error.auth.notConfigured" = "Cloud sign-in isn't configured.";
 "error.auth.invalidCredentials" = "Sign-in failed. Check your email and password.";
 "error.auth.network" = "Couldn't reach the server. Try again.";
+
+/* Display preferences */
+"settings.display" = "Display";
+"settings.theme" = "Theme";
+"settings.theme.system" = "System";
+"settings.theme.light" = "Light";
+"settings.theme.dark" = "Dark";
+"settings.textSize" = "Text size";
+"settings.textSize.standard" = "Standard";
+"settings.textSize.large" = "Large";
+"settings.textSize.larger" = "Larger";
+"settings.textSize.largest" = "Largest";
+"settings.textSize.sample" = "Open the bill and find the due date.";

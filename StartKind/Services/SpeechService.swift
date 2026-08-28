@@ -25,12 +25,29 @@ final class SpeechService: ObservableObject {
     @Published var transcript = ""
 
     private let audioEngine = AVAudioEngine()
+    private let preferredLocale: Locale
     private var recognizer: SFSpeechRecognizer?
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
 
     init(locale: Locale = .current) {
-        recognizer = SFSpeechRecognizer(locale: locale)
+        preferredLocale = locale
+    }
+
+    /// Build the recognizer only once speech access has actually been granted.
+    /// One created earlier — while authorization was still `.notDetermined` —
+    /// keeps reporting `isAvailable == false` after the grant, which made the
+    /// first tap after authorising silently do nothing.
+    private func makeRecognizer() -> SFSpeechRecognizer? {
+        if let recognizer, recognizer.isAvailable { return recognizer }
+        let candidates = [preferredLocale, Locale(identifier: "en-US")]
+        for locale in candidates {
+            if let candidate = SFSpeechRecognizer(locale: locale), candidate.isAvailable {
+                recognizer = candidate
+                return candidate
+            }
+        }
+        return nil
     }
 
     func refreshAuthorizationState() {
@@ -40,7 +57,7 @@ final class SpeechService: ObservableObject {
 
     func start() async throws {
         try await ensureAuthorization()
-        guard let recognizer, recognizer.isAvailable else {
+        guard let recognizer = makeRecognizer() else {
             throw SpeechError.notAvailable
         }
         guard configureAudioSession() else { throw SpeechError.notAvailable }

@@ -209,12 +209,6 @@ struct StartView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: Theme.spacing12)
-            Image(systemName: "arrow.up.forward")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(Theme.accent)
-                .frame(width: 44, height: 44)
-                .background(Theme.softAccent)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
         }
         .padding(Theme.spacing16)
         .background(Theme.surface)

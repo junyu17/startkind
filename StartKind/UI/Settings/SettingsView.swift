@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
+    @EnvironmentObject private var appearance: AppearanceSettings
     @State private var showPaywall = false
     @State private var showDeleteConfirm = false
     @State private var exportText: String?
@@ -22,6 +23,35 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text(verbatim: L("settings.language"))
+                }
+
+                Section {
+                    Picker(L("settings.theme"), selection: $appearance.theme) {
+                        ForEach(AppearanceTheme.allCases) { option in
+                            Text(verbatim: L(option.localizationKey)).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("settings.theme")
+
+                    VStack(alignment: .leading, spacing: Theme.spacing8) {
+                        Picker(L("settings.textSize"), selection: $appearance.textSize) {
+                            ForEach(AppearanceTextSize.allCases) { option in
+                                Text(verbatim: L(option.localizationKey)).tag(option)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("settings.textSize")
+
+                        // Show the result before the choice is committed.
+                        Text(verbatim: L("settings.textSize.sample"))
+                            .font(.system(size: 15 * appearance.textSize.sampleScale))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("settings.textSize.sample")
+                    }
+                } header: {
+                    Text(verbatim: L("settings.display"))
                 }
 
                 Section {

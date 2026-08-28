@@ -105,6 +105,10 @@ struct CoStartView: View {
             session = result.session
         } catch CoStartError.friendLimitReached {
             onFriendLimitReached?()
+        } catch APIError.network {
+            // A generic "couldn't start" here sent people hunting for a bug in
+            // the room; the usual cause is simply no route to the backend.
+            errorMessage = L("costart.offline")
         } catch {
             errorMessage = L("costart.createError")
         }

@@ -177,10 +177,17 @@ struct PaywallView: View {
                     if isAnnual {
                         Text(verbatim: L("paywall.annual.monthlyEquivalent"))
                             .font(.caption2)
-                            .foregroundStyle(Theme.accent)
+                            .foregroundStyle(.secondary)
                         Text(verbatim: L("paywall.annual.save"))
-                            .font(.caption2)
-                            .foregroundStyle(Theme.accent)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, Theme.spacing8)
+                            .padding(.vertical, Theme.spacing4)
+                            .background(Theme.savingHighlight)
+                            .clipShape(Capsule())
+                            .padding(.top, 2)
+                            .accessibilityIdentifier("paywall.annual.save")
                     }
                 }
                 Spacer()

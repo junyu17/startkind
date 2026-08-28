@@ -73,6 +73,28 @@ final class StartKindUITests: XCTestCase {
         field.typeText(text)
     }
 
+    func testDisplaySettingsOfferThemeAndTextSize() throws {
+        let app = launch()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
+        app.tabBars.firstMatch.buttons.element(boundBy: 3).tap()
+
+        let theme = app.segmentedControls["settings.theme"]
+        XCTAssertTrue(theme.waitForExistence(timeout: 10), "Theme control should be in Settings")
+        XCTAssertEqual(theme.buttons.count, 3, "System / Light / Dark")
+
+        let textSize = app.segmentedControls["settings.textSize"]
+        XCTAssertTrue(textSize.waitForExistence(timeout: 5), "Text size control should be in Settings")
+        XCTAssertEqual(textSize.buttons.count, 4, "At least four text size steps were requested")
+
+        // Choosing Dark must stick, not silently revert.
+        theme.buttons["Dark"].tap()
+        XCTAssertTrue(theme.buttons["Dark"].isSelected)
+
+        textSize.buttons["Largest"].tap()
+        XCTAssertTrue(textSize.buttons["Largest"].isSelected)
+        XCTAssertTrue(app.staticTexts["settings.textSize.sample"].exists, "A live sample should show the chosen size")
+    }
+
     private func openSettings() -> XCUIApplication {
         let app = launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 15))
