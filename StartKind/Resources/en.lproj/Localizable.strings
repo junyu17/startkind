@@ -148,7 +148,7 @@
 "patterns.model.stepSize.small" = "5 min first";
 "patterns.model.stepSize.steady" = "10 min works";
 "patterns.model.bestWindow" = "Best window";
-"patterns.model.bestWindow.pending" = "Learning";
+"patterns.model.bestWindow.pending" = "Still learning";
 "patterns.model.summary.longer" = "%@ usually needs about %@ of your estimate, so StartKind will begin smaller.";
 "patterns.model.summary.tiny" = "%@ looks easier to start when the first step is very small.";
 "patterns.model.summary.window" = "%@ starts best in the %@ window.";
@@ -377,7 +377,7 @@
 "gentleReview.title" = "Gentle review";
 "gentleReview.starts" = "Starts this week";
 "gentleReview.friction" = "Common blocker";
-"gentleReview.none" = "Learning";
+"gentleReview.none" = "Still learning";
 
 /* MARK: - Privacy */
 "privacy.title" = "Privacy";
@@ -419,7 +419,7 @@
 "startProfile.window" = "Time";
 "startProfile.duration" = "Length";
 "startProfile.category" = "Often";
-"startProfile.learning" = "Learning";
+"startProfile.learning" = "Still learning";
 "startProfile.minutes" = "%d min";
 "costart.again" = "Start another 25 min with %@";
 "costart.saveFriend" = "Save this friend";
