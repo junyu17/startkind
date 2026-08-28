@@ -156,6 +156,13 @@ final class AppEnvironment: ObservableObject {
         }
         refreshUsage()
         consumePendingAppIntentAction()
+        // Re-assert the entitlement on every launch. The one attempt made at
+        // purchase time can fail (offline, server down), and nothing else
+        // retried it - leaving someone who paid on Free limits server-side
+        // forever, with the app still showing Plus locally.
+        if !skipStoreKit, isPlus {
+            await syncEntitlementToBackend()
+        }
     }
 
     func refreshUsage() {
