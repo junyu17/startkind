@@ -42,6 +42,9 @@ struct StartView: View {
     /// its result below the fold, so without scrolling to it the screen looks
     /// like nothing happened - the worst possible feedback for this app.
     private static let stepAnchor = "start.nextStepCard"
+    /// A failure can arrive while an earlier step is still on screen, so the
+    /// two cannot share a scroll anchor.
+    private static let errorAnchor = "start.errorBanner"
 
     private enum FocusedField: Hashable {
         case taskInput
@@ -56,39 +59,61 @@ struct StartView: View {
                 VStack(spacing: Theme.spacing16) {
                     headerBand
                     primaryStartPanel
+
+                    // The answer belongs next to the question. Every control
+                    // that produces a step lives in primaryStartPanel or just
+                    // below it, so the result - and the wait before it - has
+                    // to render here rather than under the fold, where a tap
+                    // looks like it did nothing.
+                    if isLoading {
+                        StepSkeleton()
+                            .id(Self.stepAnchor)
+                            .transition(.opacity)
+                    } else if let step = currentStep {
+                        VStack(spacing: Theme.spacing16) {
+                            NextStepCard(
+                                step: step,
+                                showPlan: $showPlan,
+                                onStart: { startTimer(for: step) },
+                                onShrink: { shrink(step) },
+                                onSkip: { skip(step) },
+                                actionPrep: env.actionPrep(for: step),
+                                onPrepare: { plan in
+                                    if let url = plan.url { openURL(url) }
+                                },
+                                onUseStartLadder: { minutes in
+                                    currentStep = env.createStartLadderStep(from: step, minutes: minutes)
+                                    showPlan = false
+                                },
+                                onCoStart: {
+                                    currentStep = step
+                                    coStartInitialMode = nil
+                                    showCoStart = true
+                                },
+                                onSaveToVault: {
+                                    env.vault.add(title: step.proposal.title, body: step.proposal.step, category: step.category)
+                                    vaultMessage = L("vault.saved")
+                                }
+                            )
+                            proofOfStartPanel(step)
+                        }
+                        // No accessibility identifier here: putting one on the
+                        // wrapper collapses the card into a single element and
+                        // hides everything inside it from VoiceOver.
+                        .id(Self.stepAnchor)
+                    }
+
+                    if let errorMessage {
+                        KindBanner(text: errorMessage, tone: .warning)
+                            .id(Self.errorAnchor)
+                            .transition(.opacity)
+                            .accessibilityIdentifier("start.error")
+                    }
+
                     moreWaysPanel
                     usageLine
 
-                    if isLoading {
-                        loadingState
-                    } else if let step = currentStep {
-                        NextStepCard(
-                            step: step,
-                            showPlan: $showPlan,
-                            onStart: { startTimer(for: step) },
-                            onShrink: { shrink(step) },
-                            onSkip: { skip(step) },
-                            actionPrep: env.actionPrep(for: step),
-                            onPrepare: { plan in
-                                if let url = plan.url { openURL(url) }
-                            },
-                            onUseStartLadder: { minutes in
-                                currentStep = env.createStartLadderStep(from: step, minutes: minutes)
-                                showPlan = false
-                            },
-                            onCoStart: {
-                                currentStep = step
-                                coStartInitialMode = nil
-                                showCoStart = true
-                            },
-                            onSaveToVault: {
-                                env.vault.add(title: step.proposal.title, body: step.proposal.step, category: step.category)
-                                vaultMessage = L("vault.saved")
-                            }
-                        )
-                        proofOfStartPanel(step)
-                            .id(Self.stepAnchor)
-                    } else {
+                    if currentStep == nil && !isLoading && errorMessage == nil {
                         emptyHint
                     }
 
@@ -104,19 +129,33 @@ struct StartView: View {
                         KindBanner(text: proofMessage)
                             .transition(.opacity)
                     }
-                    if let errorMessage {
-                        Text(verbatim: errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
                 }
                 .padding(.horizontal, Theme.spacing16)
                 .padding(.vertical, Theme.spacing16)
                 .animation(.easeInOut, value: rescheduleMessage)
                 .onChange(of: currentStep?.id) { _, id in
                     guard id != nil else { return }
+                    // A step arriving supersedes whatever failed before it.
+                    // Eighteen call sites produce steps; stating the rule here
+                    // is the only version of it that stays true.
+                    errorMessage = nil
                     withAnimation(.easeInOut) {
-                        proxy.scrollTo(Self.stepAnchor, anchor: .bottom)
+                        proxy.scrollTo(Self.stepAnchor, anchor: .top)
+                    }
+                }
+                // A second, distinct confirmation when the step actually
+                // lands, so the arrival is felt as well as seen.
+                .sensoryFeedback(.success, trigger: currentStep?.id) { _, id in id != nil }
+                .onChange(of: errorMessage) { _, message in
+                    guard message != nil else { return }
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo(Self.errorAnchor, anchor: .top)
+                    }
+                }
+                .onChange(of: isLoading) { _, loading in
+                    guard loading else { return }
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo(Self.stepAnchor, anchor: .top)
                     }
                 }
                 }
@@ -256,6 +295,7 @@ struct StartView: View {
             kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
                 runAutopilot()
             }
+            .disabled(isLoading)
         }
     }
 
@@ -296,7 +336,7 @@ struct StartView: View {
             .background(Theme.softAccent.opacity(0.72))
             .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .pressableCard()
         .accessibilityIdentifier("start.kind.resume")
     }
 
@@ -330,7 +370,7 @@ struct StartView: View {
                     }
                     .font(.footnote)
                     .foregroundStyle(Theme.accent)
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("dailyOne.replace")
 
                     Button(L("dailyOne.dismiss")) {
@@ -339,7 +379,7 @@ struct StartView: View {
                     }
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("dailyOne.dismiss")
                 }
             }
@@ -373,7 +413,7 @@ struct StartView: View {
             )
             .accessibilityElement(children: .combine)
         }
-        .buttonStyle(.plain)
+        .pressableCard()
         .accessibilityLabel(Text(verbatim: L(key)))
         .accessibilityIdentifier(id)
     }
@@ -456,7 +496,8 @@ struct StartView: View {
                     .stroke(env.speech.isListening ? Color.red.opacity(0.2) : Theme.line, lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .pressableCard()
+        .disabled(isLoading)
         .accessibilityLabel(Text(verbatim: L(env.speech.isListening ? "start.voice.listening" : "start.voice.tap")))
         .accessibilityIdentifier("start.voice")
     }
@@ -481,7 +522,7 @@ struct StartView: View {
                     .background(canSubmit ? Theme.accent : Color.secondary.opacity(0.45))
                     .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
             }
-            .buttonStyle(.plain)
+            .pressableCard()
             .disabled(!canSubmit)
             .accessibilityLabel(Text(verbatim: L("start.text.submit")))
             .accessibilityIdentifier("start.submit")
@@ -504,7 +545,8 @@ struct StartView: View {
                         .stroke(Theme.accent.opacity(0.22), lineWidth: 1)
                 )
         }
-        .buttonStyle(.plain)
+        .pressableCard()
+        .disabled(isLoading)
         .accessibilityIdentifier("global.stuck")
     }
 
@@ -534,7 +576,7 @@ struct StartView: View {
                     .stroke(Theme.line, lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .pressableCard()
         .disabled(!canCoStart || isLoading)
         .accessibilityIdentifier("start.costart.friend")
     }
@@ -556,14 +598,23 @@ struct StartView: View {
                 Button {
                     Task { await joinRoomByCode() }
                 } label: {
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(canJoinRoom ? Theme.accent : Color.secondary.opacity(0.45))
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                    Group {
+                        // Joining is a round trip to the server; the arrow
+                        // turning into a spinner is the only thing telling
+                        // the person their tap went somewhere.
+                        if isJoiningRoom {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .frame(width: 38, height: 38)
+                    .background(canJoinRoom || isJoiningRoom ? Theme.accent : Color.secondary.opacity(0.45))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .disabled(!canJoinRoom)
                 .accessibilityLabel(Text(verbatim: L("costart.join")))
                 .accessibilityIdentifier("start.join.submit")
@@ -596,7 +647,7 @@ struct StartView: View {
                         .background(canCaptureAdminInbox ? Theme.accent : Color.secondary.opacity(0.45))
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .disabled(!canCaptureAdminInbox)
                 .accessibilityIdentifier("adminInbox.submit")
             }
@@ -666,7 +717,7 @@ struct StartView: View {
                             .stroke(Theme.accent.opacity(0.22), lineWidth: 1)
                     )
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .accessibilityIdentifier("frictionForecast.apply")
             }
         }
@@ -698,7 +749,7 @@ struct StartView: View {
                                     .stroke(selectedEnergy == energy ? Theme.accent.opacity(0.35) : Theme.line, lineWidth: 1)
                             )
                     }
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("energy.\(energy.rawValue)")
                 }
             }
@@ -728,7 +779,7 @@ struct StartView: View {
                                     .stroke(Theme.line, lineWidth: 1)
                             )
                     }
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("frictionPreset.\(preset.rawValue)")
                 }
             }
@@ -771,7 +822,7 @@ struct StartView: View {
                         .foregroundStyle(Theme.ink)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .accessibilityIdentifier("frictionMemory.apply")
             }
             if env.startScripts.scripts.isEmpty {
@@ -803,7 +854,7 @@ struct StartView: View {
                         .background(Theme.surfaceRaised)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                     }
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("startScript.item")
                 }
             }
@@ -830,7 +881,7 @@ struct StartView: View {
                         .background(canUseCalendarSoftLanding ? Theme.accent : Color.secondary.opacity(0.45))
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .disabled(!canUseCalendarSoftLanding)
                 .accessibilityIdentifier("calendarSoft.submit")
             }
@@ -1377,7 +1428,7 @@ struct FlowChips: View {
                             .stroke(selected == item ? Theme.accent.opacity(0.35) : Theme.line, lineWidth: 1)
                     )
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .accessibilityLabel(Text(verbatim: L(item.localizationKey)))
                 .accessibilityAddTraits(selected == item ? .isSelected : [])
             }

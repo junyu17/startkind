@@ -23,6 +23,7 @@ struct NextStepCard: View {
                 .font(.title3)
                 .fontWeight(.bold)
                 .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("nextstep.title")
 
             Text(verbatim: proposal.step)
                 .font(.body)
@@ -87,7 +88,7 @@ struct NextStepCard: View {
                         .foregroundStyle(Theme.accent)
                         .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .disabled(proposal.whyThisStep == nil)
             }
 
@@ -103,7 +104,7 @@ struct NextStepCard: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
             }
-            .buttonStyle(.plain)
+            .pressableCard()
         }
         .startKindCard()
     }
@@ -183,7 +184,7 @@ struct NextStepCard: View {
                             .foregroundStyle(Theme.accent)
                             .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
                     }
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("nextstep.prepare")
                 }
             }
@@ -213,7 +214,7 @@ struct NextStepCard: View {
                             .background(Theme.softAccent)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                     }
-                    .buttonStyle(.plain)
+                    .pressableCard()
                     .accessibilityIdentifier("nextstep.ladder.\(minutes)")
                 }
             }

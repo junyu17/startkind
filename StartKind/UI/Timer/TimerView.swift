@@ -191,7 +191,7 @@ struct BlockerPickerView: View {
                                     .stroke(Theme.line, lineWidth: 1)
                             )
                         }
-                        .buttonStyle(.plain)
+                        .pressableCard()
                         .accessibilityIdentifier("blocker.\(reason.rawValue)")
                     }
                 }
@@ -204,7 +204,7 @@ struct BlockerPickerView: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
                 }
-                .buttonStyle(.plain)
+                .pressableCard()
                 .accessibilityIdentifier("blocker.skip")
 
                 Spacer()

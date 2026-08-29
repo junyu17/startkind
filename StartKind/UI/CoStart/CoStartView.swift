@@ -62,13 +62,13 @@ struct CoStartView: View {
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous))
                 }
                 if let errorMessage {
-                    KindBanner(text: errorMessage)
+                    KindBanner(text: errorMessage, tone: .warning)
                         .accessibilityIdentifier("costart.error")
                 }
-                PrimaryButton("costart.aiQuiet", systemImage: "sparkles", enabled: !isStarting, accessibilityId: "costart.ai") {
+                PrimaryButton("costart.aiQuiet", systemImage: "sparkles", enabled: !isStarting, busy: isStarting, accessibilityId: "costart.ai") {
                     Task { await start(type: .aiQuiet) }
                 }
-                PrimaryButton("costart.friend", systemImage: "link", enabled: !isStarting, accessibilityId: "costart.friend") {
+                PrimaryButton("costart.friend", systemImage: "link", enabled: !isStarting, busy: isStarting, accessibilityId: "costart.friend") {
                     Task { await start(type: .friendLink) }
                 }
                 if let preferred = env.coStartContinuity.preferred {
@@ -174,11 +174,10 @@ struct CoStartCodeGuestJoinView: View {
                     .lineLimit(1...3)
                     .accessibilityIdentifier("costart.gueststep")
                 if let errorMessage {
-                    Text(verbatim: errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
+                    KindBanner(text: errorMessage, tone: .warning)
+                        .accessibilityIdentifier("costart.join.error")
                 }
-                PrimaryButton("costart.join", systemImage: "arrow.right.circle.fill", enabled: !joining) {
+                PrimaryButton("costart.join", systemImage: "arrow.right.circle.fill", enabled: !joining, busy: joining) {
                     Task { await join() }
                 }
             }

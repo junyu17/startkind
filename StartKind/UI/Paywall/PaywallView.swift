@@ -10,6 +10,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selected: String = SubscriptionProductID.annual
     @State private var purchasing = false
+    @State private var restoring = false
 
     var body: some View {
         NavigationStack {
@@ -24,16 +25,29 @@ struct PaywallView: View {
                     PrimaryButton(
                         verbatim: ctaTitle,
                         enabled: selectedProduct != nil && !purchasing,
+                        busy: purchasing,
                         action: { purchase() }
                     )
                     .accessibilityIdentifier("paywall.subscribe")
                     Divider().background(Theme.line)
                     planComparison
 
-                    Button(L("paywall.restore")) {
-                        Task { await env.entitlement.restore() }
+                    Button {
+                        guard !restoring else { return }
+                        restoring = true
+                        Task {
+                            await env.entitlement.restore()
+                            restoring = false
+                        }
+                    } label: {
+                        HStack(spacing: Theme.spacing8) {
+                            if restoring { ProgressView().controlSize(.small) }
+                            Text(verbatim: L("paywall.restore"))
+                        }
                     }
                     .font(.footnote)
+                    .disabled(restoring)
+                    .accessibilityIdentifier("paywall.restore")
 
                     Button(L("paywall.dismiss")) { dismiss() }
                         .font(.footnote)
@@ -202,7 +216,7 @@ struct PaywallView: View {
                     .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.line, lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .pressableCard()
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier(isAnnual ? "paywall.annual" : "paywall.monthly")
     }

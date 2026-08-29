@@ -49,9 +49,8 @@ struct AdminQuickReaderView: View {
                     if isParsing || isReadingPhoto { loadingRow }
                     if let result { resultCard(result) }
                     if let errorMessage {
-                        Text(verbatim: errorMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.red)
+                        KindBanner(text: errorMessage, tone: .warning)
+                            .accessibilityIdentifier("admin.error")
                     }
                 }
                 .padding(Theme.spacing16)
@@ -168,7 +167,7 @@ struct AdminQuickReaderView: View {
                 }
             }
 
-            PrimaryButton("admin.parse", systemImage: "wand.and.stars", enabled: canParse, accessibilityId: "admin.parse") {
+            PrimaryButton("admin.parse", systemImage: "wand.and.stars", enabled: canParse, busy: isParsing, accessibilityId: "admin.parse") {
                 Task { await parse() }
             }
         }

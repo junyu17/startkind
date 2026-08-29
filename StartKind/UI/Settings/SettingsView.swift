@@ -74,12 +74,17 @@ struct SettingsView: View {
                     if !env.isPlus {
                         Button(L("settings.subscription.plus")) { sheet = .paywall }
                     }
-                    Button(L("settings.subscription.restore")) {
+                    Button {
                         restoring = true
                         Task {
                             await env.entitlement.restore()
                             await env.syncEntitlementToBackend()
                             restoring = false
+                        }
+                    } label: {
+                        HStack(spacing: Theme.spacing8) {
+                            if restoring { ProgressView().controlSize(.small) }
+                            Text(verbatim: L("settings.subscription.restore"))
                         }
                     }
                     .disabled(restoring)

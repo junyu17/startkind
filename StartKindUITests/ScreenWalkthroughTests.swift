@@ -172,3 +172,77 @@ final class ScreenWalkthroughTests: XCTestCase {
         )
     }
 }
+
+/// The report that produced these tests: "I tapped the buttons on the home
+/// page and there was no feedback - I didn't know whether I'd missed the
+/// button or it hadn't responded, so I kept tapping, and only after scrolling
+/// to the bottom did I see it was working." Each test below pins one half of
+/// that: the result is on screen, and the controls keep working.
+final class StartFeedbackTests: XCTestCase {
+
+    private func launch() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments += ["-UITEST"]
+        app.launch()
+        return app
+    }
+
+    /// The card is taller than the screen, so its container is never fully
+    /// hittable. The title is the part that has to be readable the instant
+    /// the step exists.
+    private func produceStepAndReturnTitle(_ app: XCUIApplication) -> XCUIElement {
+        let autopilot = app.descendants(matching: .any)["start.autopilot"]
+        XCTAssertTrue(autopilot.waitForExistence(timeout: 15), "Autopilot missing")
+        autopilot.tap()
+        let title = app.descendants(matching: .any)["nextstep.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 15), "No step was produced")
+        return title
+    }
+
+    /// The whole report in one assertion: after one tap, the step is on screen
+    /// without the person scrolling for it.
+    func testProducedStepIsOnScreenWithoutScrolling() throws {
+        let app = launch()
+        let title = produceStepAndReturnTitle(app)
+
+        XCTAssertTrue(title.isHittable, "The step title landed off screen")
+        let window = app.windows.element(boundBy: 0).frame
+        XCTAssertTrue(
+            window.contains(CGPoint(x: title.frame.midX, y: title.frame.midY)),
+            "The step must be inside the viewport the moment it appears"
+        )
+    }
+
+    /// It also has to come before "More ways to start" in the layout, so it is
+    /// never pushed under the fold again by something growing above it.
+    func testProducedStepRendersAboveTheMoreWaysPanel() throws {
+        let app = launch()
+        let title = produceStepAndReturnTitle(app)
+
+        let moreWays = app.buttons["start.moreWays"].firstMatch
+        XCTAssertTrue(moreWays.exists, "More ways disclosure missing")
+        XCTAssertLessThan(
+            title.frame.minY, moreWays.frame.minY,
+            "The produced step must sit above More ways to start, not below it"
+        )
+    }
+
+    /// Producing a step scrolls it into view, which moves the start controls
+    /// off the top. They must still be there - one flick up - so a second
+    /// attempt is always available.
+    func testStartControlsRemainAvailableAfterAStepIsProduced() throws {
+        let app = launch()
+        _ = produceStepAndReturnTitle(app)
+
+        let stuck = app.buttons["global.stuck"]
+        XCTAssertTrue(stuck.exists, "I'm stuck disappeared entirely")
+        for _ in 0..<4 where !stuck.isHittable { app.swipeDown() }
+        XCTAssertTrue(stuck.isHittable, "I'm stuck could not be reached by scrolling back up")
+
+        stuck.tap()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["nextstep.title"].waitForExistence(timeout: 15),
+            "A second step could not be produced"
+        )
+    }
+}
