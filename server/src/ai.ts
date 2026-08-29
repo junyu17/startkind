@@ -67,9 +67,15 @@ type Response<T> = {
   body: T;
 };
 
+// The reply is one short JSON object either way. Without a ceiling the model
+// is free to keep generating, and every extra token is time the user spends
+// looking at a screen that has not changed yet.
+const MAX_OUTPUT_TOKENS = 400;
+
 async function callModel(
   system: string,
-  user: string
+  user: string,
+  maxTokens: number = MAX_OUTPUT_TOKENS
 ): Promise<Record<string, unknown>> {
   const apiKey = Deno.env.get("AI_API_KEY");
   if (!apiKey) throw new Error("AI_API_KEY not set");
@@ -92,6 +98,7 @@ async function callModel(
       ],
       response_format: { type: "json_object" },
       temperature: 0.4,
+      max_tokens: maxTokens,
     }),
   });
 
@@ -204,6 +211,7 @@ export async function adminParse(
       ],
       response_format: { type: "json_object" },
       temperature: 0.2,
+      max_tokens: 600,
     }),
   });
 
