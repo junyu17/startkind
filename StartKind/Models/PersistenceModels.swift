@@ -17,7 +17,10 @@ final class UserProfileModel {
 
     init(
         id: UUID = UUID(),
-        locale: String = "en",
+        // Empty means "not chosen yet", so a fresh install can follow the
+        // device language. Defaulting to "en" here sent every new Chinese
+        // user into an English app until they changed it by hand.
+        locale: String = "",
         timezone: String = TimeZone.current.identifier,
         entitlementState: EntitlementState = .free,
         preferredTone: PreferredTone = .neutral,

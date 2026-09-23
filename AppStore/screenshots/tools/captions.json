@@ -1,0 +1,18 @@
+{
+  "en-US": {
+    "01_start": ["One thing,", "not everything"],
+    "02_timer": ["Ten minutes,", "then you're free"],
+    "03_stuck": ["Stuck?", "Pick up right here"],
+    "04_patterns": ["See your", "own patterns"],
+    "05_admin": ["Turn paperwork", "into one step"],
+    "06_settingsPrivacy": ["No account", "needed, ever"]
+  },
+  "zh-Hans": {
+    "01_start": ["一件事，", "不是全部待办"],
+    "02_timer": ["十分钟", "只做这一步"],
+    "03_stuck": ["卡住了？", "从这里继续"],
+    "04_patterns": ["看见", "你的启动规律"],
+    "05_admin": ["繁琐事务", "变成一步"],
+    "06_settingsPrivacy": ["不用注册", "数据留在手机"]
+  }
+}

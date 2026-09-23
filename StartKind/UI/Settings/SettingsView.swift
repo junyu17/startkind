@@ -1,11 +1,15 @@
 import SwiftUI
+import StoreKit
+import UIKit
 
 private enum SettingsSheet: Identifiable {
+    case profile
     case paywall
     case export(String)
 
     var id: String {
         switch self {
+        case .profile: return "profile"
         case .paywall: return "paywall"
         case .export: return "export"
         }
@@ -19,6 +23,8 @@ struct SettingsView: View {
     @State private var sheet: SettingsSheet?
     @State private var showDeleteConfirm = false
     @State private var restoring = false
+    @State private var subscriptionFeedback: String?
+    @State private var subscriptionFeedbackIsError = false
 
     var body: some View {
         NavigationStack {
@@ -31,8 +37,20 @@ struct SettingsView: View {
                         Text(verbatim: L("settings.language.en")).tag("en")
                         Text(verbatim: L("settings.language.zh")).tag("zh-Hans")
                     }
+                    .accessibilityIdentifier("settings.language")
                 } header: {
                     Text(verbatim: L("settings.language"))
+                }
+
+                Section {
+                    Button {
+                        sheet = .profile
+                    } label: {
+                        Label(L("settings.editProfile"), systemImage: "person.crop.circle")
+                    }
+                    .accessibilityIdentifier("settings.editProfile")
+                } header: {
+                    Text(verbatim: L("settings.profile"))
                 }
 
                 Section {
@@ -50,7 +68,7 @@ struct SettingsView: View {
                                 Text(verbatim: L(option.localizationKey)).tag(option)
                             }
                         }
-                        .pickerStyle(.segmented)
+                        .pickerStyle(.menu)
                         .accessibilityIdentifier("settings.textSize")
 
                         // Show the result before the choice is committed.
@@ -71,14 +89,34 @@ struct SettingsView: View {
                         Text(verbatim: env.entitlement.state.displayName)
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityIdentifier("settings.subscription.status")
                     if !env.isPlus {
-                        Button(L("settings.subscription.plus")) { sheet = .paywall }
+                        Button(L("settings.subscription.upgrade")) { sheet = .paywall }
+                            .accessibilityIdentifier("settings.subscription.upgrade")
+                    } else {
+                        Button {
+                            manageSubscriptions()
+                        } label: {
+                            Label(L("settings.subscription.manage"), systemImage: "arrow.up.right.square")
+                        }
+                        .accessibilityIdentifier("settings.subscription.manage")
                     }
                     Button {
+                        subscriptionFeedback = nil
                         restoring = true
                         Task {
-                            await env.entitlement.restore()
-                            await env.syncEntitlementToBackend()
+                            let restored = await env.entitlement.restore()
+                            if let error = env.entitlement.lastError {
+                                subscriptionFeedback = error
+                                subscriptionFeedbackIsError = true
+                            } else if restored {
+                                await env.syncEntitlementToBackend()
+                                subscriptionFeedback = L("settings.subscription.restore.success")
+                                subscriptionFeedbackIsError = false
+                            } else {
+                                subscriptionFeedback = L("settings.subscription.restore.none")
+                                subscriptionFeedbackIsError = false
+                            }
                             restoring = false
                         }
                     } label: {
@@ -88,6 +126,14 @@ struct SettingsView: View {
                         }
                     }
                     .disabled(restoring)
+                    .accessibilityIdentifier("settings.subscription.restore")
+                    if let subscriptionFeedback {
+                        Text(verbatim: subscriptionFeedback)
+                            .font(.footnote)
+                            .foregroundStyle(subscriptionFeedbackIsError ? .orange : Theme.accent)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("settings.subscription.feedback")
+                    }
                 } header: {
                     Text(verbatim: L("settings.subscription"))
                 }
@@ -108,7 +154,7 @@ struct SettingsView: View {
                         sheet = .export(env.exportJSON())
                     }
                     .accessibilityIdentifier("settings.dataExport")
-                    Button(L("settings.deleteAccount"), role: .destructive) {
+                    Button(L("settings.deleteData"), role: .destructive) {
                         showDeleteConfirm = true
                     }
                     .accessibilityIdentifier("settings.deleteData")
@@ -123,21 +169,25 @@ struct SettingsView: View {
                 } header: {
                     Text(verbatim: L("settings.about"))
                 }
+
+                MoreAppsSection()
             }
             .navigationTitle(L("settings.title"))
             // One sheet driven by an item, so the content can never be built
             // from state that is still nil and present an empty sheet.
             .sheet(item: $sheet) { which in
                 switch which {
+                case .profile:
+                    OnboardingView(isEditing: true).environmentObject(env)
                 case .paywall:
                     PaywallView(trigger: .feature).environmentObject(env)
                 case .export(let text):
                     ExportView(text: text)
                 }
             }
-            .alert(L("settings.deleteAccount"), isPresented: $showDeleteConfirm) {
+            .alert(L("settings.deleteData"), isPresented: $showDeleteConfirm) {
                 Button(L("common.cancel"), role: .cancel) {}
-                Button(L("settings.deleteAccount"), role: .destructive) {
+                Button(L("settings.deleteData"), role: .destructive) {
                     env.deleteAllData()
                 }
             } message: {
@@ -158,6 +208,25 @@ struct SettingsView: View {
     private var versionRow: some View {
         Text(verbatim: L("settings.version", Bundle.main.appVersion))
             .foregroundStyle(.secondary)
+    }
+
+    private func manageSubscriptions() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first else {
+            subscriptionFeedback = L("settings.subscription.manage.error")
+            subscriptionFeedbackIsError = true
+            return
+        }
+
+        Task { @MainActor in
+            do {
+                try await AppStore.showManageSubscriptions(in: scene)
+            } catch {
+                subscriptionFeedback = error.localizedDescription
+                subscriptionFeedbackIsError = true
+            }
+        }
     }
 }
 

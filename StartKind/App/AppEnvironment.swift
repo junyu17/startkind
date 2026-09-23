@@ -1,6 +1,79 @@
 import Foundation
 import Combine
 
+enum StartKindRuntime {
+    private static let explicitUITestArguments = ["-UITEST", "-UITEST_AUTH", "-UITEST_PLUS", "-UITEST_ONBOARDING"]
+
+    private static var arguments: [String] { ProcessInfo.processInfo.arguments }
+
+    static var isTestRuntime: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        if explicitUITestArguments.contains(where: { arguments.contains($0) }) {
+            return true
+        }
+#if DEBUG
+        return isXCTestHost
+#else
+        return false
+#endif
+    }
+
+    static var shouldUseInMemoryPersistence: Bool { isTestRuntime }
+
+    static var shouldSkipStoreKit: Bool {
+#if DEBUG
+        // Screenshot mode also needs StoreKit's real (empty) entitlements
+        // left alone, or `entitlement.load()` would immediately overwrite
+        // the Plus state `forcePlusForUITest` just set below.
+        isTestRuntime || ScreenshotMode.isActive
+#else
+        isTestRuntime
+#endif
+    }
+
+    static var forcePlusForUITest: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-UITEST_PLUS") || ScreenshotMode.forcePlus
+#else
+        false
+#endif
+    }
+
+    static var shouldShowOnboarding: Bool {
+        arguments.contains("-UITEST_ONBOARDING")
+    }
+
+    static var shouldSkipOnboarding: Bool {
+#if DEBUG
+        (isTestRuntime && !shouldShowOnboarding) || ScreenshotMode.isActive
+#else
+        isTestRuntime && !shouldShowOnboarding
+#endif
+    }
+
+#if DEBUG
+    private static var isXCTestHost: Bool {
+        let processInfo = ProcessInfo.processInfo
+        let environment = processInfo.environment
+        let previewValue = environment["XCODE_RUNNING_FOR_PREVIEWS"]
+        guard previewValue != "1", previewValue != "YES" else { return false }
+
+        let xctestEnvironmentKeys = [
+            "XCTestConfigurationFilePath",
+            "XCTestBundlePath",
+            "XCInjectBundleInto",
+            "XCTestSessionIdentifier"
+        ]
+        if xctestEnvironmentKeys.contains(where: { environment[$0] != nil }) {
+            return true
+        }
+
+        let processName = processInfo.processName.lowercased()
+        return processName.contains("xctest")
+    }
+#endif
+}
+
 enum UsageError: LocalizedError {
     case stepLimitReached, adminLimitReached
 
@@ -22,6 +95,7 @@ enum CoStartError: Error {
 @MainActor
 final class AppEnvironment: ObservableObject {
     let persistence: PersistenceService
+    let onboarding: OnboardingProfileStore
     let entitlement: EntitlementService
     let usage: UsageTracker
     let vault: PersonalVaultStore
@@ -64,10 +138,14 @@ final class AppEnvironment: ObservableObject {
 
     init(
         inMemory: Bool = false,
-        usageDefaults: UserDefaults = .standard
+        usageDefaults: UserDefaults = .standard,
+        profileDefaults: UserDefaults = .standard,
+        aiClient: AIClient? = nil
     ) {
+        let testRuntime = StartKindRuntime.isTestRuntime
+
         let persistence: PersistenceService
-        if let stored = try? PersistenceService(inMemory: inMemory) {
+        if let stored = try? PersistenceService(inMemory: inMemory || testRuntime) {
             persistence = stored
         } else if let ephemeral = try? PersistenceService(inMemory: true) {
             // Last resort: this session runs on an in-memory store rather than
@@ -77,17 +155,40 @@ final class AppEnvironment: ObservableObject {
             fatalError("StartKind storage could not be initialized")
         }
         self.persistence = persistence
-        self.entitlement = EntitlementService()
+        self.onboarding = OnboardingProfileStore(
+            defaults: profileDefaults,
+            skipOnboarding: StartKindRuntime.shouldSkipOnboarding,
+            forceOnboarding: StartKindRuntime.shouldShowOnboarding
+        )
+        self.entitlement = EntitlementService(forcePlusForUITest: StartKindRuntime.forcePlusForUITest)
         self.usage = UsageTracker(defaults: usageDefaults)
         self.vault = PersonalVaultStore()
         self.liveActivity = LiveTimerActivityService()
         self.rescueNotifications = RescueNotificationService()
         self.proofOfStart = ProofOfStartStore()
         self.tinyAdminInbox = TinyAdminInboxStore()
-        self.speech = SpeechService()
-        let launchArgs = ProcessInfo.processInfo.arguments
-        let uiTestMode = launchArgs.contains("-UITEST") || launchArgs.contains("-UITEST_AUTH")
-        self.ai = uiTestMode ? LocalAIClient() : CloudAIClient()
+        var preferredLanguage = persistence.profile?.locale ?? ""
+        if preferredLanguage.isEmpty {
+            // First launch: follow the device, then remember it so a later
+            // change in Settings still wins.
+            preferredLanguage = StartKindLanguage.systemPreferred
+            persistence.updateProfile(locale: preferredLanguage)
+        }
+#if DEBUG
+        // `PersistenceService.init` already called `ensureProfile()`, which
+        // defaults a fresh install's locale to "en" - so the line above
+        // ignores `-AppleLanguages` entirely on every screenshot run, since
+        // each one starts from a fresh `simctl uninstall`. Re-derive it from
+        // the system language every screenshot launch instead; harmless to
+        // repeat on the later launches that reuse this install.
+        if ScreenshotMode.isActive {
+            preferredLanguage = ScreenshotMode.systemPreferredLanguage
+            persistence.updateProfile(locale: preferredLanguage)
+        }
+#endif
+        LocalizationManager.shared.setLanguage(preferredLanguage)
+        self.speech = SpeechService(locale: Locale(identifier: preferredLanguage))
+        self.ai = aiClient ?? (testRuntime ? LocalAIClient() : CloudAIClient())
         self.api = StartKindAPI()
         self.engine = NextStepEngine()
         self.shrinker = TaskShrinker()
@@ -114,7 +215,7 @@ final class AppEnvironment: ObservableObject {
         self.dailyOneThingPlanner = DailyOneThingPlanner()
         self.startProfilePlanner = StartProfilePlanner()
         self.urgentAdminPlanner = UrgentAdminPlanner()
-        if uiTestMode {
+        if testRuntime {
             self.vault.clear()
             self.proofOfStart.clear()
             self.tinyAdminInbox.clear()
@@ -139,13 +240,22 @@ final class AppEnvironment: ObservableObject {
         usage.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        speech.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        onboarding.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+#if DEBUG
+        seedScreenshotDataIfNeeded()
+#endif
     }
 
     // MARK: - Launch
 
     func bootstrap() async {
-        let args = ProcessInfo.processInfo.arguments
-        let skipStoreKit = args.contains("-UITEST") || args.contains("-UITEST_AUTH")
+        let skipStoreKit = StartKindRuntime.shouldSkipStoreKit
         LocalizationManager.shared.setLanguage(persistence.profile?.locale ?? "en")
         if !skipStoreKit {
             await entitlement.load()
@@ -154,6 +264,11 @@ final class AppEnvironment: ObservableObject {
         if !skipStoreKit {
             persistence.updateProfile(entitlement: entitlement.state)
         }
+#if DEBUG
+        if StartKindRuntime.forcePlusForUITest {
+            persistence.updateProfile(entitlement: entitlement.state)
+        }
+#endif
         refreshUsage()
         consumePendingAppIntentAction()
         // Re-assert the entitlement on every launch. The one attempt made at
@@ -188,7 +303,7 @@ final class AppEnvironment: ObservableObject {
 
     private func makeCoStartRoom(type: CoStartRoomType, roomCode: String? = nil) -> CoStartRoomModel {
         let hostId = persistence.userId
-        return CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .active, roomCode: roomCode, startsAt: .now)
+        return CoStartRoomModel(hostUserId: hostId, roomType: type, durationMinutes: 25, status: .scheduled, roomCode: roomCode)
     }
 
     private func persistCoStartRoom(_ room: CoStartRoomModel, stepText: String) {
@@ -202,9 +317,10 @@ final class AppEnvironment: ObservableObject {
         try? persistence.context.save()
     }
 
-    /// Start a co-start room + a 25-min timer session for the given step.
+    /// Create a co-start room for the given step. The timer session is created
+    /// only by `beginCoStart` after the person explicitly starts.
     @discardableResult
-    func startCoStart(type: CoStartRoomType, step: NextStepModel, stepText: String) async throws -> (room: CoStartRoomModel, session: TimerSessionModel) {
+    func startCoStart(type: CoStartRoomType, step: NextStepModel, stepText: String) async throws -> CoStartRoomModel {
         if type == .friendLink {
             guard canCreateFriendCoStart else { throw CoStartError.friendLimitReached }
             guard !friendCoStartCreationInFlight else { throw CoStartError.friendRoomPublishFailed }
@@ -212,21 +328,32 @@ final class AppEnvironment: ObservableObject {
             defer { friendCoStartCreationInFlight = false }
 
             guard let api else { throw CoStartError.friendRoomPublishFailed }
-            let serverRoom = try await api.createRoom()
+            let serverRoom = try await api.createRoom(
+                stepText: stepText,
+                displayName: L("costart.host")
+            )
             guard let code = serverRoom.code else { throw CoStartError.friendRoomPublishFailed }
             let room = makeCoStartRoom(type: type, roomCode: code)
             room.id = serverRoom.id
             persistCoStartRoom(room, stepText: stepText)
-            let session = persistence.startTimer(for: step, plannedMinutes: 25, coStart: .friend)
             usage.recordFriendCoStart(isPlus: isPlus)
-            return (room, session)
+            return room
         }
 
         let room = makeCoStartRoom(type: type)
         persistCoStartRoom(room, stepText: stepText)
-        let coStart: CoStartMode = (type == .aiQuiet) ? .ai : .friend
-        let session = persistence.startTimer(for: step, plannedMinutes: 25, coStart: coStart)
-        return (room, session)
+        return room
+    }
+
+    /// Begin the local focus session after the room's ready screen has been
+    /// acknowledged. Friend-room start is intentionally local: the backend
+    /// exposes presence and outcomes, but not a shared start event.
+    @discardableResult
+    func beginCoStart(room: CoStartRoomModel, step: NextStepModel) -> TimerSessionModel {
+        room.status = .active
+        room.startsAt = .now
+        let coStart: CoStartMode = (room.roomType == .aiQuiet) ? .ai : .friend
+        return persistence.startTimer(for: step, plannedMinutes: 25, coStart: coStart)
     }
 
     func endCoStart(room: CoStartRoomModel, session: TimerSessionModel, outcome: TimerOutcome, step: NextStepModel?) {
@@ -253,6 +380,21 @@ final class AppEnvironment: ObservableObject {
         try? await api.endRoom(roomID: roomID)
     }
 
+    /// Leave before focus begins. Hosts end the remote room; guests use the
+    /// existing participant-outcome endpoint to mark their departure.
+    func leaveCoStart(room: CoStartRoomModel, isGuest: Bool) async {
+        room.status = .cancelled
+        room.endedAt = .now
+        try? persistence.context.save()
+
+        guard room.roomType == .friendLink else { return }
+        if isGuest {
+            await endCoStartGuest(roomId: room.id, outcome: .abandoned)
+        } else {
+            await endRemoteCoStartRoom(roomID: room.id.uuidString)
+        }
+    }
+
     // MARK: - Co-Start guest join
 
     /// Set by an incoming join deep link; the UI presents the guest join flow.
@@ -260,6 +402,10 @@ final class AppEnvironment: ObservableObject {
     @Published var pendingCaptureText: String?
     @Published var pendingRescueRestart = false
     @Published var pendingQuickAction: QuickActionKind?
+    /// Set right after a genuine success (a completed step) when it's an
+    /// appropriate moment to ask for a review. RootView consumes this and
+    /// triggers SwiftUI's `requestReview` action.
+    @Published var pendingReviewPrompt = false
 
     func handleJoinURL(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
@@ -298,9 +444,8 @@ final class AppEnvironment: ObservableObject {
             hostUserId: persistence.userId,
             roomType: .friendLink,
             durationMinutes: serverRoom.durationMinutes,
-            status: CoStartRoomStatus(rawValue: serverRoom.status) ?? .active,
-            roomCode: serverRoom.code ?? normalizedCode,
-            startsAt: serverRoom.startsAt
+            status: .scheduled,
+            roomCode: serverRoom.code ?? normalizedCode
         )
         persistence.context.insert(room)
         try? persistence.context.save()
@@ -314,17 +459,23 @@ final class AppEnvironment: ObservableObject {
         let outcome: String?
     }
 
-    /// Poll room participants (near-real-time via periodic polling).
-    func fetchCoStartParticipants(roomId: UUID) async -> [CoStartParticipantInfo] {
-        guard let api else { return [] }
-        let participants = (try? await api.participants(roomID: roomId.uuidString)) ?? []
-        return participants.map { participant in
-            CoStartParticipantInfo(
-                id: participant.id,
-                displayName: participant.displayName,
-                statedStep: participant.statedStep,
-                outcome: participant.outcome
-            )
+    /// Poll room participants (near-real-time via periodic polling). `nil`
+    /// means the backend could not confirm the current state; an empty array
+    /// is reserved for a successful response with no active participants.
+    func fetchCoStartParticipants(roomId: UUID) async -> [CoStartParticipantInfo]? {
+        guard let api else { return nil }
+        do {
+            let participants = try await api.participants(roomID: roomId.uuidString)
+            return participants.map { participant in
+                CoStartParticipantInfo(
+                    id: participant.id,
+                    displayName: participant.displayName,
+                    statedStep: participant.statedStep,
+                    outcome: participant.outcome
+                )
+            }
+        } catch {
+            return nil
         }
     }
 
@@ -343,6 +494,9 @@ final class AppEnvironment: ObservableObject {
 
     var currentLanguage: String { persistence.profile?.locale ?? "en" }
     var isPlus: Bool { entitlement.state.isPlus }
+    var preferredGuestDisplayName: String {
+        onboarding.firstName.isEmpty ? L("costart.friend") : onboarding.firstName
+    }
     var currentLocale: Locale {
         Locale(identifier: currentLanguage.lowercased().hasPrefix("zh") ? "zh-Hans" : "en")
     }
@@ -350,6 +504,7 @@ final class AppEnvironment: ObservableObject {
     func setLanguage(_ language: String) {
         persistence.updateProfile(locale: language)
         LocalizationManager.shared.setLanguage(language)
+        speech.updateLocale(language)
         objectWillChange.send()
     }
 
@@ -359,9 +514,17 @@ final class AppEnvironment: ObservableObject {
 
     // MARK: - Capture & Next Step
 
-    private var isUITestMode: Bool {
-        let args = ProcessInfo.processInfo.arguments
-        return args.contains("-UITEST") || args.contains("-UITEST_AUTH")
+    var isUITestMode: Bool {
+#if DEBUG
+        // Screenshot mode reuses this gate too: it suppresses the same
+        // review-request and rescue-notification prompts that would
+        // otherwise cover the app while a screenshot is being taken, and it
+        // needs the same usage-limit bypass the seeded history would
+        // otherwise run into.
+        StartKindRuntime.isTestRuntime || ScreenshotMode.isActive
+#else
+        StartKindRuntime.isTestRuntime
+#endif
     }
 
     var canGenerateStep: Bool {
@@ -389,8 +552,8 @@ final class AppEnvironment: ObservableObject {
                 source: input.source
             )
         }
-        let multiplier = calibrator.multiplier(for: detected, in: persistence.calibrationSamples())
-        var proposal = try await ai.generateNextStep(input: input, calibrationMultiplier: multiplier)
+        let multiplier = calibrator.multiplier(for: detected, in: persistence.calibrationSamples(days: analysisHistoryDays))
+        var proposal = engine.generate(input, calibrationMultiplier: multiplier)
         if let energy {
             proposal = energyMatcher.apply(proposal, energy: energy, language: input.language)
         }
@@ -398,7 +561,45 @@ final class AppEnvironment: ObservableObject {
         let step = persistence.saveNextStep(proposal: proposal, capture: capture, taskTitle: proposal.title)
         widgetNextStepStore.save(proposal: proposal)
         usage.recordStepGeneration()
+        refineNextStepInBackground(
+            step,
+            localSnapshot: step.proposal,
+            input: input,
+            calibrationMultiplier: multiplier,
+            energy: energy
+        )
         return step
+    }
+
+    private func refineNextStepInBackground(
+        _ step: NextStepModel,
+        localSnapshot: NextStepProposal,
+        input: CaptureInput,
+        calibrationMultiplier: Double,
+        energy: EnergyLevel?
+    ) {
+        let ai = ai
+        Task { [weak self, weak step] in
+            let clock = ContinuousClock()
+            let startedAt = clock.now
+            guard var refined = try? await ai.generateNextStep(
+                input: input,
+                calibrationMultiplier: calibrationMultiplier
+            ),
+            startedAt.duration(to: clock.now) <= .seconds(1),
+            refined.generatedBy == .cloudAI,
+            let self,
+            let step,
+            step.status == .suggested,
+            step.startedAt == nil,
+            step.proposal == localSnapshot else { return }
+
+            if let energy {
+                refined = energyMatcher.apply(refined, energy: energy, language: input.language)
+            }
+            persistence.updateNextStep(step, proposal: refined)
+            widgetNextStepStore.save(proposal: refined)
+        }
     }
 
     @discardableResult
@@ -445,9 +646,30 @@ final class AppEnvironment: ObservableObject {
     func createStuckStep(current step: NextStepModel?) -> NextStepModel {
         if let step {
             let proposal = shrinker.shrink(step.proposal, to: shrinker.nextLevel(after: step.shrinkLevel), language: currentLanguage)
-            return createLocalNextStep(proposal: proposal, sourceText: L("stuck.source"), source: .manual)
+            persistence.updateNextStep(step, proposal: proposal)
+            return step
         }
         return createFrictionPresetStep(.tooVague, category: .other)
+    }
+
+    /// Completing a reduced rung means the user is ready for one larger action,
+    /// not that the original task is finished. Reuse the same persisted step so
+    /// its task identity and timer history stay connected.
+    @discardableResult
+    func reopenNextLargerStep(_ step: NextStepModel, rootProposal: NextStepProposal) -> NextStepProposal? {
+        guard step.shrinkLevel > rootProposal.shrinkLevel,
+              let targetLevel = ShrinkLevel(rawValue: step.shrinkLevel.rawValue - 1) else {
+            return nil
+        }
+
+        let proposal = targetLevel == rootProposal.shrinkLevel
+            ? rootProposal
+            : shrinker.shrink(rootProposal, to: targetLevel, language: currentLanguage)
+        step.status = .suggested
+        step.startedAt = nil
+        step.completedAt = nil
+        persistence.updateNextStep(step, proposal: proposal)
+        return proposal
     }
 
     func yesterdayRescueProposal() -> NextStepProposal? {
@@ -602,6 +824,9 @@ final class AppEnvironment: ObservableObject {
         if isUITestMode { return }
         if outcome == .completed {
             rescueNotifications.cancelRescue()
+            if ReviewPrompter.recordValueMoment() {
+                pendingReviewPrompt = true
+            }
         } else if step != nil {
             rescueNotifications.scheduleRescue()
         }
@@ -667,7 +892,7 @@ final class AppEnvironment: ObservableObject {
     // MARK: - Start profile
 
     func startProfile() -> StartProfile {
-        startProfilePlanner.profile(samples: persistence.calibrationSamples())
+        startProfilePlanner.profile(samples: persistence.calibrationSamples(days: analysisHistoryDays))
     }
 
     // MARK: - Co-start continuity
@@ -679,10 +904,10 @@ final class AppEnvironment: ObservableObject {
     // MARK: - Patterns
 
     func insights() -> [String] {
-        calibrator.insights(samples: persistence.calibrationSamples(), language: currentLanguage)
+        calibrator.insights(samples: persistence.calibrationSamples(days: analysisHistoryDays), language: currentLanguage)
     }
 
-    func snapshots() -> [CalibrationSnapshot] { persistence.calibrationSnapshots() }
+    func snapshots() -> [CalibrationSnapshot] { persistence.calibrationSnapshots(days: analysisHistoryDays) }
 
     func frictionInsights() -> [FrictionInsight] {
         frictionMap.insights(
@@ -695,7 +920,7 @@ final class AppEnvironment: ObservableObject {
         gentleReviewPlanner.summary(
             proofs: proofOfStart.events,
             frictionSignals: frictionMemory.signals,
-            samples: persistence.calibrationSamples(),
+            samples: persistence.calibrationSamples(days: analysisHistoryDays),
             language: currentLanguage
         )
     }
@@ -704,6 +929,7 @@ final class AppEnvironment: ObservableObject {
 
     func deleteAllData() {
         persistence.deleteAllData()
+        onboarding.reset()
         vault.clear()
         proofOfStart.clear()
         tinyAdminInbox.clear()
@@ -712,6 +938,7 @@ final class AppEnvironment: ObservableObject {
         widgetNextStepStore.clear()
         dailyOneThing.clear()
         coStartContinuity.clear()
+        persistence.updateProfile(entitlement: entitlement.state)
     }
 
     func exportJSON() -> String { persistence.exportJSON() }
@@ -722,5 +949,18 @@ final class AppEnvironment: ObservableObject {
 
     static func isValidRoomCode(_ value: String) -> Bool {
         normalizedRoomCode(value).count == 6
+    }
+
+    private var analysisHistoryDays: Int? {
+        isPlus ? nil : UsageLimits.freeHistoryDays
+    }
+}
+
+/// The app ships English and Simplified Chinese; anything else falls back to
+/// English. Used on first launch, before the person has chosen a language.
+enum StartKindLanguage {
+    static var systemPreferred: String {
+        let preferred = Locale.preferredLanguages.first ?? "en"
+        return preferred.lowercased().hasPrefix("zh") ? "zh-Hans" : "en"
     }
 }

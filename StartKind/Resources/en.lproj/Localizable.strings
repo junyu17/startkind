@@ -9,9 +9,15 @@
 /* MARK: - Start Screen */
 "start.title" = "Start";
 "start.subtitle" = "One kind step to start.";
+"start.greeting" = "Hi, %@.";
+"start.difficultyHint.getting_started" = "Try typing just the first thing you could touch.";
+"start.difficultyHint.tasks_too_big" = "If the step feels too big, tap Make it smaller.";
+"start.difficultyHint.interruptions" = "If you get interrupted, leave one short return note.";
+"start.difficultyHint.admin_pile_up" = "For bills and forms, try Scan or paste.";
 "start.voice.listening" = "Listening…";
 "start.voice.tap" = "Tap to speak";
-"start.text.placeholder" = "What's on your mind? Just type it messy.";
+"start.voice.preparing" = "Preparing…";
+"start.text.placeholder" = "What's on your mind? Type it messy.";
 "start.text.submit" = "Get one step";
 "start.category.section" = "And choose a category";
 "start.category.selected" = "Category added: %@";
@@ -22,6 +28,12 @@
 "start.kindStart.resume" = "Pick up where you left";
 "start.kindStart.adminLeft" = "%d admin left";
 "start.moreWays" = "More ways to start";
+"start.moreWays.scan" = "Scan or paste";
+"start.moreWays.reuse" = "Reuse a start";
+"start.moreWays.costart" = "Start with someone";
+"start.moreWays.match" = "Match how I feel";
+"start.moreWays.plan" = "Plan ahead";
+"start.moreWays.admin" = "Admin & saved tools";
 "frictionForecast.title" = "Likely blocker";
 "frictionForecast.loaded" = "StartKind made that blocker smaller.";
 
@@ -62,15 +74,15 @@
 "template.home.subtitle" = "Move three things from one spot.";
 "template.badDay.title" = "Bad day reset";
 "template.badDay.subtitle" = "A 5-minute nervous-system start.";
-"vault.open" = "Personal vault";
-"vault.title" = "Personal vault";
+"vault.open" = "Saved starts";
+"vault.title" = "Saved starts";
 "vault.defaultTitle" = "Saved start";
-"vault.saved" = "Saved to your local vault.";
-"vault.applied" = "Vault step loaded. Start small.";
+"vault.saved" = "Saved for next time.";
+"vault.applied" = "Saved start loaded. Start small.";
 "vault.stop" = "Stop when this saved step has been touched once.";
 "vault.why" = "Saved starts remove the decision work from beginning again.";
 "vault.empty.title" = "No saved starts yet";
-"vault.empty.body" = "Save a useful next step from a card and it will appear here.";
+"vault.empty.body" = "When StartKind gives you a useful next step, open More actions and tap Save this start. It will appear here for one-tap reuse.";
 
 /* Categories */
 "category.bills" = "Bills";
@@ -90,6 +102,7 @@
 "category.other" = "Other";
 
 /* MARK: - Next Step Card */
+"nextstep.genericLabel" = "Your next step";
 "nextstep.timer.label" = "Start";
 "nextstep.timer.minutes" = "%d minutes";
 "nextstep.makeSmaller" = "Make it smaller";
@@ -97,7 +110,10 @@
 "nextstep.hidePlan" = "Hide plan";
 "nextstep.shrink.level" = "Smaller version";
 "nextstep.share" = "Share";
-"nextstep.saveVault" = "Save";
+"nextstep.saveVault" = "Save this start";
+"nextstep.moreActions" = "More actions";
+"nextstep.moreActions.hint" = "Share, save, plan, co-start, or move on.";
+"nextstep.actionPrep.title" = "Action prep";
 
 /* MARK: - Timer */
 "timer.title" = "Focus on this step";
@@ -138,6 +154,9 @@
 "patterns.title" = "Patterns";
 "patterns.empty" = "After a few steps, gentle patterns appear here.";
 "patterns.noShame" = "These are observations, not scores.";
+"patterns.recommendation.title" = "Try this next";
+"patterns.advanced.title" = "Plus details";
+"patterns.advanced.hint" = "Personal execution model, friction map, and longer history.";
 "patterns.sample.count" = "%d steps";
 "patterns.model.title" = "Personal Execution Model";
 "patterns.model.samples" = "%d samples";
@@ -201,9 +220,18 @@
 "admin.ocr.error" = "Couldn't read that image. Try a clearer screenshot or paste the text.";
 "admin.scan.title" = "Scan a bill, letter, or screenshot";
 "admin.scan.body" = "Choose one image source. You can close this screen anytime.";
+"admin.scan.replaceBody" = "Choose a new image, or keep the text already recognized.";
+"admin.scan.paste" = "Paste text instead";
 "admin.camera" = "Use camera";
-"admin.photoLibrary" = "Choose photo";
+"admin.photoLibrary" = "Choose photo or screenshot";
 "admin.cameraUnavailable" = "Camera is not available on this device. Choose a photo or paste text instead.";
+"admin.review.title" = "Review what StartKind read";
+"admin.review.body" = "Check the image and edit the text before finding one step.";
+"admin.review.selectedImage" = "Selected image";
+"admin.review.text" = "Recognized text";
+"admin.review.empty" = "No text was recognized. Type a few words to continue.";
+"admin.replace" = "Replace image";
+"admin.remove" = "Remove image";
 "admin.result.title" = "What matters";
 "admin.confidence" = "%d%% confidence";
 "admin.fact.type" = "Type";
@@ -230,55 +258,76 @@
 "settings.language" = "Language";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.profile" = "Your profile";
+"settings.editProfile" = "Edit profile";
 "settings.subscription" = "Subscription";
 "settings.subscription.free" = "Free";
 "settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.upgrade" = "Upgrade to StartKind Plus";
+"settings.subscription.manage" = "Manage Subscription";
+"settings.subscription.manage.error" = "Subscription settings are unavailable right now.";
 "settings.subscription.restore" = "Restore purchases";
+"settings.subscription.restore.success" = "StartKind Plus was restored.";
+"settings.subscription.restore.none" = "No active StartKind Plus subscription was found.";
 "settings.privacy" = "Privacy";
 "settings.dataExport" = "Export my data";
-"settings.deleteAccount" = "Delete account & data";
-"settings.deleteConfirm.body" = "This permanently deletes your StartKind account and every synced copy of your history, capsules, and calibration data, clears this device, and signs you out. This cannot be undone.";
+"settings.deleteData" = "Delete local data";
+"settings.deleteConfirm.body" = "This clears StartKind data stored on this device. Your private iCloud data remains under your control in iCloud settings. This cannot be undone.";
 "settings.contact" = "Contact";
 "settings.contactEmail" = "billy.yu@me.com";
 "settings.about" = "About";
 "settings.version" = "Version %@";
 "settings.medical" = "Medical notice";
 "settings.medical.body" = "StartKind can help you organize and start tasks, but it does not diagnose or treat ADHD. For diagnosis, medication, or treatment decisions, talk with a qualified clinician.";
+"settings.moreApps" = "More apps";
+"settings.moreApps.maren" = "Period & perimenopause tracker";
+"settings.moreApps.dogcat" = "Feeding calculator for dogs and cats";
+"settings.moreApps.taskkin" = "Family caregiving, shared";
+"settings.moreApps.livepet" = "Your pet as a living widget";
+"settings.moreApps.virtualpets" = "Cosy pet care and dress-up";
+"settings.moreApps.platepace" = "AI-assisted nutrition tracker for GLP-1 routines";
 
 /* MARK: - Paywall */
 "paywall.title" = "StartKind Plus";
 "paywall.monthly" = "Monthly";
 "paywall.annual" = "Annual";
-"paywall.monthly.price" = "$9.99 / month";
-"paywall.annual.price" = "$89.99 / year";
 "paywall.annual.save" = "Save about 25%";
+"paywall.annual.bestValue" = "Best value";
 "paywall.cta" = "Start free trial";
 "paywall.cta.buy" = "Subscribe";
 "paywall.restore" = "Restore purchases";
+"paywall.restore.success" = "StartKind Plus was restored.";
+"paywall.restore.none" = "No active StartKind Plus subscription was found.";
 "paywall.dismiss" = "Maybe later";
 "paywall.compare.title" = "Free vs Plus";
 "paywall.free.title" = "Free";
 "paywall.free.price" = "$0";
-"paywall.free.stepLimit" = "Enough daily one-step help to build the habit.";
-"paywall.free.adminLimit" = "1 Admin Quick Start per day.";
-"paywall.free.recovery" = "Recovery capsule and timers stay usable.";
-"paywall.free.costart" = "Create 1 friend room every 7 days. Joining and quiet rooms stay free.";
+"paywall.free.starts" = "5 one-step starts per day.";
+"paywall.free.admin" = "1 Admin Quick Start per day, including photo OCR.";
+"paywall.free.personal" = "Basic Start Profile, local quiet co-start, timers, templates and Saved starts.";
+"paywall.free.sync" = "Personal data stays on your device and in your private iCloud.";
 "paywall.plus.title" = "Plus";
-"paywall.plus.price" = "$9.99/month or $89.99/year";
-"paywall.plus.unlimited" = "Unlimited one-step starts.";
-"paywall.plus.admin" = "Unlimited bill, email, appointment, and admin parsing.";
-"paywall.plus.calibration" = "Personal time calibration and execution patterns.";
-"paywall.plus.sync" = "Cross-device sync and the full execution model.";
+"paywall.plus.price" = "%@/month or %@/year";
+"paywall.plus.starts" = "Unlimited daily starts.";
+"paywall.plus.admin" = "Unlimited Admin Quick Start, including photo OCR.";
+"paywall.plus.recovery" = "Unlimited active Recovery Capsules.";
+"paywall.plus.costart" = "Unlimited friend-room creation.";
+"paywall.plus.insights" = "Advanced execution insights and history beyond 14 days.";
 "paywall.limit.title" = "You've used today's free steps";
 "paywall.limit.title.admin" = "Admin Quick Start is free 1 time today";
 "paywall.limit.title.friend" = "Friend co-start is a one-in-seven-day free benefit";
-"paywall.limit.body" = "You can still use timers and the recovery capsule. Or unlock unlimited steps with Plus.";
-"paywall.limit.body.admin" = "You can still use timers and the recovery capsule. Upgrade Plus for unlimited admin parsing and co-start.";
-"paywall.limit.body.friend" = "You created a free friend room in the past 7 days. Joining stays free, or upgrade for unlimited invites.";
+"paywall.limit.body" = "Timers, templates, Saved starts, quiet co-start, basic Start Profile, private iCloud sync and recovery stay free. Plus removes the daily start limit.";
+"paywall.limit.body.admin" = "Free includes one Admin Quick Start each day, including photo OCR. Plus keeps Admin Quick Start unlimited.";
+"paywall.limit.body.friend" = "Joining and quiet co-start stay free. Plus unlocks unlimited friend-room creation.";
 "paywall.limit.keepFree" = "Keep using free";
 "paywall.value.statement" = "Plus helps you stay consistent: one less decision, more small starts.";
-"paywall.annual.monthlyEquivalent" = "Billed as ≈ $7.50/month";
-"paywall.plus.coStart" = "Unlimited one-on-one co-start invitations";
+"paywall.products.loading" = "Loading subscription options...";
+"paywall.products.unavailable" = "Subscription options are temporarily unavailable.";
+"paywall.products.priceUnavailable" = "Price unavailable";
+"paywall.products.retry" = "Try again";
+"paywall.purchase.error" = "The purchase could not be verified. Please try again.";
+"paywall.purchase.pending" = "Your purchase is pending approval.";
+"paywall.purchase.notCompleted" = "The purchase was not completed.";
 
 /* MARK: - Usage */
 "usage.stepsLeft" = "%d of %d free steps left today";
@@ -289,8 +338,36 @@
 "common.delete" = "Delete";
 "common.done" = "Done";
 "common.error" = "Something went sideways. You can try again.";
+"legal.privacy" = "Privacy";
+"legal.terms" = "Terms";
 
 /* MARK: - Onboarding */
+"onboarding.title" = "A gentler start";
+"profile.title" = "Your profile";
+"onboarding.progress.name" = "Step 1 of 2";
+"onboarding.progress.difficulty" = "Step 2 of 2";
+"onboarding.name.title" = "What should we call you?";
+"onboarding.name.subtitle" = "Just your first name. It stays on this device.";
+"onboarding.name.label" = "Preferred first name";
+"onboarding.name.placeholder" = "First name";
+"onboarding.name.count" = "%d / 40 characters";
+"onboarding.name.tooLong" = "Keep it to 40 characters or fewer.";
+"onboarding.continue" = "Continue";
+"onboarding.difficulty.title" = "What usually makes starting hard?";
+"onboarding.difficulty.subtitle" = "Choose one. StartKind will offer a small hint, not a different app.";
+"onboarding.difficulty.getting_started.title" = "Getting started";
+"onboarding.difficulty.getting_started.detail" = "The first move is hard to find.";
+"onboarding.difficulty.tasks_too_big.title" = "Tasks feel too big";
+"onboarding.difficulty.tasks_too_big.detail" = "I know the task, but it feels like too much.";
+"onboarding.difficulty.interruptions.title" = "Interruptions";
+"onboarding.difficulty.interruptions.detail" = "Things keep breaking my focus.";
+"onboarding.difficulty.admin_pile_up.title" = "Admin pile-up";
+"onboarding.difficulty.admin_pile_up.detail" = "Bills, forms, messages, and errands stack up.";
+"onboarding.choice.selected" = "Selected";
+"onboarding.choice.notSelected" = "Not selected";
+"onboarding.finish" = "Finish setup";
+"profile.save" = "Save profile";
+"onboarding.back" = "Back";
 
 /* MARK: - Capture feedback */
 "capture.generating" = "Shaping one small step…";
@@ -321,6 +398,32 @@
 "costart.yourName" = "Your name (optional)";
 "costart.yourStep.optional" = "Your step (optional)";
 "costart.defaultGuestStep" = "Starting now";
+"costart.host" = "Host";
+"costart.stage.createOrJoin" = "1. Create or join a room";
+"costart.stage.waiting" = "2. Waiting for a participant";
+"costart.stage.ready" = "2. Ready to start";
+"costart.stage.focus" = "3. Focusing";
+"costart.roomCode" = "Room code";
+"costart.participantStatus" = "Participant status";
+"costart.participants.count" = "Participants here: %d";
+"costart.participants.pending" = "Checking the room…";
+"costart.waitingForParticipant" = "Waiting for another participant.";
+"costart.friendReady" = "Another participant is here. Start when ready.";
+"costart.guestReady" = "You joined the room. Start when ready.";
+"costart.quietReady" = "Quiet co-start is ready on this device.";
+"costart.focusStatus" = "Your local 25-minute focus is running.";
+"costart.participantStatusUnavailable" = "Participant status could not be updated. We won't infer a new participant.";
+"costart.syncNote" = "The room shares presence and outcomes; each device starts locally.";
+"costart.start25" = "Start 25 minutes";
+"costart.leave" = "Leave room";
+
+/* MARK: - Saved start completion */
+"savedStart.prompt.title" = "Keep this start for next time?";
+"savedStart.prompt.message" = "You completed \"%@\". Save the title and step for one-tap reuse?";
+"savedStart.prompt.save" = "Save";
+"savedStart.prompt.notNow" = "Not now";
+"savedStart.confirmed" = "Saved \"%@\" for next time.";
+"savedStart.view" = "View Saved starts";
 "costart.join" = "Join";
 "costart.roomNotFound" = "Couldn't find that room. It may have ended.";
 "costart.offline" = "Can't reach StartKind right now. Check your connection and try again.";
@@ -329,6 +432,7 @@
 /* MARK: - Retention assists */
 "stuck.button" = "I'm stuck";
 "stuck.loaded" = "No problem. Start with this smaller version.";
+"stuck.rungCompleted" = "Setup done. Here's the next small action.";
 "stuck.source" = "Stuck restart";
 "energy.title" = "Energy match";
 "energy.low" = "Low";
@@ -347,7 +451,7 @@
 "proof.count" = "Started %d times this week";
 "adminInbox.title" = "Tiny admin inbox";
 "adminInbox.placeholder" = "Paste a bill, email, appointment, or form text";
-"adminInbox.hint" = "StartKind saves only one next-step card from this.";
+"adminInbox.hint" = "StartKind keeps only one small next step from this.";
 "adminInbox.saved" = "Saved as one small admin step.";
 "yesterday.rescue.open" = "Yesterday rescue";
 "yesterday.rescue.loaded" = "Yesterday's task is back as a 3-minute restart.";
@@ -366,12 +470,13 @@
 "startScript.empty" = "Save useful starts here; they stay local and cost nothing to run.";
 "startScript.loaded" = "Saved start loaded.";
 "startScript.source" = "Saved start";
-"calendarSoft.title" = "Calendar soft landing";
+"calendarSoft.title" = "Upcoming event prep";
 "calendarSoft.placeholder" = "Meeting, dentist, bill due...";
 "calendarSoft.days" = "In %d days";
-"calendarSoft.hint" = "Type one upcoming event; StartKind turns it into a prep step.";
-"calendarSoft.loaded" = "Calendar prep step loaded.";
-"calendarSoft.noMatch" = "Try a bill, appointment, meeting, deadline, doctor, dentist, or call.";
+"calendarSoft.hint" = "Enter any event happening today through the next 7 days. StartKind will make one useful five-minute prep step.";
+"calendarSoft.submit" = "Create prep step";
+"calendarSoft.loaded" = "Upcoming event prep is ready.";
+"calendarSoft.noMatch" = "Choose today or a day within the next 7 days.";
 "quickAction.source" = "Home Screen quick action";
 "quickAction.loaded" = "Quick action step loaded.";
 "gentleReview.title" = "Gentle review";
@@ -382,20 +487,24 @@
 /* MARK: - Privacy */
 "privacy.title" = "Privacy";
 "privacy.principlesTitle" = "Principles";
-"privacy.principle1" = "StartKind collects the minimum data needed to help you start one small step.";
-"privacy.principle2" = "Free mode works without an account; your history stays on your device.";
-"privacy.principle3" = "Cloud features (Plus) only sync or process data after you sign in.";
+"privacy.principle1" = "No StartKind account or login is required.";
+"privacy.principle2" = "Personal data stays on this device and in your private iCloud CloudKit database.";
+"privacy.principle3" = "There are no ads, tracking, analytics SDKs, or background access to your calendar, contacts, or photos.";
 "privacy.dataTitle" = "What may be stored";
-"privacy.data1" = "Task text you type or speak, and timer history.";
-"privacy.data2" = "Subscription entitlement (from Apple) and device diagnostics.";
-"privacy.data3" = "With Plus: calendar, email, or photo content you choose to parse.";
+"privacy.data1" = "Task text, steps, timer history, recovery capsules, profiles, and saved starts are stored on-device and in private iCloud CloudKit.";
+"privacy.data2" = "When you ask for AI or Admin Quick Start parsing, selected text or OCR text is sent through a transient relay; we do not store the request text.";
+"privacy.data3" = "Co-start rooms use temporary room details, your chosen display name, and stated step so participants can coordinate; rooms expire.";
+"privacy.data4" = "Apple-signed subscription proof is sent for entitlement verification; the backend stores the resulting tier and anonymous device-token hash.";
 "privacy.controlsTitle" = "Your controls";
-"privacy.control1" = "Delete local data anytime from Settings.";
-"privacy.control2" = "Delete your cloud account and data.";
-"privacy.control3" = "Export your data.";
+"privacy.control1" = "Delete local StartKind data from Settings.";
+"privacy.control2" = "Delete the private iCloud copy from your iCloud settings; StartKind cannot access or delete it.";
+"privacy.control3" = "Export the data available on this device from Settings.";
+"privacy.control4" = "Deleting the app removes its anonymous device token; the server record is reaped automatically.";
 "privacy.sensitiveTitle" = "Sensitive content";
-"privacy.sensitive1" = "Admin tasks may contain financial, medical, or family information; it is not logged in production.";
-"privacy.sensitive2" = "Service-role keys stay server-side; the app only holds your publishable key.";
+"privacy.sensitive1" = "Admin tasks may contain financial, medical, or family information; raw request text is not logged by our server.";
+"privacy.sensitive2" = "Images are read on-device; only extracted text is relayed if you then ask for parsing.";
+"privacy.legalTitle" = "Legal";
+"privacy.fullPolicy" = "Read the full privacy policy";
 "privacy.contactTitle" = "Contact";
 
 /* MARK: - Fifth retention release */
@@ -428,10 +537,10 @@
 /* Error messages surfaced from LocalizedError types */
 "error.usage.stepLimit" = "Today's free steps are used up.";
 "error.usage.adminLimit" = "Today's free Admin Quick Start is used up.";
-"error.speech.notAuthorized" = "Speech recognition permission was not granted.";
-"error.speech.microphoneNotAuthorized" = "Microphone permission was not granted.";
-"error.speech.notAvailable" = "Speech recognition isn't available right now.";
-"error.speech.engineFailure" = "Couldn't start the audio engine.";
+"error.speech.notAuthorized" = "Enable Speech Recognition in iOS Settings > Privacy & Security > Speech Recognition. Siri is not required.";
+"error.speech.microphoneNotAuthorized" = "Enable Microphone in iOS Settings > Privacy & Security > Microphone. Siri is not required.";
+"error.speech.notAvailable" = "Speech recognition is not available right now. Siri is not required; check Speech Recognition and Microphone in iOS Settings.";
+"error.speech.engineFailure" = "Speech recognition couldn't continue. Please try again.";
 "error.api.notConfigured" = "Cloud features aren't configured.";
 "error.auth.network" = "Couldn't reach the server. Try again.";
 
@@ -442,6 +551,8 @@
 "settings.theme.light" = "Light";
 "settings.theme.dark" = "Dark";
 "settings.textSize" = "Text size";
+"settings.textSize.smaller" = "Smaller";
+"settings.textSize.small" = "Small";
 "settings.textSize.standard" = "Standard";
 "settings.textSize.large" = "Large";
 "settings.textSize.larger" = "Larger";

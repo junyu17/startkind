@@ -9,8 +9,14 @@
 /* MARK: - 开始页 */
 "start.title" = "开始";
 "start.subtitle" = "迈出温和的一小步。";
+"start.greeting" = "嗨，%@。";
+"start.difficultyHint.getting_started" = "试着写下你能碰到的第一件事。";
+"start.difficultyHint.tasks_too_big" = "如果这一步太大，点“缩小一步”。";
+"start.difficultyHint.interruptions" = "如果被打断，留下一句简短的返回备注。";
+"start.difficultyHint.admin_pile_up" = "账单和表格可以试试“扫描或粘贴”。";
 "start.voice.listening" = "正在聆听…";
 "start.voice.tap" = "点按说话";
+"start.voice.preparing" = "准备中…";
 "start.text.placeholder" = "脑子里一团乱？随便打几个字就好。";
 "start.text.submit" = "给我一步";
 "start.category.section" = "再选一个分类";
@@ -22,6 +28,12 @@
 "start.kindStart.resume" = "从上次继续";
 "start.kindStart.adminLeft" = "剩 %d 次事务";
 "start.moreWays" = "更多开始方式";
+"start.moreWays.scan" = "扫描或粘贴";
+"start.moreWays.reuse" = "复用一个启动";
+"start.moreWays.costart" = "和别人一起开始";
+"start.moreWays.match" = "匹配我的感受";
+"start.moreWays.plan" = "提前计划";
+"start.moreWays.admin" = "事务与已保存工具";
 "frictionForecast.title" = "可能卡点";
 "frictionForecast.loaded" = "StartKind 已把这个卡点缩小。";
 
@@ -62,15 +74,15 @@
 "template.home.subtitle" = "从一个位置拿走三样东西。";
 "template.badDay.title" = "糟糕日重置";
 "template.badDay.subtitle" = "5 分钟，先让身体进入状态。";
-"vault.open" = "个人保险箱";
-"vault.title" = "个人保险箱";
+"vault.open" = "已保存的启动步骤";
+"vault.title" = "已保存的启动步骤";
 "vault.defaultTitle" = "已保存的开始";
-"vault.saved" = "已保存到本地个人保险箱。";
-"vault.applied" = "已载入保存的步骤。从小处开始。";
+"vault.saved" = "已保存，之后可以再次使用。";
+"vault.applied" = "已载入保存的启动步骤。从小处开始。";
 "vault.stop" = "碰一下这个保存步骤就停。";
 "vault.why" = "保存好的启动步骤可以省掉再次决定的力气。";
-"vault.empty.title" = "还没有保存的启动";
-"vault.empty.body" = "在下一步卡片里保存有用步骤，之后会出现在这里。";
+"vault.empty.title" = "还没有保存的启动步骤";
+"vault.empty.body" = "StartKind 给出有用的下一步后，打开“更多操作”，点“保存这个启动步骤”。之后可在这里一键再次使用。";
 
 /* 分类 */
 "category.bills" = "账单";
@@ -90,6 +102,7 @@
 "category.other" = "其他";
 
 /* MARK: - 下一步卡片 */
+"nextstep.genericLabel" = "你的下一步";
 "nextstep.timer.label" = "开始";
 "nextstep.timer.minutes" = "%d 分钟";
 "nextstep.makeSmaller" = "缩小一步";
@@ -97,7 +110,10 @@
 "nextstep.hidePlan" = "收起计划";
 "nextstep.shrink.level" = "更小的版本";
 "nextstep.share" = "分享";
-"nextstep.saveVault" = "保存";
+"nextstep.saveVault" = "保存这个启动步骤";
+"nextstep.moreActions" = "更多操作";
+"nextstep.moreActions.hint" = "分享、保存、查看计划、陪伴启动或换一步。";
+"nextstep.actionPrep.title" = "开始准备";
 
 /* MARK: - 计时器 */
 "timer.title" = "只专注这一步";
@@ -138,6 +154,9 @@
 "patterns.title" = "规律";
 "patterns.empty" = "做过几个步骤后，温和的规律会出现在这里。";
 "patterns.noShame" = "这只是观察，不是打分。";
+"patterns.recommendation.title" = "下一步试试";
+"patterns.advanced.title" = "Plus 详细信息";
+"patterns.advanced.hint" = "个人执行模型、摩擦地图和更长时间的历史。";
 "patterns.sample.count" = "%d 个步骤";
 "patterns.model.title" = "个人执行模型";
 "patterns.model.samples" = "%d 个样本";
@@ -201,9 +220,18 @@
 "admin.ocr.error" = "无法读取这张图片。请换清晰截图或粘贴文字。";
 "admin.scan.title" = "扫描账单、信件或截图";
 "admin.scan.body" = "选择一个图片来源。这个页面随时可以关闭。";
+"admin.scan.replaceBody" = "可以选择新图片，也可以保留已经识别的文字。";
+"admin.scan.paste" = "改为粘贴文字";
 "admin.camera" = "使用相机";
-"admin.photoLibrary" = "选择照片";
+"admin.photoLibrary" = "选择照片或截图";
 "admin.cameraUnavailable" = "这台设备没有可用相机。可以选择照片或粘贴文字。";
+"admin.review.title" = "检查 StartKind 读到的内容";
+"admin.review.body" = "先检查图片并编辑文字，再找出一个小步骤。";
+"admin.review.selectedImage" = "已选图片";
+"admin.review.text" = "识别出的文字";
+"admin.review.empty" = "没有识别到文字。输入几个字就可以继续。";
+"admin.replace" = "替换图片";
+"admin.remove" = "移除图片";
 "admin.result.title" = "关键信息";
 "admin.confidence" = "%d%% 可信度";
 "admin.fact.type" = "类型";
@@ -230,55 +258,76 @@
 "settings.language" = "语言";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.profile" = "你的资料";
+"settings.editProfile" = "编辑资料";
 "settings.subscription" = "订阅";
 "settings.subscription.free" = "免费版";
 "settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.upgrade" = "升级到 StartKind Plus";
+"settings.subscription.manage" = "管理订阅";
+"settings.subscription.manage.error" = "订阅设置暂时无法打开。";
 "settings.subscription.restore" = "恢复购买";
+"settings.subscription.restore.success" = "StartKind Plus 已恢复。";
+"settings.subscription.restore.none" = "没有找到有效的 StartKind Plus 订阅。";
 "settings.privacy" = "隐私";
 "settings.dataExport" = "导出我的数据";
-"settings.deleteAccount" = "删除账号和数据";
-"settings.deleteConfirm.body" = "这将永久删除你的 StartKind 账号，以及云端所有同步的历史、恢复胶囊和校准数据，同时清空本机并退出登录，且无法撤销。";
+"settings.deleteData" = "删除本机数据";
+"settings.deleteConfirm.body" = "这会清除本机保存的 StartKind 数据。你的私有 iCloud 数据仍由你在 iCloud 设置中管理。此操作无法撤销。";
 "settings.contact" = "联系";
 "settings.contactEmail" = "billy.yu@me.com";
 "settings.about" = "关于";
 "settings.version" = "版本 %@";
 "settings.medical" = "医疗提示";
 "settings.medical.body" = "StartKind 可以帮你整理和开始任务，但不能诊断或治疗注意缺陷多动障碍(ADHD)。如需诊断、用药或治疗决定，请咨询合格的临床医生。";
+"settings.moreApps" = "更多 App";
+"settings.moreApps.maren" = "经期与围绝经期记录";
+"settings.moreApps.dogcat" = "猫狗喂食计算器";
+"settings.moreApps.taskkin" = "家庭协作照护";
+"settings.moreApps.livepet" = "把照片变成会动的宠物小组件";
+"settings.moreApps.virtualpets" = "温馨养宠换装游戏";
+"settings.moreApps.platepace" = "GLP-1 饮食节奏的 AI 营养记录";
 
 /* MARK: - 付费墙 */
 "paywall.title" = "StartKind Plus";
 "paywall.monthly" = "按月";
 "paywall.annual" = "按年";
-"paywall.monthly.price" = "$9.99 / 月";
-"paywall.annual.price" = "$89.99 / 年";
 "paywall.annual.save" = "省约 25%";
+"paywall.annual.bestValue" = "更划算";
 "paywall.cta" = "开始免费试用";
 "paywall.cta.buy" = "订阅";
 "paywall.restore" = "恢复购买";
+"paywall.restore.success" = "StartKind Plus 已恢复。";
+"paywall.restore.none" = "没有找到有效的 StartKind Plus 订阅。";
 "paywall.dismiss" = "以后再说";
 "paywall.compare.title" = "免费版 / Plus";
 "paywall.free.title" = "免费版";
 "paywall.free.price" = "$0";
-"paywall.free.stepLimit" = "每天有足够的「下一步」次数，先建立使用习惯。";
-"paywall.free.adminLimit" = "每天 1 次事务快速启动。";
-"paywall.free.recovery" = "恢复胶囊和计时器可继续使用。";
-"paywall.free.costart" = "每 7 天可创建 1 个好友房间；加入房间和安静陪做始终免费。";
+"paywall.free.starts" = "每天 5 次「下一步」启动。";
+"paywall.free.admin" = "每天 1 次事务快速启动，包含照片 OCR。";
+"paywall.free.personal" = "基础 Start Profile、静默陪伴启动、计时器、模板和已保存的启动步骤。";
+"paywall.free.sync" = "个人数据保存在你的设备和私有 iCloud 中。";
 "paywall.plus.title" = "Plus";
-"paywall.plus.price" = "$9.99 / 月或 $89.99 / 年";
-"paywall.plus.unlimited" = "无限生成「下一步」。";
-"paywall.plus.admin" = "无限解析账单、邮件、预约和事务。";
-"paywall.plus.calibration" = "个人时间校准和执行规律。";
-"paywall.plus.sync" = "多设备同步和完整个人执行模型。";
+"paywall.plus.price" = "%@ / 月或 %@ / 年";
+"paywall.plus.starts" = "每天不限次数启动。";
+"paywall.plus.admin" = "事务快速启动不限次数，每次都包含照片 OCR。";
+"paywall.plus.recovery" = "不限数量的有效恢复胶囊。";
+"paywall.plus.costart" = "不限次数创建好友房间。";
+"paywall.plus.insights" = "解锁超过 14 天的高级执行洞察和历史。";
 "paywall.limit.title" = "今天的免费步骤已用完";
 "paywall.limit.title.admin" = "今天事务快速启动已用完";
 "paywall.limit.title.friend" = "好友陪伴启动属于每周一次免费额度";
-"paywall.limit.body" = "计时器和恢复胶囊仍可使用。升级 Plus 可解锁无限步骤。";
-"paywall.limit.body.admin" = "你仍可用计时器与恢复胶囊。升级 Plus 可不限量使用事务解析和陪伴启动。";
-"paywall.limit.body.friend" = "你在过去 7 天内已创建过免费好友房间。加入仍免费，也可升级为无限邀请。";
+"paywall.limit.body" = "计时器、模板、已保存的启动步骤、静默陪伴启动、基础 Start Profile、私有 iCloud 同步和恢复功能仍免费。Plus 会移除每日启动限制。";
+"paywall.limit.body.admin" = "免费版每天包含 1 次事务快速启动和照片 OCR。升级 Plus 后事务快速启动不限次数。";
+"paywall.limit.body.friend" = "加入房间和静默陪伴启动仍免费。升级 Plus 后可不限次数创建好友房间。";
 "paywall.limit.keepFree" = "继续用免费版";
 "paywall.value.statement" = "Plus 帮你把启动门槛降下来：少一次决策，更容易开始。";
-"paywall.annual.monthlyEquivalent" = "按月等效约 $7.50";
-"paywall.plus.coStart" = "无限好友陪伴启动";
+"paywall.products.loading" = "正在加载订阅选项……";
+"paywall.products.unavailable" = "订阅选项暂时不可用。";
+"paywall.products.priceUnavailable" = "价格暂不可用";
+"paywall.products.retry" = "再试一次";
+"paywall.purchase.error" = "无法验证购买。请再试一次。";
+"paywall.purchase.pending" = "购买正在等待批准。";
+"paywall.purchase.notCompleted" = "购买尚未完成。";
 
 /* MARK: - 用量 */
 "usage.stepsLeft" = "今天剩余 %d / %d 个免费步骤";
@@ -289,8 +338,36 @@
 "common.delete" = "删除";
 "common.done" = "完成";
 "common.error" = "出了点小状况。可以再试一次。";
+"legal.privacy" = "隐私";
+"legal.terms" = "条款";
 
 /* MARK: - 引导 */
+"onboarding.title" = "温和地开始";
+"profile.title" = "你的资料";
+"onboarding.progress.name" = "第 1 步，共 2 步";
+"onboarding.progress.difficulty" = "第 2 步，共 2 步";
+"onboarding.name.title" = "我们怎么称呼你？";
+"onboarding.name.subtitle" = "只需要名字。它只保存在这台设备上。";
+"onboarding.name.label" = "偏好的名字";
+"onboarding.name.placeholder" = "名字";
+"onboarding.name.count" = "%d / 40 个字符";
+"onboarding.name.tooLong" = "请控制在 40 个字符以内。";
+"onboarding.continue" = "继续";
+"onboarding.difficulty.title" = "通常是什么让你难以开始？";
+"onboarding.difficulty.subtitle" = "选一个就好。StartKind 只会给你一个小提示，不会变成另一款应用。";
+"onboarding.difficulty.getting_started.title" = "难以开始";
+"onboarding.difficulty.getting_started.detail" = "很难找到第一步。";
+"onboarding.difficulty.tasks_too_big.title" = "任务感觉太大";
+"onboarding.difficulty.tasks_too_big.detail" = "知道要做什么，但感觉太多了。";
+"onboarding.difficulty.interruptions.title" = "总被打断";
+"onboarding.difficulty.interruptions.detail" = "注意力总是被打断。";
+"onboarding.difficulty.admin_pile_up.title" = "事务堆积";
+"onboarding.difficulty.admin_pile_up.detail" = "账单、表格、消息和跑腿越堆越多。";
+"onboarding.choice.selected" = "已选择";
+"onboarding.choice.notSelected" = "未选择";
+"onboarding.finish" = "完成设置";
+"profile.save" = "保存资料";
+"onboarding.back" = "返回";
 
 /* MARK: - 捕获反馈 */
 "capture.generating" = "正在整理一个小步骤…";
@@ -321,6 +398,32 @@
 "costart.yourName" = "你的名字(可选)";
 "costart.yourStep.optional" = "你的步骤(可选)";
 "costart.defaultGuestStep" = "现在开始";
+"costart.host" = "房主";
+"costart.stage.createOrJoin" = "1. 创建或加入房间";
+"costart.stage.waiting" = "2. 等待参与者";
+"costart.stage.ready" = "2. 可以开始";
+"costart.stage.focus" = "3. 专注中";
+"costart.roomCode" = "房间码";
+"costart.participantStatus" = "参与者状态";
+"costart.participants.count" = "当前参与者：%d 人";
+"costart.participants.pending" = "正在查看房间……";
+"costart.waitingForParticipant" = "等待另一位参与者。";
+"costart.friendReady" = "另一位参与者已在房间。准备好后即可开始。";
+"costart.guestReady" = "你已加入房间。准备好后即可开始。";
+"costart.quietReady" = "这台设备上的静默陪伴已准备好。";
+"costart.focusStatus" = "这台设备上的 25 分钟专注正在进行。";
+"costart.participantStatusUnavailable" = "暂时无法更新参与者状态；我们不会推断有新参与者。";
+"costart.syncNote" = "房间只共享参与状态和结果；每台设备都要在本地开始。";
+"costart.start25" = "开始 25 分钟";
+"costart.leave" = "离开房间";
+
+/* MARK: - 完成后保存启动步骤 */
+"savedStart.prompt.title" = "要把这一步留到下次吗？";
+"savedStart.prompt.message" = "你完成了“%@”。要保存标题和步骤，之后一键再次使用吗？";
+"savedStart.prompt.save" = "保存";
+"savedStart.prompt.notNow" = "暂时不用";
+"savedStart.confirmed" = "已保存“%@”，下次可以继续。";
+"savedStart.view" = "查看已保存的启动步骤";
 "costart.join" = "加入";
 "costart.roomNotFound" = "找不到那个房间，可能已结束。";
 "costart.offline" = "现在连不上 StartKind。请检查网络后再试。";
@@ -329,6 +432,7 @@
 /* MARK: - 留存辅助 */
 "stuck.button" = "我卡住了";
 "stuck.loaded" = "没关系。先从更小版本开始。";
+"stuck.rungCompleted" = "准备完成，下面是下一小步。";
 "stuck.source" = "卡住后重启";
 "energy.title" = "匹配能量";
 "energy.low" = "低";
@@ -347,7 +451,7 @@
 "proof.count" = "本周开始 %d 次";
 "adminInbox.title" = "极小事务收件箱";
 "adminInbox.placeholder" = "粘贴账单、邮件、预约或表格文字";
-"adminInbox.hint" = "StartKind 只保存一个下一步卡片。";
+"adminInbox.hint" = "StartKind 只会从中保留一个很小的下一步。";
 "adminInbox.saved" = "已保存成一个小事务步骤。";
 "yesterday.rescue.open" = "昨天恢复";
 "yesterday.rescue.loaded" = "昨天的事已变成 3 分钟重启。";
@@ -366,12 +470,13 @@
 "startScript.empty" = "有用的启动可保存在这里；本地保存且没有运营成本。";
 "startScript.loaded" = "已载入保存启动。";
 "startScript.source" = "保存启动";
-"calendarSoft.title" = "日历软着陆";
+"calendarSoft.title" = "日程准备";
 "calendarSoft.placeholder" = "会议、牙医、账单截止...";
 "calendarSoft.days" = "%d 天后";
-"calendarSoft.hint" = "输入一个即将到来的日程，StartKind 只转成一个准备动作。";
-"calendarSoft.loaded" = "日程准备步骤已载入。";
-"calendarSoft.noMatch" = "试试账单、预约、会议、截止日、医生、牙医或电话。";
+"calendarSoft.hint" = "输入今天到未来 7 天内的任意日程。StartKind 会生成一个有用的 5 分钟准备步骤。";
+"calendarSoft.submit" = "创建准备步骤";
+"calendarSoft.loaded" = "日程准备好了。";
+"calendarSoft.noMatch" = "请选择今天或未来 7 天内的日期。";
 "quickAction.source" = "主屏幕快捷动作";
 "quickAction.loaded" = "快捷启动已载入。";
 "gentleReview.title" = "温和回顾";
@@ -382,20 +487,24 @@
 /* MARK: - 隐私 */
 "privacy.title" = "隐私";
 "privacy.principlesTitle" = "原则";
-"privacy.principle1" = "StartKind 只收集帮你迈出一小步所需的最少数据。";
-"privacy.principle2" = "免费模式无需账号，历史记录保存在你的设备上。";
-"privacy.principle3" = "云端功能(Plus)仅在登录后同步或处理数据。";
+"privacy.principle1" = "StartKind 不要求账号或登录。";
+"privacy.principle2" = "个人数据保存在本机和你的私有 iCloud CloudKit 数据库中。";
+"privacy.principle3" = "没有广告、追踪或分析 SDK，也不会在后台访问日历、通讯录或照片。";
 "privacy.dataTitle" = "可能存储的数据";
-"privacy.data1" = "你输入或说出的任务文本，以及计时历史。";
-"privacy.data2" = "订阅权益(来自 Apple)和设备诊断。";
-"privacy.data3" = "Plus:你选择解析的日历、邮件或照片内容。";
+"privacy.data1" = "任务文字、步骤、计时历史、恢复胶囊、个人资料和已保存的启动方式会保存在本机和私有 iCloud CloudKit 中。";
+"privacy.data2" = "当你请求 AI 或事务快速启动解析时，你选择的文字或 OCR 文字会通过一次性中转服务发送；我们不会保存请求文字。";
+"privacy.data3" = "陪伴房间会使用临时房间信息、你选择的昵称和你说出的一句话步骤，让参与者能够配合；房间会过期。";
+"privacy.data4" = "Apple 签名的订阅凭证会用于权益验证；服务端只保存最终等级和匿名设备令牌的哈希。";
 "privacy.controlsTitle" = "你的控制";
-"privacy.control1" = "随时在设置中删除本地数据。";
-"privacy.control2" = "删除你的云账号和数据。";
-"privacy.control3" = "导出你的数据。";
+"privacy.control1" = "在设置中删除本机的 StartKind 数据。";
+"privacy.control2" = "在你的 iCloud 设置中删除私有 iCloud 副本；StartKind 无法访问或删除它。";
+"privacy.control3" = "在设置中导出本机可用的数据。";
+"privacy.control4" = "删除 App 会移除匿名设备令牌；服务端记录会自动清理。";
 "privacy.sensitiveTitle" = "敏感内容";
-"privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息；生产环境不记录。";
-"privacy.sensitive2" = "服务端密钥仅存服务器；app 只持有你的公开密钥。";
+"privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息；我们的服务端不会记录原始请求文字。";
+"privacy.sensitive2" = "图片在本机读取；只有你继续请求解析时，提取出的文字才会被中转。";
+"privacy.legalTitle" = "法律信息";
+"privacy.fullPolicy" = "阅读完整隐私政策";
 "privacy.contactTitle" = "联系";
 
 /* MARK: - Fifth retention release */
@@ -428,10 +537,10 @@
 /* Error messages surfaced from LocalizedError types */
 "error.usage.stepLimit" = "今天的免费步骤已经用完了。";
 "error.usage.adminLimit" = "今天的免费事务快速开始已经用完了。";
-"error.speech.notAuthorized" = "还没有获得语音识别权限。";
-"error.speech.microphoneNotAuthorized" = "还没有获得麦克风权限。";
-"error.speech.notAvailable" = "现在无法使用语音识别。";
-"error.speech.engineFailure" = "无法启动音频引擎。";
+"error.speech.notAuthorized" = "请在 iOS“设置”>“隐私与安全性”>“语音识别”中开启“语音识别”。不需要 Siri。";
+"error.speech.microphoneNotAuthorized" = "请在 iOS“设置”>“隐私与安全性”>“麦克风”中开启“麦克风”。不需要 Siri。";
+"error.speech.notAvailable" = "语音识别暂时不可用。不需要 Siri；请在 iOS“设置”中检查“语音识别”和“麦克风”。";
+"error.speech.engineFailure" = "语音识别未能继续，请重试。";
 "error.api.notConfigured" = "还没有配置云端功能。";
 "error.auth.network" = "无法连接服务器，请稍后再试。";
 
@@ -442,6 +551,8 @@
 "settings.theme.light" = "浅色";
 "settings.theme.dark" = "深色";
 "settings.textSize" = "字体大小";
+"settings.textSize.smaller" = "更小";
+"settings.textSize.small" = "小";
 "settings.textSize.standard" = "标准";
 "settings.textSize.large" = "大";
 "settings.textSize.larger" = "更大";

@@ -1,9 +1,163 @@
 import SwiftUI
+import UIKit
+
+fileprivate struct RoomCodeTextField: UIViewRepresentable {
+    @Binding var text: String
+    let placeholder: String
+    let accessibilityIdentifier: String
+    @Binding var isFocused: Bool
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text, isFocused: $isFocused)
+    }
+
+    func makeUIView(context: Context) -> UITextField {
+        let textField = UITextField(frame: .zero)
+        textField.delegate = context.coordinator
+        textField.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.textFieldEditingChanged(_:)),
+            for: .editingChanged
+        )
+        textField.borderStyle = .none
+        textField.backgroundColor = .clear
+        textField.font = .preferredFont(forTextStyle: .body)
+        textField.adjustsFontForContentSizeCategory = true
+        textField.placeholder = placeholder
+        textField.keyboardType = .numberPad
+        textField.textContentType = .oneTimeCode
+        textField.accessibilityIdentifier = accessibilityIdentifier
+        textField.accessibilityLabel = placeholder
+        textField.text = Self.normalizedDigits(text)
+        textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textField
+    }
+
+    func updateUIView(_ uiView: UITextField, context: Context) {
+        context.coordinator.text = $text
+        context.coordinator.isFocused = $isFocused
+
+        uiView.placeholder = placeholder
+        uiView.keyboardType = .numberPad
+        uiView.textContentType = .oneTimeCode
+        uiView.accessibilityIdentifier = accessibilityIdentifier
+        uiView.accessibilityLabel = placeholder
+
+        let normalizedText = Self.normalizedDigits(text)
+        if uiView.text != normalizedText {
+            uiView.text = normalizedText
+        }
+
+        if isFocused {
+            if !uiView.isFirstResponder {
+                uiView.becomeFirstResponder()
+            }
+        } else if uiView.isFirstResponder {
+            uiView.resignFirstResponder()
+        }
+    }
+
+    private static func normalizedDigits(_ value: String) -> String {
+        var result = ""
+        for scalar in value.unicodeScalars {
+            guard CharacterSet.decimalDigits.contains(scalar) else { continue }
+            guard result.count < 6 else { break }
+            result.append(String(scalar))
+        }
+        return result
+    }
+
+    final class Coordinator: NSObject, UITextFieldDelegate {
+        var text: Binding<String>
+        var isFocused: Binding<Bool>
+
+        init(text: Binding<String>, isFocused: Binding<Bool>) {
+            self.text = text
+            self.isFocused = isFocused
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            isFocused.wrappedValue = true
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            isFocused.wrappedValue = false
+        }
+
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            isFocused.wrappedValue = false
+            return true
+        }
+
+        @objc func textFieldEditingChanged(_ textField: UITextField) {
+            let normalized = RoomCodeTextField.normalizedDigits(textField.text ?? "")
+            if textField.text != normalized {
+                textField.text = normalized
+            }
+            text.wrappedValue = normalized
+        }
+
+        func textField(
+            _ textField: UITextField,
+            shouldChangeCharactersIn range: NSRange,
+            replacementString string: String
+        ) -> Bool {
+            let currentText = textField.text ?? ""
+            guard let stringRange = Range(range, in: currentText) else { return false }
+
+            let candidate = currentText.replacingCharacters(in: stringRange, with: string)
+            let normalized = RoomCodeTextField.normalizedDigits(candidate)
+            let remainingCapacity = max(
+                0,
+                6 - RoomCodeTextField.normalizedDigits(
+                    currentText.replacingCharacters(in: stringRange, with: "")
+                ).utf16.count
+            )
+
+            if candidate == normalized && string.utf16.count <= remainingCapacity {
+                return true
+            }
+
+            let rawCaretOffset = range.location + string.utf16.count
+            let candidatePrefixLength = min(rawCaretOffset, candidate.utf16.count)
+            let candidatePrefix = (candidate as NSString).substring(
+                with: NSRange(location: 0, length: candidatePrefixLength)
+            )
+            let normalizedCaretOffset = RoomCodeTextField.normalizedDigits(candidatePrefix).utf16.count
+
+            textField.text = normalized
+            text.wrappedValue = normalized
+
+            if let caretPosition = textField.position(
+                from: textField.beginningOfDocument,
+                offset: min(normalizedCaretOffset, normalized.utf16.count)
+            ) {
+                textField.selectedTextRange = textField.textRange(from: caretPosition, to: caretPosition)
+            }
+
+            return false
+        }
+    }
+}
 
 struct StartView: View {
+    private struct CoStartRoute: Identifiable {
+        let id = UUID()
+        let step: NextStepModel
+        let initialMode: CoStartRoomType?
+    }
+
+    private struct JoinedCoStartRoute: Identifiable {
+        let id = UUID()
+        let room: CoStartRoomModel
+        let stepText: String
+    }
+
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
     @Environment(\.openURL) private var openURL
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var inputText = ""
     @State private var joinRoomCode = ""
@@ -12,6 +166,7 @@ struct StartView: View {
     @State private var selectedCategory: TaskCategory?
     @State private var selectedEnergy: EnergyLevel?
     @State private var currentStep: NextStepModel?
+    @State private var rootProposalBeforeShrink: NextStepProposal?
     @State private var isLoading = false
     @State private var isJoiningRoom = false
     @State private var errorMessage: String?
@@ -30,13 +185,18 @@ struct StartView: View {
     @State private var showPaywall = false
     @State private var paywallReason: PaywallTrigger = .stepLimit
     @State private var moreWaysExpanded = false
+    @State private var scanOrPasteExpanded = false
+    @State private var reuseStartExpanded = false
+    @State private var coStartExpanded = false
+    @State private var matchFeelExpanded = false
+    @State private var planAheadExpanded = false
 
-    @State private var timerSession: TimerSessionModel?
-    @State private var showCoStart = false
-    @State private var coStartInitialMode: CoStartRoomType?
-    @State private var joinedCoStartRoom: CoStartRoomModel?
-    @State private var joinedCoStartStepText = ""
-    @State private var showJoinedCoStart = false
+    @State private var timerRoute: TimerRoute?
+    @State private var coStartRoute: CoStartRoute?
+    @State private var joinedCoStartRoute: JoinedCoStartRoute?
+    @State private var pendingSaveStart: SavedStartDraft?
+    @State private var savePrompt: SavedStartDraft?
+    @State private var savedStartConfirmation: SavedStartDraft?
 
     /// Anchor for the produced step card. Every "give me a step" action renders
     /// its result below the fold, so without scrolling to it the screen looks
@@ -86,9 +246,7 @@ struct StartView: View {
                                     showPlan = false
                                 },
                                 onCoStart: {
-                                    currentStep = step
-                                    coStartInitialMode = nil
-                                    showCoStart = true
+                                    coStartRoute = CoStartRoute(step: step, initialMode: nil)
                                 },
                                 onSaveToVault: {
                                     env.vault.add(title: step.proposal.title, body: step.proposal.step, category: step.category)
@@ -129,17 +287,25 @@ struct StartView: View {
                         KindBanner(text: proofMessage)
                             .transition(.opacity)
                     }
+                    if let savedStartConfirmation {
+                        SavedStartConfirmationBanner(title: savedStartConfirmation.title) {
+                            self.savedStartConfirmation = nil
+                            showVault = true
+                        }
+                        .transition(.opacity)
+                    }
                 }
                 .padding(.horizontal, Theme.spacing16)
                 .padding(.vertical, Theme.spacing16)
-                .animation(.easeInOut, value: rescheduleMessage)
+                .animation(reduceMotion ? nil : .easeInOut, value: rescheduleMessage)
                 .onChange(of: currentStep?.id) { _, id in
+                    rootProposalBeforeShrink = nil
                     guard id != nil else { return }
                     // A step arriving supersedes whatever failed before it.
                     // Eighteen call sites produce steps; stating the rule here
                     // is the only version of it that stays true.
                     errorMessage = nil
-                    withAnimation(.easeInOut) {
+                    withAnimation(reduceMotion ? nil : .easeInOut) {
                         proxy.scrollTo(Self.stepAnchor, anchor: .top)
                     }
                 }
@@ -148,13 +314,13 @@ struct StartView: View {
                 .sensoryFeedback(.success, trigger: currentStep?.id) { _, id in id != nil }
                 .onChange(of: errorMessage) { _, message in
                     guard message != nil else { return }
-                    withAnimation(.easeInOut) {
+                    withAnimation(reduceMotion ? nil : .easeInOut) {
                         proxy.scrollTo(Self.errorAnchor, anchor: .top)
                     }
                 }
                 .onChange(of: isLoading) { _, loading in
                     guard loading else { return }
-                    withAnimation(.easeInOut) {
+                    withAnimation(reduceMotion ? nil : .easeInOut) {
                         proxy.scrollTo(Self.stepAnchor, anchor: .top)
                     }
                 }
@@ -172,11 +338,9 @@ struct StartView: View {
                 }
             }
         }
-        .sheet(item: $timerSession) { session in
-            if let step = currentStep {
-                TimerView(session: session, step: step) { outcome, blocker, returnNote in
-                    handleTimerOutcome(outcome, session: session, step: step, blocker: blocker, returnNote: returnNote)
-                }
+        .sheet(item: $timerRoute, onDismiss: presentPendingSavePrompt) { route in
+            TimerView(session: route.session, step: route.step) { outcome, blocker, returnNote in
+                handleTimerOutcome(outcome, session: route.session, step: route.step, blocker: blocker, returnNote: returnNote)
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -197,34 +361,66 @@ struct StartView: View {
                 useVaultItem(item)
             }
         }
-        .sheet(isPresented: $showCoStart) {
-            if let step = currentStep {
-                CoStartView(
-                    step: step,
-                    initialMode: coStartInitialMode,
-                    onFriendLimitReached: {
-                        paywallReason = .friendCoStartLimit
-                        showCoStart = false
-                        showPaywall = true
-                    }
-                )
-                    .environmentObject(env)
-            }
-        }
-        .sheet(isPresented: $showJoinedCoStart) {
-            if let room = joinedCoStartRoom {
-                CoStartRoomView(room: room, stepText: joinedCoStartStepText, isGuest: true) { outcome in
-                    Task { await env.endCoStartGuest(roomId: room.id, outcome: outcome) }
-                    showJoinedCoStart = false
+        .sheet(item: $coStartRoute) { route in
+            CoStartView(
+                step: route.step,
+                initialMode: route.initialMode,
+                onFriendLimitReached: {
+                    paywallReason = .friendCoStartLimit
+                    coStartRoute = nil
+                    showPaywall = true
                 }
+            )
                 .environmentObject(env)
+        }
+        .sheet(item: $joinedCoStartRoute) { route in
+            CoStartRoomView(
+                room: route.room,
+                stepText: route.stepText,
+                isGuest: true,
+                onLeave: {
+                    await env.leaveCoStart(room: route.room, isGuest: true)
+                    joinedCoStartRoute = nil
+                }
+            ) { outcome in
+                Task { await env.endCoStartGuest(roomId: route.room.id, outcome: outcome) }
+                joinedCoStartRoute = nil
+            }
+            .environmentObject(env)
+        }
+        .alert(
+            L("savedStart.prompt.title"),
+            isPresented: Binding(
+                get: { savePrompt != nil },
+                set: { isPresented in
+                    if !isPresented { savePrompt = nil }
+                }
+            )
+        ) {
+            if let draft = savePrompt {
+                Button(L("savedStart.prompt.save")) {
+                    saveCompletedStart(draft)
+                }
+                .accessibilityIdentifier("savedStart.save")
+            }
+            Button(L("savedStart.prompt.notNow"), role: .cancel) {
+                savePrompt = nil
+            }
+            .accessibilityIdentifier("savedStart.notNow")
+        } message: {
+            if let draft = savePrompt {
+                Text(verbatim: L("savedStart.prompt.message", draft.title))
             }
         }
         .onChange(of: env.speech.transcript) { _, new in
-            if env.speech.isListening {
-                inputText = new
-                lastSource = .voice
-            }
+            guard !new.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+            inputText = new
+            lastSource = .voice
+            errorMessage = nil
+        }
+        .onChange(of: env.speech.lastError) { _, error in
+            guard let error else { return }
+            errorMessage = error.localizedDescription
         }
         .onChange(of: env.pendingCaptureText) { _, newValue in
             guard let newValue, !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
@@ -246,30 +442,43 @@ struct StartView: View {
         }
         .onAppear {
             refreshDailyOneThing()
+#if DEBUG
+            if ScreenshotMode.screen == .start, currentStep == nil {
+                currentStep = env.createLocalNextStep(
+                    proposal: ScreenshotDemoContent.mainStep,
+                    sourceText: ScreenshotDemoContent.mainStep.step
+                )
+            }
+#endif
         }
     }
 
     // MARK: - Subviews
 
     private var headerBand: some View {
-        HStack(alignment: .center, spacing: Theme.spacing12) {
-            VStack(alignment: .leading, spacing: Theme.spacing4) {
-                SectionLabel("start.title")
-                Text(verbatim: L("start.subtitle"))
-                    .font(.system(.title2, design: .rounded))
-                    .fontWeight(.bold)
+        VStack(alignment: .leading, spacing: Theme.spacing4) {
+            if !env.onboarding.firstName.isEmpty {
+                Text(verbatim: L("start.greeting", env.onboarding.firstName))
+                    .font(.headline)
                     .foregroundStyle(Theme.ink)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("start.greeting")
             }
-            Spacer(minLength: Theme.spacing12)
+            Text(verbatim: L("start.subtitle"))
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            if let difficulty = env.onboarding.difficulty {
+                Text(verbatim: L(difficulty.hintKey))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("start.difficultyHint")
+            }
         }
-        .padding(Theme.spacing16)
-        .background(Theme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
-                .stroke(Theme.line, lineWidth: 1)
-        )
+        .padding(.horizontal, Theme.spacing16)
+        .padding(.vertical, Theme.spacing4)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var primaryStartPanel: some View {
@@ -277,25 +486,6 @@ struct StartView: View {
             voiceButton
             captureField
             stuckButton
-
-            if dailyOneThing != nil {
-                dailyOneThingPanel
-            }
-
-            if let capsule = env.activeCapsule() {
-                resumePanel(capsule)
-            }
-
-            if env.yesterdayRescueProposal() != nil {
-                kindStartButton("yesterday.rescue.open", systemImage: "clock.arrow.circlepath", id: "start.yesterdayRescue") {
-                    applyYesterdayRescue()
-                }
-            }
-
-            kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
-                runAutopilot()
-            }
-            .disabled(isLoading)
         }
     }
 
@@ -420,45 +610,40 @@ struct StartView: View {
 
     private var moreWaysPanel: some View {
         DisclosureGroup(isExpanded: $moreWaysExpanded) {
-            VStack(spacing: Theme.spacing12) {
-                VStack(alignment: .leading, spacing: Theme.spacing8) {
-                    SectionLabel("start.kindStart.title")
-                        .accessibilityIdentifier("start.kindStart")
-                    HStack(spacing: Theme.spacing8) {
-                        kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
-                            adminReaderInitialMode = .text
-                        }
-                        kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
-                            adminReaderInitialMode = .photo
-                        }
+            if moreWaysExpanded {
+                VStack(alignment: .leading, spacing: Theme.spacing12) {
+                    DisclosureGroup(isExpanded: $scanOrPasteExpanded) {
+                        if scanOrPasteExpanded { scanOrPasteContent }
+                    } label: {
+                        moreWaysGroupLabel("start.moreWays.scan", systemImage: "doc.viewfinder", id: "start.moreWays.scan")
                     }
-                    HStack(spacing: Theme.spacing8) {
-                        kindStartButton("template.open", systemImage: "square.grid.2x2.fill", id: "start.templates") {
-                            showTemplates = true
-                        }
-                        kindStartButton("vault.open", systemImage: "tray.full.fill", id: "start.vault") {
-                            showVault = true
-                        }
+
+                    DisclosureGroup(isExpanded: $reuseStartExpanded) {
+                        if reuseStartExpanded { reuseStartContent }
+                    } label: {
+                        moreWaysGroupLabel("start.moreWays.reuse", systemImage: "arrow.clockwise.circle", id: "start.moreWays.reuse")
+                    }
+
+                    DisclosureGroup(isExpanded: $coStartExpanded) {
+                        if coStartExpanded { coStartContent }
+                    } label: {
+                        moreWaysGroupLabel("start.moreWays.costart", systemImage: "person.2.wave.2", id: "start.moreWays.costart")
+                    }
+
+                    DisclosureGroup(isExpanded: $matchFeelExpanded) {
+                        if matchFeelExpanded { matchFeelContent }
+                    } label: {
+                        moreWaysGroupLabel("start.moreWays.match", systemImage: "heart.text.square", id: "start.moreWays.match")
+                    }
+
+                    DisclosureGroup(isExpanded: $planAheadExpanded) {
+                        if planAheadExpanded { planAheadContent }
+                    } label: {
+                        moreWaysGroupLabel("start.moreWays.plan", systemImage: "list.bullet.clipboard", id: "start.moreWays.plan")
                     }
                 }
-                if !env.isPlus {
-                    Text(verbatim: L("start.kindStart.adminLeft", env.usageState.adminQuickStartsRemaining))
-                        .font(.caption)
-                        .foregroundStyle(Theme.accent)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                quickFriendCoStartButton
-                roomCodeJoinField
-                tinyAdminInboxField
-                categoryChips
-                energyMatchChips
-                frictionPresetChips
-                frictionForecastPanel
-                dayPartAndEmergencyPanel
-                calendarSoftLandingPanel
-                memoryAndScriptsPanel
+                .padding(.top, Theme.spacing8)
             }
-            .padding(.top, Theme.spacing8)
         } label: {
             Label(L("start.moreWays"), systemImage: moreWaysExpanded ? "chevron.up" : "chevron.right")
                 .font(.headline)
@@ -468,20 +653,131 @@ struct StartView: View {
         .padding(.vertical, Theme.spacing12)
         .overlay(alignment: .top) { Divider().background(Theme.line) }
         .overlay(alignment: .bottom) { Divider().background(Theme.line) }
+        .onChange(of: moreWaysExpanded) { _, expanded in
+            guard !expanded else { return }
+            scanOrPasteExpanded = false
+            reuseStartExpanded = false
+            coStartExpanded = false
+            matchFeelExpanded = false
+            planAheadExpanded = false
+        }
+    }
+
+    private func moreWaysGroupLabel(_ key: String, systemImage: String, id: String) -> some View {
+        Label(L(key), systemImage: systemImage)
+            .font(.subheadline)
+            .fontWeight(.semibold)
+            .foregroundStyle(Theme.ink)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+            .accessibilityIdentifier(id)
+    }
+
+    private var scanOrPasteContent: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            VStack(alignment: .leading, spacing: Theme.spacing8) {
+                SectionLabel("start.kindStart.title")
+                    .accessibilityIdentifier("start.kindStart")
+                HStack(spacing: Theme.spacing8) {
+                    kindStartButton("start.kindStart.admin", systemImage: "doc.text.magnifyingglass", id: "start.kind.admin") {
+                        adminReaderInitialMode = .text
+                    }
+                    kindStartButton("start.kindStart.photo", systemImage: "camera.viewfinder", id: "start.kind.photo") {
+                        adminReaderInitialMode = .photo
+                    }
+                }
+            }
+            if !env.isPlus {
+                Text(verbatim: L("start.kindStart.adminLeft", env.usageState.adminQuickStartsRemaining))
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            tinyAdminInboxField
+        }
+    }
+
+    private var reuseStartContent: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            HStack(spacing: Theme.spacing8) {
+                kindStartButton("template.open", systemImage: "square.grid.2x2.fill", id: "start.templates") {
+                    showTemplates = true
+                }
+                kindStartButton("vault.open", systemImage: "tray.full.fill", id: "start.vault") {
+                    showVault = true
+                }
+            }
+            memoryAndScriptsPanel
+        }
+    }
+
+    private var coStartContent: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            quickQuietCoStartButton
+            quickFriendCoStartButton
+            roomCodeJoinField
+        }
+    }
+
+    private var matchFeelContent: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            categoryChips
+            energyMatchChips
+            frictionPresetChips
+            frictionForecastPanel
+            frictionMemoryPanel
+            dayPartAndEmergencyPanel
+        }
+    }
+
+    private var planAheadContent: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing12) {
+            if dailyOneThing != nil {
+                dailyOneThingPanel
+            }
+
+            if let capsule = env.activeCapsule() {
+                resumePanel(capsule)
+            }
+
+            if env.yesterdayRescueProposal() != nil {
+                kindStartButton("yesterday.rescue.open", systemImage: "clock.arrow.circlepath", id: "start.yesterdayRescue") {
+                    applyYesterdayRescue()
+                }
+            }
+
+            kindStartButton("autopilot.open", systemImage: "sparkles", id: "start.autopilot") {
+                runAutopilot()
+            }
+            .disabled(isLoading)
+
+            calendarSoftLandingPanel
+        }
     }
 
     private var voiceButton: some View {
-        Button {
+        let voiceLabel = {
+            if env.speech.isPreparing { return L("start.voice.preparing") }
+            if env.speech.isListening { return L("start.voice.listening") }
+            return L("start.voice.tap")
+        }()
+
+        return Button {
             toggleVoice()
         } label: {
             HStack(spacing: Theme.spacing12) {
-                Image(systemName: env.speech.isListening ? "waveform" : "mic.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(env.speech.isListening ? .white : Theme.accent)
-                    .background(env.speech.isListening ? Color.red.opacity(0.82) : Theme.softAccent)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
-                Text(verbatim: L(env.speech.isListening ? "start.voice.listening" : "start.voice.tap"))
+                if env.speech.isPreparing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(width: 40, height: 40)
+                } else {
+                    Image(systemName: env.speech.isListening ? "waveform" : "mic.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(env.speech.isListening ? .white : Theme.accent)
+                        .background(env.speech.isListening ? Color.red.opacity(0.82) : Theme.softAccent)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                Text(verbatim: voiceLabel)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundStyle(Theme.ink)
@@ -497,32 +793,57 @@ struct StartView: View {
             )
         }
         .pressableCard()
-        .disabled(isLoading)
-        .accessibilityLabel(Text(verbatim: L(env.speech.isListening ? "start.voice.listening" : "start.voice.tap")))
+        .disabled(isLoading || env.speech.isPreparing)
+        .accessibilityLabel(Text(verbatim: voiceLabel))
+        .accessibilityValue(
+            env.speech.isListening
+                ? L("start.voice.listening")
+                : (env.speech.isPreparing ? L("start.voice.preparing") : L("start.voice.tap"))
+        )
         .accessibilityIdentifier("start.voice")
     }
 
     private var captureField: some View {
         FieldShell(systemImage: "text.alignleft") {
-            TextField(L("start.text.placeholder"), text: $inputText, axis: .vertical)
-                .lineLimit(1...4)
-                .submitLabel(.done)
-                .focused($focusedField, equals: .taskInput)
-                .accessibilityIdentifier("start.input")
-                .onChange(of: inputText) { _, _ in lastSource = .text }
-                .onSubmit { focusedField = nil }
-
-            Button {
-                Task { await generate() }
-            } label: {
-                Image(systemName: "arrow.up")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(canSubmit ? Theme.accent : Color.secondary.opacity(0.45))
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            ZStack(alignment: .leading) {
+                if inputText.isEmpty {
+                    Text(verbatim: L("start.text.placeholder"))
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4, alignment: .leading)
+                        .padding(.vertical, Theme.spacing10)
+                        .allowsHitTesting(false)
+                }
+                TextField("", text: $inputText, axis: .vertical)
+                    .lineLimit(1...4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4, alignment: .leading)
+                    .submitLabel(.done)
+                    .focused($focusedField, equals: .taskInput)
+                    .accessibilityLabel(Text(verbatim: L("start.text.placeholder")))
+                    .accessibilityIdentifier("start.input")
+                    .onChange(of: inputText) { _, _ in lastSource = .text }
+                    .onSubmit { focusedField = nil }
             }
-            .pressableCard()
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+
+                Button {
+                    Task { await generate() }
+                } label: {
+                    Group {
+                        if isLoading {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                        .frame(width: Theme.minTapTarget, height: Theme.minTapTarget)
+                        .background(hasCaptureInput || isLoading ? Theme.accent : Color.secondary.opacity(0.45))
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                }
+                .pressableCard()
             .disabled(!canSubmit)
             .accessibilityLabel(Text(verbatim: L("start.text.submit")))
             .accessibilityIdentifier("start.submit")
@@ -581,19 +902,58 @@ struct StartView: View {
         .accessibilityIdentifier("start.costart.friend")
     }
 
+    private var quickQuietCoStartButton: some View {
+        Button {
+            Task { await startQuietCoStart() }
+        } label: {
+            HStack(spacing: Theme.spacing12) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(width: 38, height: 38)
+                    .foregroundStyle(canCoStart ? Theme.accent : Color.secondary)
+                    .background(canCoStart ? Theme.softAccent : Color.secondary.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+                Text(verbatim: L("costart.aiQuiet"))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(canCoStart ? Theme.ink : Color.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, Theme.spacing12)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+            .background(Theme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
+                    .stroke(Theme.line, lineWidth: 1)
+            )
+        }
+        .pressableCard()
+        .disabled(!canCoStart || isLoading)
+        .accessibilityIdentifier("start.costart.quiet")
+    }
+
     private var roomCodeJoinField: some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
             SectionLabel("costart.joinByCode")
             FieldShell(systemImage: "number") {
-                TextField(L("costart.code.placeholder"), text: $joinRoomCode)
-                    .keyboardType(.numberPad)
-                    .textContentType(.oneTimeCode)
-                    .focused($focusedField, equals: .roomCode)
-                    .accessibilityIdentifier("start.join.code")
-                    .onChange(of: joinRoomCode) { _, newValue in
-                        let normalized = AppEnvironment.normalizedRoomCode(newValue)
-                        if normalized != newValue { joinRoomCode = normalized }
-                    }
+                RoomCodeTextField(
+                    text: $joinRoomCode,
+                    placeholder: L("costart.code.placeholder"),
+                    accessibilityIdentifier: "start.join.code",
+                    isFocused: Binding(
+                        get: { focusedField == .roomCode },
+                        set: { isFocused in
+                            if isFocused {
+                                focusedField = .roomCode
+                            } else if focusedField == .roomCode {
+                                focusedField = nil
+                            }
+                        }
+                    )
+                )
+                .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+                .focused($focusedField, equals: .roomCode)
 
                 Button {
                     Task { await joinRoomByCode() }
@@ -610,7 +970,7 @@ struct StartView: View {
                                 .foregroundStyle(.white)
                         }
                     }
-                    .frame(width: 38, height: 38)
+                    .frame(width: Theme.minTapTarget, height: Theme.minTapTarget)
                     .background(canJoinRoom || isJoiningRoom ? Theme.accent : Color.secondary.opacity(0.45))
                     .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
@@ -640,11 +1000,17 @@ struct StartView: View {
                 Button {
                     Task { await captureAdminInbox() }
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(canCaptureAdminInbox ? Theme.accent : Color.secondary.opacity(0.45))
+                    Group {
+                        if isLoading {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                        .frame(width: Theme.minTapTarget, height: Theme.minTapTarget)
+                        .background(canCaptureAdminInbox || isLoading ? Theme.accent : Color.secondary.opacity(0.45))
                         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
                 }
                 .pressableCard()
@@ -801,6 +1167,7 @@ struct StartView: View {
     private var memoryAndScriptsPanel: some View {
         VStack(alignment: .leading, spacing: Theme.spacing10) {
             SectionLabel("startScript.title")
+                .accessibilityIdentifier("startScript.title")
             if let step = currentStep {
                 QuietButton("startScript.save", systemImage: "bookmark.fill", accessibilityId: "startScript.save") {
                     env.saveStartScript(from: step)
@@ -808,22 +1175,6 @@ struct StartView: View {
                     vaultMessage = nil
                     rescheduleMessage = nil
                 }
-            }
-            if let memory = env.frictionMemoryProposal(category: selectedCategory) {
-                Button {
-                    applyFrictionMemory()
-                } label: {
-                    Label(memory.title, systemImage: "brain.head.profile")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .padding(Theme.spacing12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.softAccent.opacity(0.72))
-                        .foregroundStyle(Theme.ink)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
-                }
-                .pressableCard()
-                .accessibilityIdentifier("frictionMemory.apply")
             }
             if env.startScripts.scripts.isEmpty {
                 Text(verbatim: L("startScript.empty"))
@@ -862,6 +1213,26 @@ struct StartView: View {
         .startKindCard()
     }
 
+    @ViewBuilder
+    private var frictionMemoryPanel: some View {
+        if let memory = env.frictionMemoryProposal(category: selectedCategory) {
+            Button {
+                applyFrictionMemory()
+            } label: {
+                Label(memory.title, systemImage: "brain.head.profile")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .padding(Theme.spacing12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.softAccent.opacity(0.72))
+                    .foregroundStyle(Theme.ink)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            }
+            .pressableCard()
+            .accessibilityIdentifier("frictionMemory.apply")
+        }
+    }
+
     private var calendarSoftLandingPanel: some View {
         VStack(alignment: .leading, spacing: Theme.spacing10) {
             SectionLabel("calendarSoft.title")
@@ -883,6 +1254,7 @@ struct StartView: View {
                 }
                 .pressableCard()
                 .disabled(!canUseCalendarSoftLanding)
+                .accessibilityLabel(Text(verbatim: L("calendarSoft.submit")))
                 .accessibilityIdentifier("calendarSoft.submit")
             }
             Stepper(L("calendarSoft.days", calendarDaysFromNow), value: $calendarDaysFromNow, in: 0...7)
@@ -972,8 +1344,12 @@ struct StartView: View {
         )
     }
 
-    private var canSubmit: Bool {
+    private var hasCaptureInput: Bool {
         !inputText.trimmingCharacters(in: .whitespaces).isEmpty || selectedCategory != nil
+    }
+
+    private var canSubmit: Bool {
+        hasCaptureInput && !isLoading
     }
 
     private var canCoStart: Bool {
@@ -1002,9 +1378,11 @@ struct StartView: View {
         if env.speech.isListening {
             env.speech.stop()
         } else {
+            errorMessage = nil
             Task {
                 do {
                     try await env.speech.start()
+                    lastSource = .voice
                 } catch {
                     errorMessage = error.localizedDescription
                 }
@@ -1013,52 +1391,34 @@ struct StartView: View {
     }
 
     private func startFriendCoStart() async {
+        await startCoStart(initialMode: .friendLink)
+    }
+
+    private func startQuietCoStart() async {
+        await startCoStart(initialMode: .aiQuiet)
+    }
+
+    private func startCoStart(initialMode: CoStartRoomType) async {
+        guard !isLoading else { return }
         focusedField = nil
         if let step = currentStep {
-            guard env.canCreateFriendCoStart else {
-                paywallReason = .friendCoStartLimit
-                showPaywall = true
-                return
-            }
-            coStartInitialMode = .friendLink
-            currentStep = step
-            showCoStart = true
+            coStartRoute = CoStartRoute(step: step, initialMode: initialMode)
             return
         }
+        env.speech.stop()
         let raw = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty || selectedCategory != nil else { return }
-        guard env.canGenerateStep else {
-            paywallReason = .stepLimit
-            showPaywall = true
-            return
-        }
         isLoading = true
         errorMessage = nil
         do {
             let step = try await env.generateNextStep(input: captureInput(raw: raw), energy: selectedEnergy)
-            guard env.canCreateFriendCoStart else {
-                paywallReason = .friendCoStartLimit
-                showPaywall = true
-                currentStep = step
-                rescheduleMessage = nil
-                vaultMessage = nil
-                showPlan = false
-                showCoStart = false
-                isLoading = false
-                return
-            }
             currentStep = step
             rescheduleMessage = nil
             vaultMessage = nil
             showPlan = false
-            coStartInitialMode = .friendLink
-            showCoStart = true
+            coStartRoute = CoStartRoute(step: step, initialMode: initialMode)
         } catch let usageError as UsageError {
-            switch usageError {
-            case .stepLimitReached: paywallReason = .stepLimit
-            case .adminLimitReached: paywallReason = .adminLimit
-            }
-            showPaywall = true
+            presentPaywall(for: usageError)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
         }
@@ -1066,14 +1426,11 @@ struct StartView: View {
     }
 
     private func generate() async {
+        guard !isLoading else { return }
+        env.speech.stop()
         focusedField = nil
         let raw = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty || selectedCategory != nil else { return }
-        guard env.canGenerateStep else {
-            paywallReason = .stepLimit
-            showPaywall = true
-            return
-        }
         isLoading = true
         errorMessage = nil
         do {
@@ -1082,11 +1439,7 @@ struct StartView: View {
             vaultMessage = nil
             showPlan = false
         } catch let usageError as UsageError {
-            switch usageError {
-            case .stepLimitReached: paywallReason = .stepLimit
-            case .adminLimitReached: paywallReason = .adminLimit
-            }
-            showPaywall = true
+            presentPaywall(for: usageError)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
         }
@@ -1094,6 +1447,7 @@ struct StartView: View {
     }
 
     private func joinRoomByCode() async {
+        guard !isJoiningRoom else { return }
         focusedField = nil
         let code = AppEnvironment.normalizedRoomCode(joinRoomCode)
         guard AppEnvironment.isValidRoomCode(code) else { return }
@@ -1104,12 +1458,10 @@ struct StartView: View {
             let room = try await env.joinCoStartRoom(
                 code: code,
                 stepText: guestStep,
-                displayName: L("costart.friend")
+                displayName: env.preferredGuestDisplayName
             )
             if let room {
-                joinedCoStartRoom = room
-                joinedCoStartStepText = guestStep
-                showJoinedCoStart = true
+                joinedCoStartRoute = JoinedCoStartRoute(room: room, stepText: guestStep)
                 joinRoomCode = ""
             } else {
                 errorMessage = L("costart.roomNotFound")
@@ -1131,17 +1483,28 @@ struct StartView: View {
         )
     }
 
+    private func presentPaywall(for error: Error) {
+        guard let trigger = PaywallTrigger.fromReturnedLimitError(error) else {
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
+            return
+        }
+        paywallReason = trigger
+        showPaywall = true
+    }
+
     private func startTimer(for step: NextStepModel) {
         let minutes = min(step.proposal.timerMinutes, 25)
         env.recordProofOfStart(step: step)
-        timerSession = env.startTimer(step: step, minutes: minutes)
+        let session = env.startTimer(step: step, minutes: minutes)
+        timerRoute = TimerRoute(session: session, step: step)
     }
 
     private func resume(_ capsule: RecoveryCapsuleModel) {
         let proposal = capsule.resumeProposal
         let step = env.persistence.saveNextStep(proposal: proposal, capture: nil, taskTitle: proposal.title)
         currentStep = step
-        timerSession = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
+        let session = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
+        timerRoute = TimerRoute(session: session, step: step)
     }
 
     private func apply(_ template: MicroTemplate) {
@@ -1269,6 +1632,7 @@ struct StartView: View {
             errorMessage = L("calendarSoft.noMatch")
             return
         }
+        currentStep = nil
         currentStep = step
         selectedCategory = step.category
         calendarEventTitle = ""
@@ -1311,6 +1675,9 @@ struct StartView: View {
 
     private func handleStuck() {
         focusedField = nil
+        if let currentStep, rootProposalBeforeShrink == nil {
+            rootProposalBeforeShrink = currentStep.proposal
+        }
         let step = env.createStuckStep(current: currentStep)
         currentStep = step
         selectedCategory = step.category
@@ -1321,14 +1688,10 @@ struct StartView: View {
     }
 
     private func captureAdminInbox() async {
+        guard !isLoading else { return }
         focusedField = nil
         let raw = adminInboxText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty else { return }
-        guard env.canUseAdminQuickStart else {
-            paywallReason = .adminLimit
-            showPaywall = true
-            return
-        }
         isLoading = true
         errorMessage = nil
         do {
@@ -1341,11 +1704,7 @@ struct StartView: View {
             proofMessage = nil
             showPlan = false
         } catch let usageError as UsageError {
-            switch usageError {
-            case .stepLimitReached: paywallReason = .stepLimit
-            case .adminLimitReached: paywallReason = .adminLimit
-            }
-            showPaywall = true
+            presentPaywall(for: usageError)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L("common.error")
         }
@@ -1363,6 +1722,9 @@ struct StartView: View {
     }
 
     private func shrink(_ step: NextStepModel) {
+        if rootProposalBeforeShrink == nil {
+            rootProposalBeforeShrink = step.proposal
+        }
         // shrinkCurrentStep persists the new level onto step, so the previous
         // level comparison here was always true.
         env.shrinkCurrentStep(step)
@@ -1377,25 +1739,55 @@ struct StartView: View {
     private func handleTimerOutcome(_ outcome: TimerOutcome, session: TimerSessionModel, step: NextStepModel, blocker: BlockerReason? = nil, returnNote: String? = nil) {
         let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
         if outcome == .completed {
+            let completedProposal = step.proposal
             env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
-            timerSession = nil
-            withAnimation {
+            timerRoute = nil
+            if let rootProposalBeforeShrink,
+               env.reopenNextLargerStep(step, rootProposal: rootProposalBeforeShrink) != nil {
+                currentStep = step
+                rescheduleMessage = L("stuck.rungCompleted")
+                proofMessage = nil
+                vaultMessage = nil
+                showPlan = false
+                return
+            }
+            withAnimation(reduceMotion ? nil : .default) {
                 currentStep = nil
                 inputText = ""
                 selectedCategory = nil
                 rescheduleMessage = nil
+                vaultMessage = nil
             }
+            rootProposalBeforeShrink = nil
+            pendingSaveStart = SavedStartCompletionPolicy.draft(
+                outcome: outcome,
+                isRootFinished: true,
+                proposal: completedProposal,
+                vault: env.vault
+            )
         } else if outcome == .partial || outcome == .paused {
             let result = env.rescheduleStep(step, reason: .paused)
             env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
-            timerSession = nil
+            timerRoute = nil
             rescheduleMessage = result.message
         } else {
             let result = env.rescheduleStep(step, reason: .skipped)
             env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
-            timerSession = nil
+            timerRoute = nil
             rescheduleMessage = result.message
         }
+    }
+
+    private func presentPendingSavePrompt() {
+        guard let pendingSaveStart else { return }
+        self.pendingSaveStart = nil
+        savePrompt = pendingSaveStart
+    }
+
+    private func saveCompletedStart(_ draft: SavedStartDraft) {
+        env.vault.add(title: draft.title, body: draft.body, category: draft.category)
+        savePrompt = nil
+        savedStartConfirmation = draft
     }
 }
 
