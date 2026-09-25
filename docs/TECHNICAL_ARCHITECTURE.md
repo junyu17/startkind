@@ -97,7 +97,7 @@ Free core features should work offline:
 - Timers
 - Local history
 - Recovery Capsule
-- Personal Vault
+- Saved starts (`PersonalVaultStore`)
 - Basic manual task shrinking
 
 Plus cloud-only features should degrade gracefully:

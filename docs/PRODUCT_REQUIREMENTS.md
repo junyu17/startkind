@@ -46,7 +46,7 @@ Input modes:
 - Voice
 - Text
 - Quick category button
-- Screenshot/photo for Plus
+- Photo OCR included within the one daily Free Admin Quick Start allowance
 
 Output:
 
@@ -116,11 +116,11 @@ When a user returns after interruption, the app shows:
 - Relevant notes, links, or draft text
 
 Free: one active recovery capsule.
-Plus: unlimited recovery history.
+Plus: unlimited active recovery capsules.
 
 ### 6. Admin Task Reader
 
-Plus feature. Turns email, screenshots, pasted text, or photos into:
+Admin Quick Start turns pasted text or photos into:
 
 - Due date
 - Amount
@@ -145,7 +145,7 @@ Categories:
 
 Modes:
 
-- AI quiet co-start
+- Local quiet co-start
 - Friend invite link for 25 minutes
 - Optional quiet room with minimal status
 
@@ -159,9 +159,11 @@ Room flow:
 Friend invite must work from a link without forcing registration before joining.
 Free users can create one Friend co-start invite per rolling 7-day window; Plus users can create unlimited invites.
 
-### 8. Personal Execution Model
+### 8. Start Profile and Personal Execution Insights
 
-Plus feature. Builds a private profile of how the user starts work:
+The basic Start Profile is Free. Plus extends it into advanced execution
+insights and history beyond 14 days. It builds a private profile of how the
+user starts work:
 
 - Best start windows
 - Task categories with high avoidance
@@ -185,6 +187,8 @@ Free includes:
 - Voice input where local OS dictation can be used
 - Local task shrinker templates
 - Local micro-templates for bills, email, appointments, documents, home reset, and bad-day reset
+- Private iCloud sync through the user's private CloudKit database
+- Local quiet co-start without creating a friend room
 - Bad Day Mode for overwhelm phrases such as "I'm overwhelmed" or "我今天一团乱"
 - 5, 10, 15, and 25 minute start timers
 - "I got interrupted" timer action
@@ -192,10 +196,10 @@ Free includes:
 - No-Shame Rescheduler
 - Local actual-time history for 14 days
 - One active Recovery Capsule
-- Local Personal Vault for reusable tiny-start snippets
+- Local Saved starts for reusable tiny-start snippets
 - Shareable Start Card
 - Start widget and iOS share extension entry points
-- One Admin Quick Start per day
+- One Admin Quick Start per day, including photo OCR
 - One Friend co-start invite per rolling 7-day window
 - Stuck Button in the Start first viewport that creates a smaller restart
 - Energy Match selection for low, medium, wired, or overwhelmed states
@@ -215,31 +219,19 @@ Free includes:
 Free excludes:
 
 - Unlimited AI usage
-- Screenshot/photo analysis
-- Email or calendar integration
-- Cross-device cloud sync
-- Unlimited recovery history
-- Friend co-start links (7-day free rolling limit)
-- Advanced Personal Execution Model
+- Additional Admin Quick Starts beyond the daily allowance; the daily Free Admin Quick Start includes photo OCR
+- Advanced execution insights and history beyond 14 days
+- Friend co-start room creation beyond the 7-day free rolling limit
 
 ## Plus Feature Scope
 
 StartKind Plus includes:
 
 - Unlimited One Next Step
-- Deep AI task parsing
-- Voice-first overwhelm capture
-- Calendar sync
-- Email, pasted text, screenshot, and photo parsing
-- Admin Task Reader
-- Personal Time Calibration
-- Personal Execution Model
-- Unlimited Recovery Capsules
-- AI quiet co-start
-- Unlimited Friend co-start links
-- Cross-device sync
-- Advanced insights
-- Family or partner shared support controls
+- Unlimited Admin Quick Start, including photo OCR
+- Personal Time Calibration and advanced execution insights/history beyond 14 days
+- Unlimited active Recovery Capsules
+- Unlimited Friend co-start room creation
 
 ## MVP Avoidance
 
@@ -260,7 +252,7 @@ The first iOS release includes these non-MVP retention features:
 5. Micro-Templates: local, no-cost tiny-start flows for recurring adult-admin tasks.
 6. Widget: quick return to Start from the Home Screen.
 7. Shareable Start Card: natural encouragement sharing without exposing private history.
-8. Personal Vault: local reusable next-step snippets that help repeat users start faster.
+8. Saved starts: local reusable next-step snippets that help repeat users start faster.
 9. Autopilot Mode: one button chooses a locally sensible next start without planning.
 10. Return Note: interrupted users can leave one short clue for resuming.
 11. Friction Map: blocker and timing history become non-shaming restart insights.

@@ -26,6 +26,10 @@ Free should rely on:
 - Local templates
 - Local timers
 - Local history
+- Private iCloud sync through the user's private CloudKit database
+- Local quiet co-start
+- Basic Start Profile
+- Saved starts (stored locally by `PersonalVaultStore`)
 - Local OS speech-to-text where available
 - Limited daily AI calls
 
@@ -39,9 +43,8 @@ Free limits:
 
 Free limits and exclusions:
 
-- Cloud sync
-- Email/calendar connection
-- Unlimited screenshot/photo analysis (the daily Admin Quick Start allowance applies)
+- Additional Admin Quick Starts beyond the daily allowance; the daily Free Admin Quick Start includes photo OCR
+- Advanced execution insights and history beyond 14 days
 - Unlimited AI calls
 - Unlimited Friend co-start room creation (1 per rolling 7 days)
 
@@ -49,21 +52,18 @@ Free limits and exclusions:
 
 Plus sells the complete system:
 
-- Unlimited starts
-- Deep personalization
-- External life admin parsing
-- Time calibration
-- Recovery history
-- Co-start support
-- Cross-device continuity
+- Unlimited daily starts
+- Unlimited Admin Quick Start, including photo OCR
+- Unlimited active Recovery Capsules
+- Unlimited Friend co-start room creation
+- Advanced execution insights and history beyond 14 days
 
 ## Paywall Moments
 
 Good paywall moments:
 
 - User reaches daily One Next Step limit.
-- User wants to scan a bill or screenshot.
-- User wants to connect calendar or email.
+- User reaches the daily Admin Quick Start allowance and wants another Admin Quick Start or photo scan.
 - User wants unlimited recovery capsules.
 - User wants to invite a friend to co-start.
 - User asks for personal patterns or advanced insights.

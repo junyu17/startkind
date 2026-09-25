@@ -32,18 +32,27 @@ final class PersonalVaultStore: ObservableObject {
 
     @discardableResult
     func add(title: String, body: String, category: TaskCategory?) -> VaultItem {
+        let cleanTitle = normalized(title, fallback: L("vault.defaultTitle"))
         let item = VaultItem(
-            title: normalized(title, fallback: L("vault.defaultTitle")),
-            body: normalized(body, fallback: title),
+            title: cleanTitle,
+            body: normalized(body, fallback: cleanTitle),
             category: category
         )
-        items.removeAll { $0.title == item.title && $0.body == item.body }
+        items.removeAll { isEquivalent($0, item) }
         items.insert(item, at: 0)
         if items.count > limit {
             items = Array(items.prefix(limit))
         }
         persist()
         return item
+    }
+
+    func containsEquivalent(title: String, body: String) -> Bool {
+        let cleanTitle = normalized(title, fallback: L("vault.defaultTitle"))
+        let cleanBody = normalized(body, fallback: cleanTitle)
+        return items.contains {
+            comparisonKey(title: $0.title, body: $0.body) == comparisonKey(title: cleanTitle, body: cleanBody)
+        }
     }
 
     func delete(_ item: VaultItem) {
@@ -59,6 +68,21 @@ final class PersonalVaultStore: ObservableObject {
     private func normalized(_ text: String, fallback: String) -> String {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? fallback : String(trimmed.prefix(240))
+    }
+
+    private func isEquivalent(_ lhs: VaultItem, _ rhs: VaultItem) -> Bool {
+        comparisonKey(title: lhs.title, body: lhs.body) == comparisonKey(title: rhs.title, body: rhs.body)
+    }
+
+    private func comparisonKey(title: String, body: String) -> String {
+        [title, body]
+            .map { value in
+                value
+                    .split(whereSeparator: { $0.isWhitespace })
+                    .joined(separator: " ")
+                    .lowercased()
+            }
+            .joined(separator: "\u{1F}")
     }
 
     private func persist() {

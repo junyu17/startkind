@@ -14,24 +14,24 @@ enum UsageLimits {
     static let timerPresets: [Int] = [5, 10, 15, 25]
 
     /// Features gated behind Plus.
+    ///
+    /// Private iCloud sync, local quiet co-start, the basic Start Profile,
+    /// timers, templates, and the Personal Vault are intentionally absent:
+    /// they are Free features. Photo OCR is part of Admin Quick Start rather
+    /// than a separate entitlement.
     enum PlusFeature {
-        case unlimitedSteps
-        case adminTaskReader
-        case screenshotPhoto
-        case calendarSync
-        case emailParsing
-        case unlimitedRecovery
-        case aiCoStart
-        case friendCoStart
-        case crossDeviceSync
-        case personalExecutionModel
+        case unlimitedDailyStarts
+        case unlimitedAdminQuickStarts
+        case unlimitedActiveRecoveryCapsules
+        case unlimitedFriendRooms
+        case advancedExecutionInsights
     }
 
     static func isGated(_ feature: PlusFeature, entitlement: EntitlementState) -> Bool {
         switch feature {
-        case .unlimitedSteps, .adminTaskReader, .screenshotPhoto, .calendarSync,
-             .emailParsing, .unlimitedRecovery, .aiCoStart, .friendCoStart,
-             .crossDeviceSync, .personalExecutionModel:
+        case .unlimitedDailyStarts, .unlimitedAdminQuickStarts,
+             .unlimitedActiveRecoveryCapsules, .unlimitedFriendRooms,
+             .advancedExecutionInsights:
             return !entitlement.isPlus
         }
     }

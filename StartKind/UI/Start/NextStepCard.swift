@@ -12,6 +12,8 @@ struct NextStepCard: View {
     var onCoStart: () -> Void = {}
     var onSaveToVault: () -> Void = {}
     @EnvironmentObject private var loc: LocalizationManager
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var moreActionsExpanded = false
 
     private var proposal: NextStepProposal { step.proposal }
 
@@ -29,41 +31,9 @@ struct NextStepCard: View {
                 .font(.body)
                 .fontWeight(.medium)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("nextstep.action")
 
             stopRow
-            actionPrepRow
-            startLadderRow
-
-            if showPlan, let why = proposal.whyThisStep {
-                Text(verbatim: why)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            HStack(spacing: Theme.spacing8) {
-                ShareLink(item: shareText) {
-                    Label(L("nextstep.share"), systemImage: "square.and.arrow.up")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .accessibilityIdentifier("nextstep.share")
-
-                Button {
-                    onSaveToVault()
-                } label: {
-                    Label(L("nextstep.saveVault"), systemImage: "tray.and.arrow.down.fill")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .accessibilityIdentifier("nextstep.saveVault")
-            }
 
             PrimaryButton(
                 verbatim: L("nextstep.timer.label") + " " + L("nextstep.timer.minutes", proposal.timerMinutes),
@@ -73,38 +43,12 @@ struct NextStepCard: View {
                 onStart()
             }
 
-            HStack(spacing: Theme.spacing8) {
-                QuietButton("nextstep.makeSmaller", systemImage: "arrow.down.right") {
-                    onShrink()
-                }
-                .disabled(proposal.shrinkLevel == .three)
-
-                Button {
-                    withAnimation { showPlan.toggle() }
-                } label: {
-                    Text(verbatim: L(showPlan ? "nextstep.hidePlan" : "nextstep.showPlan"))
-                        .font(.footnote)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Theme.accent)
-                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
-                }
-                .pressableCard()
-                .disabled(proposal.whyThisStep == nil)
+            QuietButton("nextstep.makeSmaller", systemImage: "arrow.down.right", accessibilityId: "nextstep.makeSmaller") {
+                onShrink()
             }
+            .disabled(proposal.shrinkLevel == .three)
 
-            QuietButton("costart.cta", systemImage: "person.2.wave.2", accessibilityId: "nextstep.costart") {
-                onCoStart()
-            }
-
-            Button(role: .cancel) {
-                onSkip()
-            } label: {
-                Text(verbatim: L("timer.outcome.skipped"))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
-            }
-            .pressableCard()
+            moreActions
         }
         .startKindCard()
     }
@@ -112,13 +56,18 @@ struct NextStepCard: View {
     private var headerRow: some View {
         HStack(spacing: Theme.spacing8) {
             Label {
-                Text(verbatim: L(proposal.category.localizationKey))
+                Text(verbatim: proposal.category == .other
+                    ? L("nextstep.genericLabel")
+                    : L(proposal.category.localizationKey))
                     .font(.caption)
                     .fontWeight(.semibold)
             } icon: {
-                Image(systemName: proposal.category.systemImage)
+                Image(systemName: proposal.category == .other
+                    ? "arrow.forward.circle.fill"
+                    : proposal.category.systemImage)
             }
             .foregroundStyle(Theme.accent)
+            .accessibilityIdentifier("nextstep.category")
 
             Spacer()
 
@@ -160,12 +109,96 @@ struct NextStepCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.warmWash.opacity(0.65))
         .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+        .accessibilityIdentifier("nextstep.stop")
+    }
+
+    private var moreActions: some View {
+        DisclosureGroup(isExpanded: $moreActionsExpanded) {
+            VStack(alignment: .leading, spacing: Theme.spacing12) {
+                Button {
+                    withAnimation(reduceMotion ? nil : .default) { showPlan.toggle() }
+                } label: {
+                    Label(L(showPlan ? "nextstep.hidePlan" : "nextstep.showPlan"), systemImage: "list.bullet")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Theme.accent)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+                }
+                .pressableCard()
+                .disabled(proposal.whyThisStep == nil)
+                .accessibilityIdentifier("nextstep.showPlan")
+
+                if showPlan, let why = proposal.whyThisStep {
+                    Text(verbatim: why)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("nextstep.plan")
+                }
+
+                HStack(spacing: Theme.spacing8) {
+                    ShareLink(item: shareText) {
+                        Label(L("nextstep.share"), systemImage: "square.and.arrow.up")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .accessibilityIdentifier("nextstep.share")
+
+                    Button {
+                        onSaveToVault()
+                    } label: {
+                        Label(L("nextstep.saveVault"), systemImage: "tray.and.arrow.down.fill")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .accessibilityIdentifier("nextstep.saveVault")
+                }
+
+                actionPrepRow
+                startLadderRow
+
+                QuietButton("costart.cta", systemImage: "person.2.wave.2", accessibilityId: "nextstep.costart") {
+                    onCoStart()
+                }
+
+                Button(role: .cancel) {
+                    onSkip()
+                } label: {
+                    Label(L("timer.outcome.skipped"), systemImage: "arrow.right")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+                }
+                .pressableCard()
+                .accessibilityIdentifier("nextstep.moveOn")
+            }
+            .padding(.top, Theme.spacing8)
+        } label: {
+            Label(L("nextstep.moreActions"), systemImage: moreActionsExpanded ? "ellipsis.circle.fill" : "ellipsis.circle")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(Theme.ink)
+                .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+                .accessibilityIdentifier("nextstep.moreActions")
+        }
+        .accessibilityHint(Text(verbatim: L("nextstep.moreActions.hint")))
     }
 
     @ViewBuilder
     private var actionPrepRow: some View {
         if let actionPrep {
             VStack(alignment: .leading, spacing: Theme.spacing8) {
+                Text(verbatim: L("nextstep.actionPrep.title"))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
                 Label(actionPrep.label, systemImage: actionPrep.url == nil ? "rectangle.and.pencil.and.ellipsis" : "arrow.up.right.square")
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -192,6 +225,7 @@ struct NextStepCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.softAccent.opacity(0.55))
             .clipShape(RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous))
+            .accessibilityIdentifier("nextstep.actionPrep")
         }
     }
 
@@ -201,6 +235,7 @@ struct NextStepCard: View {
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
+                .accessibilityIdentifier("nextstep.ladder")
             HStack(spacing: Theme.spacing8) {
                 ForEach(StartLadderPlanner.minutes, id: \.self) { minutes in
                     Button {

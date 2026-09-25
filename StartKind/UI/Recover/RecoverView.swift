@@ -4,8 +4,7 @@ struct RecoverView: View {
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
     @State private var capsule: RecoveryCapsuleModel?
-    @State private var session: TimerSessionModel?
-    @State private var showTimer = false
+    @State private var timerRoute: TimerRoute?
 
     var body: some View {
         NavigationStack {
@@ -23,19 +22,17 @@ struct RecoverView: View {
             .background(Theme.background.ignoresSafeArea())
         }
         .onAppear { capsule = env.activeCapsule() }
-        .sheet(isPresented: $showTimer) {
-            if let session, let stepId = session.nextStepId, let step = env.persistence.fetchNextStep(id: stepId) {
-                TimerView(session: session, step: step) { outcome, blocker, returnNote in
-                    let elapsed = max(0, Int(Date.now.timeIntervalSince(session.createdAt)))
-                    if outcome == .partial || outcome == .paused {
-                        _ = env.rescheduleStep(step, reason: .paused)
-                    } else if outcome == .abandoned {
-                        _ = env.rescheduleStep(step, reason: .skipped)
-                    }
-                    env.finishTimer(session: session, actualSeconds: elapsed, outcome: outcome, step: step, blocker: blocker, returnNote: returnNote)
-                    showTimer = false
-                    if outcome == .completed { capsule = nil }
+        .sheet(item: $timerRoute) { route in
+            TimerView(session: route.session, step: route.step) { outcome, blocker, returnNote in
+                let elapsed = max(0, Int(Date.now.timeIntervalSince(route.session.createdAt)))
+                if outcome == .partial || outcome == .paused {
+                    _ = env.rescheduleStep(route.step, reason: .paused)
+                } else if outcome == .abandoned {
+                    _ = env.rescheduleStep(route.step, reason: .skipped)
                 }
+                env.finishTimer(session: route.session, actualSeconds: elapsed, outcome: outcome, step: route.step, blocker: blocker, returnNote: returnNote)
+                timerRoute = nil
+                if outcome == .completed { capsule = nil }
             }
         }
     }
@@ -80,7 +77,7 @@ struct RecoverView: View {
                     .accessibilityIdentifier("recover.returnNote")
             }
 
-            PrimaryButton("recover.startTimer", systemImage: "play.fill") {
+            PrimaryButton("recover.startTimer", systemImage: "play.fill", accessibilityId: "recover.startTimer") {
                 resume(from: model)
             }
             QuietButton("recover.clear", systemImage: "trash") {
@@ -108,7 +105,7 @@ struct RecoverView: View {
     private func resume(from capsule: RecoveryCapsuleModel) {
         let proposal = capsule.resumeProposal
         let step = env.persistence.saveNextStep(proposal: proposal, capture: nil, taskTitle: proposal.title)
-        session = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
-        showTimer = true
+        let session = env.startTimer(step: step, minutes: min(proposal.timerMinutes, 25))
+        timerRoute = TimerRoute(session: session, step: step)
     }
 }

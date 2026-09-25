@@ -1,0 +1,561 @@
+/* StartKind ローカライズ文字列 - 日本語 */
+
+/* MARK: - タブ */
+"tab.start" = "スタート";
+"tab.recover" = "再開";
+"tab.patterns" = "傾向";
+"tab.settings" = "設定";
+
+/* MARK: - スタート画面 */
+"start.title" = "スタート";
+"start.subtitle" = "やさしい一歩で、始めよう。";
+"start.greeting" = "こんにちは、%@さん。";
+"start.difficultyHint.getting_started" = "まず触れられそうなことだけ、入力してみましょう。";
+"start.difficultyHint.tasks_too_big" = "その一歩が大きく感じたら、「もっと小さくする」をタップしてください。";
+"start.difficultyHint.interruptions" = "中断されたときは、短い再開メモを残しておきましょう。";
+"start.difficultyHint.admin_pile_up" = "請求書や書類には、「スキャンまたは貼り付け」を試してみましょう。";
+"start.voice.listening" = "聞き取り中…";
+"start.voice.tap" = "タップして話す";
+"start.voice.preparing" = "準備中…";
+"start.text.placeholder" = "頭にあることを、そのまま書いてみてください。";
+"start.text.submit" = "一歩をもらう";
+"start.category.section" = "カテゴリも選ぶ";
+"start.category.selected" = "カテゴリを追加しました：%@";
+"start.empty.hint" = "負担に感じていることを話すか書いてください。小さな一歩をお渡しします。";
+"start.kindStart.title" = "今日のやさしいスタート";
+"start.kindStart.admin" = "請求書やメール、予約情報を貼り付け";
+"start.kindStart.photo" = "写真やスクリーンショットをスキャン";
+"start.kindStart.resume" = "前回の続きから";
+"start.kindStart.adminLeft" = "残り事務 %d 件";
+"start.moreWays" = "ほかの始め方";
+"start.moreWays.scan" = "スキャンまたは貼り付け";
+"start.moreWays.reuse" = "保存した開始を使う";
+"start.moreWays.costart" = "誰かと一緒に始める";
+"start.moreWays.match" = "今の気分に合わせる";
+"start.moreWays.plan" = "先に計画する";
+"start.moreWays.admin" = "事務と保存ツール";
+"frictionForecast.title" = "起こりそうな壁";
+"frictionForecast.loaded" = "StartKindがその壁を小さくしました。";
+
+/* MARK: - オートパイロット */
+"autopilot.open" = "今何を始めるか教えて";
+"autopilot.loaded" = "オートパイロットが小さな開始をひとつ選びました。";
+"autopilot.source" = "オートパイロット";
+"autopilot.why.recovery" = "前回途中だったことに戻る方が、ゼロから選ぶより簡単なことが多いです。";
+"autopilot.why.note" = "再開メモ：%@";
+"autopilot.why.vault" = "保存した開始なら、選ぶ手間がいりません。";
+"autopilot.why.default" = "目に見える小さな行動だけで、勢いは戻ります。";
+"autopilot.stop.saved" = "この保存した開始に一度触れたら、そこで止めてOK。";
+"autopilot.default.title" = "小さな再スタート";
+"autopilot.default.step" = "何かひとつを目の前に置いて、次の小さな動きを言葉にしましょう。";
+"autopilot.default.stop" = "次の小さな動きを言葉にしたら、そこで止めてOK。";
+
+/* MARK: - 再開メモとレスキュー */
+"returnNote.title" = "再開メモ";
+"returnNote.placeholder" = "次の自分は、どこから再開する？";
+"returnNote.hint" = "任意です。短い手がかりで十分です。";
+"returnNote.resume" = "メモ：%@";
+"rescue.notification.title" = "一番小さな再スタート、しますか？";
+"rescue.notification.body" = "StartKindが小さな次の一歩から再開します。たまったリストの確認は不要です。";
+
+/* MARK: - ミニテンプレートと保存箱 */
+"template.open" = "ミニテンプレート";
+"template.title" = "ミニテンプレート";
+"template.applied" = "テンプレートを読み込みました。準備ができたらタイマーを開始しましょう。";
+"template.bill.title" = "請求書スターター";
+"template.bill.subtitle" = "金額、期限、支払いボタンを探すだけ。";
+"template.email.title" = "返信スターター";
+"template.email.subtitle" = "返信全部ではなく、一文だけ書く。";
+"template.appointment.title" = "予約スターター";
+"template.appointment.subtitle" = "予約の入り口をひとつ見つけるだけ。";
+"template.document.title" = "書類スターター";
+"template.document.subtitle" = "探す場所はひとつだけ。";
+"template.home.title" = "お部屋リセット";
+"template.home.subtitle" = "1か所から3つだけ片づける。";
+"template.badDay.title" = "しんどい日のリセット";
+"template.badDay.subtitle" = "5分間、まず気持ちを落ち着けるところから。";
+"vault.open" = "保存した開始";
+"vault.title" = "保存した開始";
+"vault.defaultTitle" = "保存した開始";
+"vault.saved" = "次回のために保存しました。";
+"vault.applied" = "保存した開始を読み込みました。小さく始めましょう。";
+"vault.stop" = "この保存した一歩に一度触れたら、そこで止めてOK。";
+"vault.why" = "保存した開始があれば、また一から選ぶ必要がありません。";
+"vault.empty.title" = "保存した開始はまだありません";
+"vault.empty.body" = "StartKindが役立つ次の一歩を出したら、「その他の操作」を開いて「この開始を保存」をタップしてください。ここにワンタップで再利用できるように表示されます。";
+
+/* カテゴリ */
+"category.bills" = "請求書";
+"category.email" = "メール";
+"category.appointments" = "予約";
+"category.returns" = "返品";
+"category.insurance" = "保険";
+"category.banking" = "銀行";
+"category.taxes" = "税金";
+"category.household" = "家事";
+"category.family_admin" = "家族の手続き";
+"category.medical" = "医療";
+"category.work_admin" = "仕事の事務";
+"category.school" = "学校";
+"category.cleaning" = "掃除";
+"category.errands" = "用事";
+"category.other" = "その他";
+
+/* MARK: - 次の一歩カード */
+"nextstep.genericLabel" = "あなたの次の一歩";
+"nextstep.timer.label" = "開始";
+"nextstep.timer.minutes" = "%d分";
+"nextstep.makeSmaller" = "もっと小さくする";
+"nextstep.showPlan" = "計画を見る";
+"nextstep.hidePlan" = "計画を隠す";
+"nextstep.shrink.level" = "もっと小さい版";
+"nextstep.share" = "共有";
+"nextstep.saveVault" = "この開始を保存";
+"nextstep.moreActions" = "その他の操作";
+"nextstep.moreActions.hint" = "共有、保存、計画、一緒にスタート、または次へ進む。";
+"nextstep.actionPrep.title" = "行動の準備";
+
+/* MARK: - タイマー */
+"timer.title" = "この一歩に集中";
+"timer.paused" = "一時停止中";
+"timer.done" = "完了";
+"timer.pause" = "一時停止";
+"timer.resume" = "再開";
+"timer.makeSmaller" = "もっと小さくする";
+"timer.interrupted" = "中断された";
+"timer.continueFive" = "あと5分続ける";
+"timer.stopHint" = "止めどき：%@";
+"timer.finished.title" = "いいですね、始められました。";
+"timer.finished.subtitle" = "どうでしたか？";
+"timer.outcome.skipped" = "次へ進む";
+
+/* MARK: - 再開 */
+"recover.title" = "再開";
+"recover.empty" = "今は再開するものがありません。\nこの一歩を一時停止すると、ここでそっと待っています。";
+"recover.lastStep" = "前回の続きから";
+"recover.startTimer" = "タイマーを開始";
+"recover.related" = "メモ：%@";
+"recover.blocker" = "壁：%@";
+"recover.clear" = "このカプセルを消す";
+
+/* MARK: - 壁になっていること */
+"blocker.title.pause" = "何が邪魔をしましたか？";
+"blocker.title.skip" = "何が妨げになりましたか？";
+"blocker.subtitle" = "これは評価ではありません。次回、StartKindが再開をもっと小さくするためのヒントです。";
+"blocker.skip" = "わからない";
+"blocker.need_login" = "ログインが必要";
+"blocker.need_document" = "書類が必要";
+"blocker.too_vague" = "あいまいすぎる";
+"blocker.too_big" = "大きすぎる";
+"blocker.emotionally_hard" = "気持ち的につらい";
+"blocker.need_another_person" = "他の人が必要";
+
+/* MARK: - 傾向 */
+"patterns.title" = "傾向";
+"patterns.empty" = "いくつか一歩を重ねると、やさしい傾向がここに表示されます。";
+"patterns.noShame" = "これは観察であり、評価ではありません。";
+"patterns.recommendation.title" = "次に試すこと";
+"patterns.advanced.title" = "Plusの詳細";
+"patterns.advanced.hint" = "個人の実行モデル、摩擦マップ、より長い履歴。";
+"patterns.sample.count" = "%d 回の一歩";
+"patterns.model.title" = "個人の実行モデル";
+"patterns.model.samples" = "%d件のサンプル";
+"patterns.model.empty" = "タイマーを何度か使うと、StartKindがあなたに合った開始時間帯、見積もりの傾向、一歩の大きさ、一緒にスタートする効果を学習します。";
+"patterns.model.stepSize" = "一歩の大きさ";
+"patterns.model.stepSize.default" = "5〜10分";
+"patterns.model.stepSize.tiny" = "まず2〜5分";
+"patterns.model.stepSize.small" = "まず5分";
+"patterns.model.stepSize.steady" = "10分でも大丈夫";
+"patterns.model.bestWindow" = "最適な時間帯";
+"patterns.model.bestWindow.pending" = "学習中";
+"patterns.model.summary.longer" = "%@は見積もりの約%@かかることが多いので、StartKindは小さめに始めます。";
+"patterns.model.summary.tiny" = "%@は最初の一歩をごく小さくすると、始めやすいようです。";
+"patterns.model.summary.window" = "%@は%@の時間帯が一番始めやすいようです。";
+"patterns.model.summary.steady" = "%@は通常の10分スタートでも十分読めるようになってきました。";
+"patterns.model.blocker" = "現在の再開の壁：%@";
+"window.morning" = "午前";
+"window.afternoon" = "午後";
+"window.evening" = "夜";
+"patterns.insight.longer" = "%@の一歩は、思ったより少し時間がかかることが多いです。";
+"patterns.insight.window" = "%@のタスクは、正午前に始めることが多いようです。";
+"patterns.insight.costart" = "一緒にスタートしたことで、直近の事務の一歩を%d件終えられました。";
+"patterns.medianActual" = "目安の時間：%@";
+"patterns.estimateMultiplier" = "見積もりの補正：%@";
+"patterns.bestWindow" = "最適な開始時間帯：%@";
+"patterns.completion" = "このカテゴリでは%d / %d件の一歩を始めました。";
+"patterns.recommendation.buffer" = "次回、StartKindは%@前後を見込んで、もっと小さな最初の動きを提案します。";
+"patterns.recommendation.tiny" = "次回は2〜5分版から始めましょう。";
+"patterns.recommendation.window" = "このカテゴリは%@に向いています。";
+"patterns.recommendation.keep" = "タイマーを使い続けると、精度がさらに上がります。";
+"patterns.unlock.title" = "個人の実行モデル";
+"patterns.unlock.body" = "StartKind Plusは、最適な開始時間帯や避けがちな傾向、一緒にスタートする効果を学習します。";
+
+/* MARK: - 摩擦マップ */
+"friction.title" = "摩擦マップ";
+"friction.empty" = "中断や一時停止が何度か続くと、壁の傾向がここに表示されます。";
+"friction.blocker.title" = "よくある壁：%@";
+"friction.blocker.body" = "これは摩擦が起きている場所を示すもので、性格の問題ではありません。";
+"friction.category.title" = "%@にはもっと小さな入り口が必要です";
+"friction.category.body" = "このカテゴリは完了しづらい傾向があるので、StartKindはもっと小さく始めます。";
+"friction.category.step" = "本題の前に、5分の入り口ステップを試してみましょう。";
+"friction.step.login" = "ログインページを見つけたら、詳細を入力する前に止めましょう。";
+"friction.step.document" = "書類がありそうな場所をひとつ見つけたら止めましょう。";
+"friction.step.vague" = "タスクを、目に見える動詞ひとつと対象ひとつに書き直しましょう。";
+"friction.step.big" = "最初の表面だけに触れましょう。開く、広げる、ひとつだけ検索する、など。";
+"friction.step.emotion" = "5分のタイマーをセットして、タスクの見出しだけを見ましょう。";
+"friction.step.person" = "足りない情報を相手に尋ねる一文を書いてみましょう。";
+
+/* MARK: - 事務リーダー */
+"admin.title" = "事務リーダー";
+"admin.kicker" = "請求書、メール、予約、書類";
+"admin.subtitle" = "テキストを貼り付けるか、スクリーンショットを選んでください。StartKindが必要な情報を抜き出し、すぐ始められる一歩だけをお渡しします。";
+"admin.freeAllowance" = "今日の無料事務クイックスタート、残り%d / %d回";
+"admin.input.placeholder" = "雑然としたメッセージをここに貼り付けるか、スクリーンショットや写真を選んでください。";
+"admin.paste" = "貼り付け";
+"admin.photo" = "写真";
+"admin.parse" = "一歩を見つける";
+"admin.ocr.loading" = "画像を読み取っています...";
+"admin.parse.loading" = "次の一歩を探しています...";
+"admin.ocr.empty" = "読み取れる文字が見つかりませんでした。代わりに少しだけ入力できます。";
+"admin.ocr.error" = "その画像を読み取れませんでした。より鮮明なスクリーンショットを試すか、テキストを貼り付けてください。";
+"admin.scan.title" = "請求書、手紙、スクリーンショットをスキャン";
+"admin.scan.body" = "画像のソースをひとつ選んでください。この画面はいつでも閉じられます。";
+"admin.scan.replaceBody" = "新しい画像を選ぶか、すでに認識されたテキストのままにできます。";
+"admin.scan.paste" = "代わりにテキストを貼り付け";
+"admin.camera" = "カメラを使う";
+"admin.photoLibrary" = "写真かスクリーンショットを選ぶ";
+"admin.cameraUnavailable" = "このデバイスではカメラを使用できません。代わりに写真を選ぶかテキストを貼り付けてください。";
+"admin.review.title" = "StartKindが読み取った内容を確認";
+"admin.review.body" = "一歩を見つける前に、画像を確認してテキストを編集してください。";
+"admin.review.selectedImage" = "選択した画像";
+"admin.review.text" = "認識されたテキスト";
+"admin.review.empty" = "テキストが認識されませんでした。続けるには少し入力してください。";
+"admin.replace" = "画像を差し替え";
+"admin.remove" = "画像を削除";
+"admin.result.title" = "重要なポイント";
+"admin.confidence" = "信頼度 %d%%";
+"admin.fact.type" = "種類";
+"admin.fact.due" = "期限";
+"admin.fact.amount" = "金額";
+"admin.fact.contact" = "連絡先";
+"admin.fact.link" = "リンクまたは電話番号";
+"admin.documents" = "手元に用意";
+"admin.missing" = "不足している情報";
+"admin.nextStep" = "次の一歩";
+"admin.artifact.bill" = "請求書";
+"admin.artifact.email" = "メール";
+"admin.artifact.appointment" = "予約";
+"admin.artifact.return" = "返品";
+"admin.artifact.insurance" = "保険";
+"admin.artifact.banking" = "銀行";
+"admin.artifact.school" = "学校";
+"admin.artifact.household" = "家事";
+"admin.artifact.medical" = "医療";
+"admin.artifact.other" = "その他";
+
+/* MARK: - 設定 */
+"settings.title" = "設定";
+"settings.language" = "言語";
+"settings.language.en" = "English";
+"settings.language.zh" = "简体中文";
+"settings.language.ja" = "日本語";
+"settings.profile" = "あなたのプロフィール";
+"settings.editProfile" = "プロフィールを編集";
+"settings.subscription" = "サブスクリプション";
+"settings.subscription.free" = "無料";
+"settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.upgrade" = "StartKind Plusにアップグレード";
+"settings.subscription.manage" = "サブスクリプションを管理";
+"settings.subscription.manage.error" = "サブスクリプション設定は現在利用できません。";
+"settings.subscription.restore" = "購入を復元";
+"settings.subscription.restore.success" = "StartKind Plusを復元しました。";
+"settings.subscription.restore.none" = "有効なStartKind Plusのサブスクリプションが見つかりませんでした。";
+"settings.privacy" = "プライバシー";
+"settings.dataExport" = "データを書き出す";
+"settings.deleteData" = "端末内のデータを削除";
+"settings.deleteConfirm.body" = "この操作でこの端末に保存されたStartKindのデータが消去されます。プライベートなiCloudのデータはiCloudの設定であなたが引き続き管理できます。この操作は取り消せません。";
+"settings.contact" = "お問い合わせ";
+"settings.contactEmail" = "billy.yu@me.com";
+"settings.about" = "このアプリについて";
+"settings.version" = "バージョン %@";
+"settings.medical" = "医療に関する注意";
+"settings.medical.body" = "StartKindはタスクの整理や開始をサポートしますが、ADHDの診断や治療を行うものではありません。診断、服薬、治療方針については、資格を持つ医療専門家にご相談ください。";
+"settings.moreApps" = "その他のアプリ";
+"settings.moreApps.maren" = "生理・更年期トラッカー";
+"settings.moreApps.dogcat" = "犬猫の給餌量計算";
+"settings.moreApps.taskkin" = "家族で共有する介護サポート";
+"settings.moreApps.livepet" = "ペットの写真を、やさしく動かす";
+"settings.moreApps.virtualpets" = "ほっこり癒やされるペットのお世話";
+"settings.moreApps.platepace" = "GLP-1向けAI栄養管理アプリ";
+
+/* MARK: - 有料化画面 */
+"paywall.title" = "StartKind Plus";
+"paywall.monthly" = "月額";
+"paywall.annual" = "年額";
+"paywall.annual.save" = "約25%お得";
+"paywall.annual.bestValue" = "一番お得";
+"paywall.cta" = "無料トライアルを開始";
+"paywall.cta.buy" = "登録する";
+"paywall.restore" = "購入を復元";
+"paywall.restore.success" = "StartKind Plusを復元しました。";
+"paywall.restore.none" = "有効なStartKind Plusのサブスクリプションが見つかりませんでした。";
+"paywall.dismiss" = "また今度";
+"paywall.compare.title" = "無料版とPlus";
+"paywall.free.title" = "無料版";
+"paywall.free.price" = "$0";
+"paywall.free.starts" = "1日5回の一歩スタート。";
+"paywall.free.admin" = "1日1回の事務クイックスタート（写真OCR含む）。";
+"paywall.free.personal" = "基本の開始プロフィール、端末内での静かな一緒にスタート、タイマー、テンプレート、保存した開始。";
+"paywall.free.sync" = "個人データは端末とプライベートなiCloud内にのみ保存されます。";
+"paywall.plus.title" = "Plus";
+"paywall.plus.price" = "月額%@または年額%@";
+"paywall.plus.starts" = "1日の開始回数が無制限。";
+"paywall.plus.admin" = "事務クイックスタートが無制限（写真OCR含む）。";
+"paywall.plus.recovery" = "再開カプセルが無制限。";
+"paywall.plus.costart" = "フレンドルームの作成が無制限。";
+"paywall.plus.insights" = "高度な実行インサイトと14日を超える履歴。";
+"paywall.limit.title" = "今日の無料回数を使い切りました";
+"paywall.limit.title.admin" = "事務クイックスタートは今日1回まで無料です";
+"paywall.limit.title.friend" = "フレンドとの一緒にスタートは7日に1回無料です";
+"paywall.limit.body" = "タイマー、テンプレート、保存した開始、静かな一緒にスタート、基本の開始プロフィール、プライベートなiCloud同期、再開機能は引き続き無料です。Plusは1日の開始回数の上限をなくします。";
+"paywall.limit.body.admin" = "無料版には写真OCRを含む事務クイックスタートが1日1回含まれます。Plusなら事務クイックスタートが無制限になります。";
+"paywall.limit.body.friend" = "参加と静かな一緒にスタートは引き続き無料です。Plusでフレンドルームの作成が無制限になります。";
+"paywall.limit.keepFree" = "無料版を使い続ける";
+"paywall.value.statement" = "Plusで迷いをひとつ減らし、小さなスタートを積み重ねましょう。";
+"paywall.products.loading" = "サブスクリプションのオプションを読み込んでいます...";
+"paywall.products.unavailable" = "サブスクリプションのオプションは一時的に利用できません。";
+"paywall.products.priceUnavailable" = "価格を取得できません";
+"paywall.products.retry" = "再試行";
+"paywall.purchase.error" = "購入を確認できませんでした。もう一度お試しください。";
+"paywall.purchase.pending" = "購入は承認待ちです。";
+"paywall.purchase.notCompleted" = "購入は完了しませんでした。";
+
+/* MARK: - 利用状況 */
+"usage.stepsLeft" = "今日の無料回数、残り%d / %d回";
+
+/* MARK: - 共通 */
+"common.cancel" = "キャンセル";
+"common.close" = "閉じる";
+"common.delete" = "削除";
+"common.done" = "完了";
+"common.error" = "うまくいきませんでした。もう一度お試しください。";
+"legal.privacy" = "プライバシー";
+"legal.terms" = "利用規約";
+
+/* MARK: - オンボーディング */
+"onboarding.title" = "やさしいスタート";
+"profile.title" = "あなたのプロフィール";
+"onboarding.progress.name" = "手順1/2";
+"onboarding.progress.difficulty" = "手順2/2";
+"onboarding.name.title" = "何とお呼びすればいいですか？";
+"onboarding.name.subtitle" = "下の名前だけで大丈夫です。この端末に保存され、一緒に始めるルームに参加したときだけ相手に表示されます。";
+"onboarding.name.label" = "呼んでほしい名前";
+"onboarding.name.placeholder" = "名前";
+"onboarding.name.count" = "%d / 40文字";
+"onboarding.name.tooLong" = "40文字以内で入力してください。";
+"onboarding.continue" = "続ける";
+"onboarding.difficulty.title" = "始めるのを難しくしているのは、何ですか？";
+"onboarding.difficulty.subtitle" = "ひとつ選んでください。StartKindが小さなヒントを出します。別のアプリになるわけではありません。";
+"onboarding.difficulty.getting_started.title" = "始めること自体";
+"onboarding.difficulty.getting_started.detail" = "最初の一手が見つけにくい。";
+"onboarding.difficulty.tasks_too_big.title" = "タスクが大きく感じる";
+"onboarding.difficulty.tasks_too_big.detail" = "何をするかはわかるけれど、量が多く感じる。";
+"onboarding.difficulty.interruptions.title" = "中断";
+"onboarding.difficulty.interruptions.detail" = "何かと集中が途切れてしまう。";
+"onboarding.difficulty.admin_pile_up.title" = "事務がたまる";
+"onboarding.difficulty.admin_pile_up.detail" = "請求書や書類、メッセージ、用事が積み重なる。";
+"onboarding.choice.selected" = "選択済み";
+"onboarding.choice.notSelected" = "未選択";
+"onboarding.finish" = "設定を完了";
+"profile.save" = "プロフィールを保存";
+"onboarding.back" = "戻る";
+
+/* MARK: - 取り込み中の表示 */
+"capture.generating" = "小さな一歩を組み立てています…";
+
+/* MARK: - 認証 */
+
+/* MARK: - 一緒にスタート */
+"costart.title" = "一緒にスタート";
+"costart.subtitle" = "ひとりで難しいときは、一緒に始めましょう。";
+"costart.cta" = "一緒にスタート";
+"costart.aiQuiet" = "AIとの静かな一緒にスタート";
+"costart.friend" = "友だちを招待（25分）";
+"costart.you" = "あなた";
+"costart.ai" = "AI";
+"costart.aiQuietPresence" = "静かな一緒にスタート";
+"costart.roomTitle" = "静かなルーム";
+"costart.yourStep" = "あなたの一歩";
+"costart.waitingForFriend" = "友だちを待っています…";
+"costart.joinByCode" = "ルームコードで参加";
+"costart.enterCode" = "ルームコードを入力";
+"costart.code.placeholder" = "6桁のコード";
+"costart.code.hint" = "友だちは自分の静かなルームでこの6桁を確認できます。";
+"costart.roomCodeHint" = "友だちがこのコードを入力すると参加できます。";
+"costart.share" = "共有";
+"costart.copy" = "コピー";
+"costart.copied" = "コピーしました";
+"costart.guestSubtitle" = "友だちから一緒にスタートへの招待が届きました。小さな一歩を決めて参加しましょう。";
+"costart.yourName" = "あなたの名前（任意）";
+"costart.yourStep.optional" = "あなたの一歩（任意）";
+"costart.defaultGuestStep" = "今から始めます";
+"costart.host" = "ホスト";
+"costart.stage.createOrJoin" = "1. ルームを作成または参加";
+"costart.stage.waiting" = "2. 参加者を待っています";
+"costart.stage.ready" = "2. 開始の準備完了";
+"costart.stage.focus" = "3. 集中中";
+"costart.roomCode" = "ルームコード";
+"costart.participantStatus" = "参加者の状況";
+"costart.participants.count" = "現在の参加者：%d人";
+"costart.participants.pending" = "ルームを確認しています…";
+"costart.waitingForParticipant" = "他の参加者を待っています。";
+"costart.friendReady" = "他の参加者が来ています。準備ができたら始めましょう。";
+"costart.guestReady" = "ルームに参加しました。準備ができたら始めましょう。";
+"costart.quietReady" = "この端末で静かな一緒にスタートの準備ができました。";
+"costart.focusStatus" = "この端末で25分の集中が進行中です。";
+"costart.participantStatusUnavailable" = "参加者の状況を更新できませんでした。新しい参加者を推測することはしません。";
+"costart.syncNote" = "ルームでは在室状況と結果のみ共有され、開始は各端末で行われます。";
+"costart.start25" = "25分スタート";
+"costart.leave" = "ルームを退出";
+
+/* MARK: - 保存した開始の完了時 */
+"savedStart.prompt.title" = "この開始を次回のために保存しますか？";
+"savedStart.prompt.message" = "「%@」を完了しました。タイトルと一歩を保存して、次回ワンタップで使えるようにしますか？";
+"savedStart.prompt.save" = "保存";
+"savedStart.prompt.notNow" = "今はしない";
+"savedStart.confirmed" = "「%@」を次回のために保存しました。";
+"savedStart.view" = "保存した開始を見る";
+"costart.join" = "参加";
+"costart.roomNotFound" = "そのルームが見つかりませんでした。終了した可能性があります。";
+"costart.offline" = "StartKindに接続できません。接続を確認してもう一度お試しください。";
+"costart.createError" = "そのルームは今開始できませんでした。無料招待の権利はまだ残っています。もう一度お試しください。";
+
+/* MARK: - 継続サポート */
+"stuck.button" = "行き詰まった";
+"stuck.loaded" = "大丈夫です。この小さい版から始めましょう。";
+"stuck.rungCompleted" = "準備完了です。次の小さな行動はこちら。";
+"stuck.source" = "行き詰まりからの再開";
+"energy.title" = "エネルギーに合わせる";
+"energy.low" = "低い";
+"energy.medium" = "普通";
+"energy.wired" = "そわそわ";
+"energy.overwhelmed" = "いっぱいいっぱい";
+"frictionPreset.title" = "摩擦プリセット";
+"frictionPreset.need_login" = "ログイン";
+"frictionPreset.need_document" = "書類";
+"frictionPreset.too_vague" = "あいまい";
+"frictionPreset.too_many_tabs" = "タブ";
+"frictionPreset.need_another_person" = "他の人";
+"frictionPreset.loaded" = "摩擦だけに絞った開始の準備ができました。";
+"proof.started" = "始めました";
+"proof.saved" = "始めたことがすべて記録されます。直近7日間で%d回。";
+"proof.count" = "今週%d回スタート";
+"adminInbox.title" = "小さな事務受信箱";
+"adminInbox.placeholder" = "請求書、メール、予約、書類のテキストを貼り付け";
+"adminInbox.hint" = "StartKindはここから小さな次の一歩だけを取り出します。";
+"adminInbox.saved" = "小さな事務の一歩として保存しました。";
+"yesterday.rescue.open" = "昨日のレスキュー";
+"yesterday.rescue.loaded" = "昨日のタスクが3分の再スタートとして戻ってきました。";
+"yesterday.source" = "昨日のレスキュー";
+"daypart.open" = "今おすすめの開始";
+"daypart.loaded" = "この時間帯に合った開始の準備ができました。";
+"daypart.source" = "時間帯スタート";
+"emergency.open" = "緊急3分";
+"emergency.loaded" = "緊急の極小モードの準備ができました。";
+"emergency.source" = "緊急の極小モード";
+"frictionMemory.source" = "摩擦の記憶";
+"frictionMemory.loaded" = "StartKindがよくある壁を踏まえて、始めやすくしました。";
+"startScript.title" = "保存した開始";
+"startScript.save" = "この開始を保存";
+"startScript.saved" = "再利用できる開始として保存しました。";
+"startScript.empty" = "役立つ開始をここに保存できます。端末内に保存され、利用に費用はかかりません。";
+"startScript.loaded" = "保存した開始を読み込みました。";
+"startScript.source" = "保存した開始";
+"calendarSoft.title" = "予定前の準備";
+"calendarSoft.placeholder" = "会議、歯医者、請求書の期限など...";
+"calendarSoft.days" = "%d日後";
+"calendarSoft.hint" = "今日から7日以内の予定を入力してください。StartKindが役立つ5分の準備ステップを作ります。";
+"calendarSoft.submit" = "準備ステップを作成";
+"calendarSoft.loaded" = "予定前の準備ができました。";
+"calendarSoft.noMatch" = "今日から7日以内の日付を選んでください。";
+"quickAction.source" = "ホーム画面のクイックアクション";
+"quickAction.loaded" = "クイックアクションの一歩を読み込みました。";
+"gentleReview.title" = "やさしい振り返り";
+"gentleReview.starts" = "今週のスタート数";
+"gentleReview.friction" = "よくある壁";
+"gentleReview.none" = "学習中";
+
+/* MARK: - プライバシー */
+"privacy.title" = "プライバシー";
+"privacy.principlesTitle" = "基本方針";
+"privacy.principle1" = "StartKindのアカウントやログインは不要です。";
+"privacy.principle2" = "個人データはこの端末と、あなた専用のiCloud CloudKitデータベースにのみ保存されます。";
+"privacy.principle3" = "広告、トラッキング、分析SDKはなく、カレンダーや連絡先、写真へのバックグラウンドアクセスもありません。";
+"privacy.dataTitle" = "保存される可能性のあるデータ";
+"privacy.data1" = "タスクの文章、一歩、タイマーの履歴、再開カプセル、プロフィール、保存した開始は、端末内とプライベートなiCloud CloudKitに保存されます。";
+"privacy.data2" = "AIや事務クイックスタートの解析を依頼すると、選択したテキストやOCRのテキストが一時的な中継を通じて送信されます。リクエストのテキスト自体は保存されません。";
+"privacy.data3" = "一緒にスタートのルームは、参加者同士が調整できるよう、一時的なルーム情報と選んだ表示名、入力した一歩を使用します。ルームには有効期限があります。";
+"privacy.data4" = "権利の確認のため、Apple署名済みのサブスクリプション証明が送信されます。サーバーには結果のプランと匿名のデバイストークンのハッシュのみが保存されます。";
+"privacy.controlsTitle" = "あなたが管理できること";
+"privacy.control1" = "設定から端末内のStartKindデータを削除できます。";
+"privacy.control2" = "iCloudの設定からプライベートなiCloud上のコピーを削除できます。StartKindはこれにアクセスも削除もできません。";
+"privacy.control3" = "設定から、この端末にあるデータを書き出せます。";
+"privacy.control4" = "匿名のデバイストークンはキーチェーンに保存されるため、再インストールしてもサブスクリプションと無料枠はそのまま引き継がれます。アプリを削除しただけでは、サーバー上の匿名記録は残ります。";
+"privacy.sensitiveTitle" = "取り扱いに注意が必要な内容";
+"privacy.sensitive1" = "事務タスクには金融、医療、家族に関する情報が含まれることがありますが、リクエストの原文がサーバーに記録されることはありません。";
+"privacy.sensitive2" = "画像は端末内で読み取られます。解析を依頼した場合のみ、抽出されたテキストが中継されます。";
+"privacy.legalTitle" = "法的情報";
+"privacy.fullPolicy" = "プライバシーポリシーの全文を読む";
+"privacy.contactTitle" = "お問い合わせ";
+
+/* MARK: - 第五弾 継続機能 */
+"ladder.title" = "開始の長さを選ぶ";
+"ladder.minutes" = "%d分";
+"dailyOne.title" = "今日はやさしくひとつだけ";
+"dailyOne.source.recovery" = "再開";
+"dailyOne.source.admin" = "事務";
+"dailyOne.source.vault" = "保存済み";
+"dailyOne.start" = "これにする";
+"dailyOne.replace" = "別のものにする";
+"dailyOne.dismiss" = "今日はやめる";
+"dailyOne.stop" = "役に立つ最小の取っかかりまでできたら、そこで止めてOK。";
+"dailyOne.why" = "以前あなたが選んだ、保存済みの開始です。";
+"dailyOne.source" = "今日のひとつ";
+"dailyOne.loaded" = "今日のやさしいひとつの準備ができました。";
+"urgentAdmin.start" = "連絡手段を見つける";
+"startProfile.title" = "あなたの開始プロフィール";
+"startProfile.empty" = "完璧な計画は求めず、実際の開始から学習していきます。";
+"startProfile.summary" = "あなたがいつ、どのように始めるとうまくいきやすいかの、静かなまとめです。";
+"startProfile.window" = "時間帯";
+"startProfile.duration" = "長さ";
+"startProfile.category" = "よくある";
+"startProfile.learning" = "学習中";
+"startProfile.minutes" = "%d分";
+"costart.again" = "%@ともう一度25分スタート";
+"costart.saveFriend" = "この友だちを保存";
+"costart.friendSaved" = "次回の一緒にスタートのために保存しました";
+
+/* LocalizedError から表示されるエラーメッセージ */
+"error.usage.stepLimit" = "今日の無料回数を使い切りました。";
+"error.usage.adminLimit" = "今日の無料事務クイックスタートを使い切りました。";
+"error.speech.notAuthorized" = "iOSの「設定」>「プライバシーとセキュリティ」>「音声認識」で音声認識を有効にしてください。Siriは不要です。";
+"error.speech.microphoneNotAuthorized" = "iOSの「設定」>「プライバシーとセキュリティ」>「マイク」でマイクを有効にしてください。Siriは不要です。";
+"error.speech.notAvailable" = "音声認識は現在利用できません。Siriは不要です。iOSの「設定」で音声認識とマイクの設定を確認してください。";
+"error.speech.engineFailure" = "音声認識を続行できませんでした。もう一度お試しください。";
+"error.api.notConfigured" = "クラウド機能が設定されていません。";
+"error.auth.network" = "サーバーに接続できませんでした。もう一度お試しください。";
+
+/* 表示設定 */
+"settings.display" = "表示";
+"settings.theme" = "テーマ";
+"settings.theme.system" = "システム";
+"settings.theme.light" = "ライト";
+"settings.theme.dark" = "ダーク";
+"settings.textSize" = "文字サイズ";
+"settings.textSize.smaller" = "小さめ";
+"settings.textSize.small" = "小";
+"settings.textSize.standard" = "標準";
+"settings.textSize.large" = "大";
+"settings.textSize.larger" = "大きめ";
+"settings.textSize.largest" = "最大";
+"settings.textSize.sample" = "請求書を開いて、期限を確認する。";

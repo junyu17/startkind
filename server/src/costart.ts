@@ -39,9 +39,18 @@ function generateCode(): string {
 }
 
 export async function createRoom(
-  device: Device
+  device: Device,
+  body: {
+    step_text?: unknown;
+    display_name?: unknown;
+  } = {}
 ): Promise<Response<ResponseBody>> {
   let room: Room | null = null;
+
+  const displayName =
+    typeof body.display_name === "string" ? body.display_name.slice(0, 40) : "";
+  const statedStep =
+    typeof body.step_text === "string" ? body.step_text.slice(0, 180) : "";
 
   // Try up to 5 times to generate a unique code
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -58,8 +67,8 @@ export async function createRoom(
 
         // Insert host as participant
         await query(
-          "INSERT INTO costart_participants (room_id, device_id) VALUES ($1, $2)",
-          [room.id, device.id]
+          "INSERT INTO costart_participants (room_id, device_id, display_name, stated_step) VALUES ($1, $2, $3, $4)",
+          [room.id, device.id, displayName, statedStep]
         );
 
         return { status: 201, body: { room } };
@@ -112,7 +121,7 @@ export async function joinRoom(
 
   // Upsert participant
   await query(
-    "INSERT INTO costart_participants (room_id, device_id, display_name, stated_step) VALUES ($1, $2, $3, $4) ON CONFLICT (room_id, device_id) DO UPDATE SET display_name = $3, stated_step = $4",
+    "INSERT INTO costart_participants (room_id, device_id, display_name, stated_step) VALUES ($1, $2, $3, $4) ON CONFLICT (room_id, device_id) DO UPDATE SET display_name = $3, stated_step = $4, left_at = NULL, outcome = NULL",
     [room.id, device.id, displayName, stepText]
   );
 
@@ -131,7 +140,7 @@ export async function participants(
   if (!member) return { status: 403, body: { error: "not_a_participant" } };
 
   const rows = await query<Participant>(
-    "SELECT id, display_name, stated_step, outcome FROM costart_participants WHERE room_id = $1",
+    "SELECT id, display_name, stated_step, outcome FROM costart_participants WHERE room_id = $1 AND left_at IS NULL",
     [roomId]
   );
 

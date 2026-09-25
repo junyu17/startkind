@@ -1,6 +1,13 @@
 import SwiftUI
 import Combine
 
+struct TimerRoute: Identifiable {
+    let session: TimerSessionModel
+    let step: NextStepModel
+
+    var id: UUID { session.id }
+}
+
 struct TimerView: View {
     let session: TimerSessionModel
     let step: NextStepModel

@@ -146,6 +146,69 @@ struct UsageState: Equatable, Sendable, Codable {
     var canCreateFriendCoStart: Bool { friendCoStartsRemaining > 0 }
 }
 
+/// The local, explicit stages of a co-start room. A friend room becomes ready
+/// only after the backend reports someone besides the current participant.
+enum CoStartStage: String, Equatable, Sendable {
+    case waiting
+    case ready
+    case focus
+}
+
+/// Pure co-start transition and countdown rules. The room view owns polling and
+/// presentation; this type makes it impossible for a timer tick to start a
+/// session implicitly.
+struct CoStartFlowState: Equatable, Sendable {
+    static let defaultDurationSeconds = 25 * 60
+
+    let roomType: CoStartRoomType
+    let durationSeconds: Int
+    private(set) var participantCount: Int
+    private(set) var stage: CoStartStage
+    private(set) var remainingSeconds: Int
+
+    init(
+        roomType: CoStartRoomType,
+        participantCount: Int,
+        durationSeconds: Int = CoStartFlowState.defaultDurationSeconds,
+        started: Bool = false
+    ) {
+        self.roomType = roomType
+        self.durationSeconds = max(1, durationSeconds)
+        self.participantCount = max(0, participantCount)
+        self.stage = started
+            ? .focus
+            : Self.stage(roomType: roomType, participantCount: participantCount)
+        self.remainingSeconds = max(1, durationSeconds)
+    }
+
+    var canStart: Bool { stage == .ready }
+
+    mutating func updateParticipantCount(_ count: Int) {
+        participantCount = max(0, count)
+        guard stage != .focus else { return }
+        stage = Self.stage(roomType: roomType, participantCount: participantCount)
+    }
+
+    mutating func start() {
+        guard canStart else { return }
+        stage = .focus
+    }
+
+    mutating func tick() {
+        guard stage == .focus, remainingSeconds > 0 else { return }
+        remainingSeconds -= 1
+    }
+
+    mutating func add(minutes: Int) {
+        guard stage == .focus else { return }
+        remainingSeconds += max(0, minutes) * 60
+    }
+
+    private static func stage(roomType: CoStartRoomType, participantCount: Int) -> CoStartStage {
+        roomType == .friendLink && participantCount < 2 ? .waiting : .ready
+    }
+}
+
 /// What kind of capture input the engine received.
 struct CaptureInput: Equatable, Sendable {
     var rawText: String

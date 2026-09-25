@@ -1,3 +1,4 @@
+import CoreData
 import Foundation
 import SwiftData
 
@@ -37,16 +38,82 @@ final class PersistenceService: ObservableObject {
         let schema = Self.fullSchema
         if inMemory {
             // Tests and UI-test runs must never touch a real iCloud account.
-            let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            let config = ModelConfiguration(
+                "StartKindInMemory",
+                schema: schema,
+                isStoredInMemoryOnly: true,
+                cloudKitDatabase: .none
+            )
             container = try ModelContainer(for: schema, configurations: [config])
         } else {
             let dir = FileManager.default
                 .urls(for: .applicationSupportDirectory, in: .userDomainMask)
                 .first ?? URL.temporaryDirectory
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            Self.initializeCloudKitSchemaIfDevelopmentSigned()
             container = try Self.diskContainer(in: dir)
         }
         profile = ensureProfile()
+    }
+
+    // MARK: - CloudKit schema (development builds only)
+
+    /// CloudKit adds a record type or field to the Development schema only when a
+    /// record carrying it is exported, so a schema grown by using the app lacks every
+    /// model nothing has saved yet. Production accepts no schema changes from the app,
+    /// so anything missing when Development is deployed stays missing for every
+    /// customer. `initializeCloudKitSchema()` writes the whole schema from the model.
+    ///
+    /// Gated on development signing rather than `DEBUG`, because the shared scheme runs
+    /// the Release configuration; Xcode-installed builds are the ones that talk to the
+    /// Development environment, and App Store and TestFlight builds carry no embedded
+    /// provisioning profile, so customers never reach this. It uses a throwaway store in
+    /// the temporary directory, runs off the main thread, and retries on the next launch
+    /// until it succeeds once.
+    private static func initializeCloudKitSchemaIfDevelopmentSigned() {
+        let doneKey = "cloudKitSchemaInitialized.v1"
+        guard isDevelopmentSigned,
+              !UserDefaults.standard.bool(forKey: doneKey),
+              let builtModel = NSManagedObjectModel.makeManagedObjectModel(for: syncedModels)
+        else { return }
+        nonisolated(unsafe) let model = builtModel
+        let containerID = cloudKitContainerID
+        Task.detached(priority: .utility) {
+            let storeURL = URL.temporaryDirectory
+                .appendingPathComponent("CloudKitSchemaInit-\(UUID().uuidString).store")
+            let description = NSPersistentStoreDescription(url: storeURL)
+            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                containerIdentifier: containerID)
+            description.shouldAddStoreAsynchronously = false
+            let container = NSPersistentCloudKitContainer(
+                name: "StartKindSchemaInit", managedObjectModel: model)
+            container.persistentStoreDescriptions = [description]
+            nonisolated(unsafe) var loaded = true
+            container.loadPersistentStores { _, error in
+                if error != nil { loaded = false }
+            }
+            if loaded, (try? container.initializeCloudKitSchema(options: [])) != nil {
+                UserDefaults.standard.set(true, forKey: doneKey)
+            }
+            let coordinator = container.persistentStoreCoordinator
+            for store in coordinator.persistentStores {
+                try? coordinator.remove(store)
+            }
+            for suffix in ["", "-shm", "-wal"] {
+                try? FileManager.default.removeItem(atPath: storeURL.path + suffix)
+            }
+        }
+    }
+
+    /// Xcode signs the builds it installs with a development profile that lets a
+    /// debugger attach. App Store and TestFlight builds have no embedded profile at all.
+    private static var isDevelopmentSigned: Bool {
+        guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+              let data = try? Data(contentsOf: url),
+              let text = String(data: data, encoding: .isoLatin1)
+        else { return false }
+        return text.range(of: "<key>get-task-allow</key>\\s*<true/>",
+                          options: .regularExpression) != nil
     }
 
     /// A store that cannot be opened - corrupted on disk, or written by an
@@ -155,6 +222,7 @@ final class PersistenceService: ObservableObject {
         step.category = proposal.category
         step.shrinkLevel = proposal.shrinkLevel
         step.targetMinutes = proposal.timerMinutes
+        step.generatedBy = proposal.generatedBy
         step.whyThisStep = proposal.whyThisStep
         step.updatedAt = .now
         try? context.save()
@@ -307,18 +375,26 @@ final class PersistenceService: ObservableObject {
 
     // MARK: - History & Calibration
 
-    func recentSessions(days: Int = UsageLimits.freeHistoryDays) -> [TimerSessionModel] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: .now) ?? .now
+    func recentSessions(days: Int? = UsageLimits.freeHistoryDays) -> [TimerSessionModel] {
         let id = userId
-        let descriptor = FetchDescriptor<TimerSessionModel>(
-            predicate: #Predicate { $0.userId == id && $0.createdAt >= cutoff },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
-        )
+        let descriptor: FetchDescriptor<TimerSessionModel>
+        if let days {
+            let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: .now) ?? .now
+            descriptor = FetchDescriptor<TimerSessionModel>(
+                predicate: #Predicate { $0.userId == id && $0.createdAt >= cutoff },
+                sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            )
+        } else {
+            descriptor = FetchDescriptor<TimerSessionModel>(
+                predicate: #Predicate { $0.userId == id },
+                sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            )
+        }
         return (try? context.fetch(descriptor)) ?? []
     }
 
-    func calibrationSamples() -> [CalibrationSample] {
-        recentSessions().map { session in
+    func calibrationSamples(days: Int? = UsageLimits.freeHistoryDays) -> [CalibrationSample] {
+        recentSessions(days: days).map { session in
             CalibrationSample(
                 category: session.category,
                 estimatedMinutes: session.estimatedMinutes,
@@ -330,8 +406,8 @@ final class PersistenceService: ObservableObject {
         }
     }
 
-    func calibrationSnapshots() -> [CalibrationSnapshot] {
-        let samples = calibrationSamples()
+    func calibrationSnapshots(days: Int? = UsageLimits.freeHistoryDays) -> [CalibrationSnapshot] {
+        let samples = calibrationSamples(days: days)
         let calibrator = TimeCalibrator()
         return Set(samples.map(\.category))
             .sorted(by: { $0.displayName < $1.displayName })

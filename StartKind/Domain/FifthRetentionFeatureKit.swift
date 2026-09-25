@@ -24,10 +24,22 @@ struct StartLadderPlanner: Sendable {
 
     func proposal(from source: NextStepProposal, minutes: Int, language: String) -> NextStepProposal {
         let selected = Self.minutes.contains(minutes) ? minutes : 5
-        let zh = language.lowercased().hasPrefix("zh")
-        let title = zh ? "\(selected) 分钟开始：\(source.title)" : "\(selected)-minute start: \(source.title)"
-        let step = zh ? "接下来的 \(selected) 分钟，只做这一件事：\(source.step)" : "For the next \(selected) minutes, do only this: \(source.step)"
-        let stop = zh ? "\(selected) 分钟到就停，不需要决定下一步。" : "Stop at \(selected) minutes. You do not need to decide what comes next."
+        let lang = ContentLanguage(language)
+        let title = lang.pick(
+            en: "\(selected)-minute start: \(source.title)",
+            zh: "\(selected) 分钟开始：\(source.title)",
+            ja: "\(selected)分の開始：\(source.title)"
+        )
+        let step = lang.pick(
+            en: "For the next \(selected) minutes, do only this: \(source.step)",
+            zh: "接下来的 \(selected) 分钟，只做这一件事：\(source.step)",
+            ja: "これからの\(selected)分は、これだけをやりましょう：\(source.step)"
+        )
+        let stop = lang.pick(
+            en: "Stop at \(selected) minutes. You do not need to decide what comes next.",
+            zh: "\(selected) 分钟到就停，不需要决定下一步。",
+            ja: "\(selected)分たったら止めましょう。次を決めなくて大丈夫です。"
+        )
         return NextStepProposal(
             title: title,
             step: step,
@@ -36,7 +48,11 @@ struct StartLadderPlanner: Sendable {
             category: source.category,
             shrinkLevel: selected <= 5 ? max(source.shrinkLevel, .two) : source.shrinkLevel,
             generatedBy: .localTemplate,
-            whyThisStep: zh ? "你选择了一个可承受的开始时长。" : "You chose a start length that fits right now."
+            whyThisStep: lang.pick(
+                en: "You chose a start length that fits right now.",
+                zh: "你选择了一个可承受的开始时长。",
+                ja: "今の自分に合う長さを選びました。"
+            )
         )
     }
 }
@@ -55,24 +71,78 @@ struct ActionPrepPlan: Equatable, Sendable {
 struct ActionPrepPlanner: Sendable {
     func plan(for proposal: NextStepProposal, language: String) -> ActionPrepPlan? {
         let text = "\(proposal.title) \(proposal.step)"
-        let zh = language.lowercased().hasPrefix("zh")
+        let lang = ContentLanguage(language)
         if let email = firstEmail(in: text), let url = URL(string: "mailto:\(email)") {
-            return ActionPrepPlan(kind: .email, label: zh ? "准备一封邮件" : "Prepare an email", instruction: zh ? "将打开邮件草稿，不会自动发送。" : "This opens a draft. Nothing is sent automatically.", url: url)
+            return ActionPrepPlan(
+                kind: .email,
+                label: lang.pick(en: "Prepare an email", zh: "准备一封邮件", ja: "メールの下書きを用意する"),
+                instruction: lang.pick(
+                    en: "This opens a draft. Nothing is sent automatically.",
+                    zh: "将打开邮件草稿，不会自动发送。",
+                    ja: "下書きが開きます。自動で送信されることはありません。"
+                ),
+                url: url
+            )
         }
         if let phone = firstPhone(in: text), let url = URL(string: "tel:\(phone)") {
-            return ActionPrepPlan(kind: .phone, label: zh ? "准备拨号" : "Prepare a call", instruction: zh ? "将打开电话；由你决定是否拨出。" : "This opens Phone. You decide whether to place the call.", url: url)
+            return ActionPrepPlan(
+                kind: .phone,
+                label: lang.pick(en: "Prepare a call", zh: "准备拨号", ja: "電話の準備をする"),
+                instruction: lang.pick(
+                    en: "This opens Phone. You decide whether to place the call.",
+                    zh: "将打开电话；由你决定是否拨出。",
+                    ja: "電話アプリが開きます。かけるかどうかは、あなたが決めて大丈夫です。"
+                ),
+                url: url
+            )
         }
         if let url = firstURL(in: text) {
-            return ActionPrepPlan(kind: .website, label: zh ? "打开相关网站" : "Open the related site", instruction: zh ? "网站已准备好；由你决定是否继续。" : "The site is ready. You decide whether to continue.", url: url)
+            return ActionPrepPlan(
+                kind: .website,
+                label: lang.pick(en: "Open the related site", zh: "打开相关网站", ja: "関係するサイトを開く"),
+                instruction: lang.pick(
+                    en: "The site is ready. You decide whether to continue.",
+                    zh: "网站已准备好；由你决定是否继续。",
+                    ja: "サイトの準備ができました。進むかどうかは、あなたが決めて大丈夫です。"
+                ),
+                url: url
+            )
         }
         let lower = text.lowercased()
-        if proposal.category == .appointments || lower.contains("appointment") || lower.contains("预约") || lower.contains("calendar") || lower.contains("日历") {
-            return ActionPrepPlan(kind: .appointment, label: zh ? "准备预约入口" : "Prepare the appointment", instruction: zh ? "先确认时间、地点或联系方式中的一项。" : "Confirm one thing: the time, place, or contact method.", url: nil)
+        if proposal.category == .appointments || lower.contains("appointment") || lower.contains("预约") || lower.contains("calendar") || lower.contains("日历") || lower.contains("予約") || lower.contains("カレンダー") {
+            return ActionPrepPlan(
+                kind: .appointment,
+                label: lang.pick(en: "Prepare the appointment", zh: "准备预约入口", ja: "予約の入り口を用意する"),
+                instruction: lang.pick(
+                    en: "Confirm one thing: the time, place, or contact method.",
+                    zh: "先确认时间、地点或联系方式中的一项。",
+                    ja: "時間か場所、連絡方法のどれかひとつだけを確かめましょう。"
+                ),
+                url: nil
+            )
         }
-        if lower.contains("document") || lower.contains("form") || lower.contains("file") || lower.contains("文件") || lower.contains("表格") {
-            return ActionPrepPlan(kind: .document, label: zh ? "准备文件入口" : "Prepare the document", instruction: zh ? "先找到文件名或表格入口，不需要填写。" : "Find the document or form first; you do not need to fill it out yet.", url: nil)
+        if lower.contains("document") || lower.contains("form") || lower.contains("file") || lower.contains("文件") || lower.contains("表格") || lower.contains("書類") || lower.contains("用紙") || lower.contains("ファイル") {
+            return ActionPrepPlan(
+                kind: .document,
+                label: lang.pick(en: "Prepare the document", zh: "准备文件入口", ja: "書類の入り口を用意する"),
+                instruction: lang.pick(
+                    en: "Find the document or form first; you do not need to fill it out yet.",
+                    zh: "先找到文件名或表格入口，不需要填写。",
+                    ja: "まず書類か用紙を見つけましょう。まだ記入しなくて大丈夫です。"
+                ),
+                url: nil
+            )
         }
-        return ActionPrepPlan(kind: .instruction, label: zh ? "准备开始环境" : "Prepare your starting place", instruction: zh ? "只打开完成这一步需要的第一个应用或页面。" : "Open only the first app or page this step needs.", url: nil)
+        return ActionPrepPlan(
+            kind: .instruction,
+            label: lang.pick(en: "Prepare your starting place", zh: "准备开始环境", ja: "始める場所を整える"),
+            instruction: lang.pick(
+                en: "Open only the first app or page this step needs.",
+                zh: "只打开完成这一步需要的第一个应用或页面。",
+                ja: "この一歩に必要な最初のアプリかページだけを開きましょう。"
+            ),
+            url: nil
+        )
     }
 
     private func firstURL(in text: String) -> URL? {
@@ -242,27 +312,51 @@ struct UrgentAdminSignal: Equatable, Sendable {
 struct UrgentAdminPlanner: Sendable {
     func signal(in text: String, category: TaskCategory? = nil, language: String) -> UrgentAdminSignal? {
         let lower = text.lowercased()
-        let cues = ["urgent", "final notice", "past due", "due today", "deadline", "respond by", "overdue", "紧急", "最后通知", "已逾期", "今天到期", "截止", "请回复"]
+        let cues = ["urgent", "final notice", "past due", "due today", "deadline", "respond by", "overdue", "紧急", "最后通知", "已逾期", "今天到期", "截止", "请回复", "至急", "最終通知", "督促", "期限切れ", "本日まで", "締切", "締め切り", "ご返信"]
         guard cues.contains(where: { lower.contains($0) }) else { return nil }
-        let zh = language.lowercased().hasPrefix("zh")
+        let lang = ContentLanguage(language)
         let selectedCategory = category ?? inferredCategory(in: lower)
         let proposal = NextStepProposal(
-            title: zh ? "先联系原始发送方" : "Contact the original sender first",
-            step: zh ? "打开原始信件、邮件或网站，只找到联系入口或回复按钮。" : "Open the original letter, email, or site and only find its contact or reply path.",
+            title: lang.pick(
+                en: "Contact the original sender first",
+                zh: "先联系原始发送方",
+                ja: "まず差出人に連絡する"
+            ),
+            step: lang.pick(
+                en: "Open the original letter, email, or site and only find its contact or reply path.",
+                zh: "打开原始信件、邮件或网站，只找到联系入口或回复按钮。",
+                ja: "元の手紙かメール、サイトを開いて、連絡先か返信の入り口だけを見つけましょう。"
+            ),
             timerMinutes: 5,
-            stopCondition: zh ? "找到联系入口就停；是否联系由你决定。" : "Stop after finding the contact path. You decide whether to contact them.",
+            stopCondition: lang.pick(
+                en: "Stop after finding the contact path. You decide whether to contact them.",
+                zh: "找到联系入口就停；是否联系由你决定。",
+                ja: "連絡先が見つかったら止めましょう。連絡するかどうかは、あなたが決めて大丈夫です。"
+            ),
             category: selectedCategory,
             shrinkLevel: .two,
             generatedBy: .localTemplate,
-            whyThisStep: zh ? "这看起来有时间提示；先找到原始联系人，不提供建议。" : "This appears time-sensitive. Start by finding the original contact; StartKind does not advise on the content."
+            whyThisStep: lang.pick(
+                en: "This appears time-sensitive. Start by finding the original contact; StartKind does not advise on the content.",
+                zh: "这看起来有时间提示；先找到原始联系人，不提供建议。",
+                ja: "急ぎのようです。まず元の連絡先を見つけましょう。内容についてStartKindは判断しません。"
+            )
         )
-        return UrgentAdminSignal(title: zh ? "时间敏感" : "Time-sensitive", detail: zh ? "先找到原始发送方的联系入口。" : "Find the original sender's contact path first.", proposal: proposal)
+        return UrgentAdminSignal(
+            title: lang.pick(en: "Time-sensitive", zh: "时间敏感", ja: "急ぎのようです"),
+            detail: lang.pick(
+                en: "Find the original sender's contact path first.",
+                zh: "先找到原始发送方的联系入口。",
+                ja: "まず差出人の連絡先を見つけましょう。"
+            ),
+            proposal: proposal
+        )
     }
 
     private func inferredCategory(in text: String) -> TaskCategory {
-        if text.contains("bill") || text.contains("payment") || text.contains("账单") || text.contains("付款") { return .bills }
-        if text.contains("appointment") || text.contains("doctor") || text.contains("预约") || text.contains("医生") { return .appointments }
-        if text.contains("insurance") || text.contains("保险") { return .insurance }
+        if text.contains("bill") || text.contains("payment") || text.contains("账单") || text.contains("付款") || text.contains("請求") || text.contains("支払") { return .bills }
+        if text.contains("appointment") || text.contains("doctor") || text.contains("预约") || text.contains("医生") || text.contains("予約") || text.contains("医者") { return .appointments }
+        if text.contains("insurance") || text.contains("保险") || text.contains("保険") { return .insurance }
         return .other
     }
 }

@@ -258,6 +258,7 @@
 "settings.language" = "Language";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.language.ja" = "日本語";
 "settings.profile" = "Your profile";
 "settings.editProfile" = "Edit profile";
 "settings.subscription" = "Subscription";
@@ -283,7 +284,7 @@
 "settings.moreApps.maren" = "Period & perimenopause tracker";
 "settings.moreApps.dogcat" = "Feeding calculator for dogs and cats";
 "settings.moreApps.taskkin" = "Family caregiving, shared";
-"settings.moreApps.livepet" = "Your pet as a living widget";
+"settings.moreApps.livepet" = "One photo of your pet, gently animated";
 "settings.moreApps.virtualpets" = "Cosy pet care and dress-up";
 "settings.moreApps.platepace" = "AI-assisted nutrition tracker for GLP-1 routines";
 
@@ -347,7 +348,7 @@
 "onboarding.progress.name" = "Step 1 of 2";
 "onboarding.progress.difficulty" = "Step 2 of 2";
 "onboarding.name.title" = "What should we call you?";
-"onboarding.name.subtitle" = "Just your first name. It stays on this device.";
+"onboarding.name.subtitle" = "Just your first name. It stays on this device, unless you join a shared start — then the person you are starting with sees it.";
 "onboarding.name.label" = "Preferred first name";
 "onboarding.name.placeholder" = "First name";
 "onboarding.name.count" = "%d / 40 characters";
@@ -499,7 +500,7 @@
 "privacy.control1" = "Delete local StartKind data from Settings.";
 "privacy.control2" = "Delete the private iCloud copy from your iCloud settings; StartKind cannot access or delete it.";
 "privacy.control3" = "Export the data available on this device from Settings.";
-"privacy.control4" = "Deleting the app removes its anonymous device token; the server record is reaped automatically.";
+"privacy.control4" = "The anonymous device token stays in your keychain, so reinstalling keeps your subscription and your free allowance. Deleting the app does not by itself remove the anonymous row on the server.";
 "privacy.sensitiveTitle" = "Sensitive content";
 "privacy.sensitive1" = "Admin tasks may contain financial, medical, or family information; raw request text is not logged by our server.";
 "privacy.sensitive2" = "Images are read on-device; only extracted text is relayed if you then ask for parsing.";

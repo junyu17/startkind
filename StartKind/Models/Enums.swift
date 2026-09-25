@@ -44,7 +44,7 @@ enum TaskCategory: String, Codable, CaseIterable, Sendable, Identifiable {
         case .returns, .errands: return 10
         case .household, .cleaning: return 12
         case .familyAdmin, .school: return 12
-        case .other: return 10
+        case .other: return 5
         }
     }
 }

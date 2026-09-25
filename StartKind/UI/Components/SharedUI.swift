@@ -195,6 +195,7 @@ struct PressableCard: ButtonStyle {
     // would otherwise look exactly like a live one - a tap target that
     // silently swallows taps is worse than no target at all.
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// A control that is busy is disabled too, but it must stay legible: the
     /// spinner inside it is the whole point.
@@ -202,13 +203,15 @@ struct PressableCard: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .scaleEffect(!reduceMotion && configuration.isPressed ? 0.975 : 1)
             .opacity(!isEnabled && dimsWhenDisabled ? 0.4 : (configuration.isPressed ? 0.68 : 1))
-            .animation(.easeOut(duration: 0.10), value: configuration.isPressed)
-            .animation(.easeOut(duration: 0.15), value: isEnabled)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.10), value: configuration.isPressed)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isEnabled)
             // Fires on the press, not the release, so the confirmation lands
             // under the finger at the moment of contact.
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in
+                // Reduce Motion changes visual movement only; tactile feedback
+                // remains useful and should not disappear for accessibility users.
                 pressed
             }
     }
@@ -225,6 +228,7 @@ extension View {
 /// about to replace it, so the wait reads as "your step is coming, here" -
 /// not as an anonymous spinner somewhere on the page.
 struct StepSkeleton: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulsing = false
 
     var body: some View {
@@ -248,7 +252,10 @@ struct StepSkeleton: View {
             RoundedRectangle(cornerRadius: Theme.radius8, style: .continuous)
                 .stroke(Theme.line, lineWidth: 1)
         )
-        .onAppear { pulsing = true }
+        .onAppear { pulsing = !reduceMotion }
+        .onChange(of: reduceMotion) { _, value in
+            pulsing = !value
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(verbatim: L("capture.generating")))
         .accessibilityIdentifier("start.generating")
@@ -260,7 +267,10 @@ struct StepSkeleton: View {
                 .fill(Theme.softAccent)
                 .frame(width: geo.size.width * widthFraction, height: height)
                 .opacity(pulsing ? 0.45 : 0.95)
-                .animation(.easeInOut(duration: 0.85).repeatForever(autoreverses: true), value: pulsing)
+                .animation(
+                    reduceMotion ? nil : .easeInOut(duration: 0.85).repeatForever(autoreverses: true),
+                    value: pulsing
+                )
         }
         .frame(height: height)
     }

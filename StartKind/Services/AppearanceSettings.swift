@@ -21,13 +21,15 @@ enum AppearanceTheme: String, CaseIterable, Identifiable, Sendable {
 }
 
 enum AppearanceTextSize: String, CaseIterable, Identifiable, Sendable {
-    case standard, large, larger, largest
+    case smaller, small, standard, large, larger, largest
 
     var id: String { rawValue }
     var localizationKey: String { "settings.textSize.\(rawValue)" }
 
     var dynamicTypeSize: DynamicTypeSize {
         switch self {
+        case .smaller: return .small
+        case .small: return .medium
         case .standard: return .large
         case .large: return .xLarge
         case .larger: return .xxLarge
@@ -39,10 +41,12 @@ enum AppearanceTextSize: String, CaseIterable, Identifiable, Sendable {
     /// it is made.
     var sampleScale: CGFloat {
         switch self {
+        case .smaller: return 0.82
+        case .small: return 0.91
         case .standard: return 1.0
-        case .large: return 1.15
-        case .larger: return 1.3
-        case .largest: return 1.5
+        case .large: return 1.08
+        case .larger: return 1.17
+        case .largest: return 1.33
         }
     }
 }

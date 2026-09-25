@@ -140,16 +140,11 @@ final class UsageTrackerTests: XCTestCase {
 final class UsageLimitsTests: XCTestCase {
     func testFreeGatesAllPlusFeatures() {
         for feature in [
-            UsageLimits.PlusFeature.unlimitedSteps,
-            .adminTaskReader,
-            .screenshotPhoto,
-            .calendarSync,
-            .emailParsing,
-            .unlimitedRecovery,
-            .aiCoStart,
-            .friendCoStart,
-            .crossDeviceSync,
-            .personalExecutionModel
+            UsageLimits.PlusFeature.unlimitedDailyStarts,
+            .unlimitedAdminQuickStarts,
+            .unlimitedActiveRecoveryCapsules,
+            .unlimitedFriendRooms,
+            .advancedExecutionInsights
         ] {
             XCTAssertTrue(UsageLimits.isGated(feature, entitlement: .free), "free should gate \(feature)")
         }
@@ -157,17 +152,18 @@ final class UsageLimitsTests: XCTestCase {
 
     func testPlusActiveUnlocksAll() {
         for feature in [
-            UsageLimits.PlusFeature.unlimitedSteps,
-            .adminTaskReader,
-            .crossDeviceSync,
-            .personalExecutionModel
+            UsageLimits.PlusFeature.unlimitedDailyStarts,
+            .unlimitedAdminQuickStarts,
+            .unlimitedActiveRecoveryCapsules,
+            .unlimitedFriendRooms,
+            .advancedExecutionInsights
         ] {
             XCTAssertFalse(UsageLimits.isGated(feature, entitlement: .plusActive))
         }
     }
 
     func testTrialCountsAsPlus() {
-        XCTAssertFalse(UsageLimits.isGated(.unlimitedSteps, entitlement: .plusTrial))
+        XCTAssertFalse(UsageLimits.isGated(.unlimitedDailyStarts, entitlement: .plusTrial))
     }
 
     func testTimerPresetsAvailableToAll() {

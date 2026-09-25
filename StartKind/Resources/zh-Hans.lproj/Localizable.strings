@@ -258,6 +258,7 @@
 "settings.language" = "语言";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.language.ja" = "日本語";
 "settings.profile" = "你的资料";
 "settings.editProfile" = "编辑资料";
 "settings.subscription" = "订阅";
@@ -283,7 +284,7 @@
 "settings.moreApps.maren" = "经期与围绝经期记录";
 "settings.moreApps.dogcat" = "猫狗喂食计算器";
 "settings.moreApps.taskkin" = "家庭协作照护";
-"settings.moreApps.livepet" = "把照片变成会动的宠物小组件";
+"settings.moreApps.livepet" = "把一张照片变成会动的宠物";
 "settings.moreApps.virtualpets" = "温馨养宠换装游戏";
 "settings.moreApps.platepace" = "GLP-1 饮食节奏的 AI 营养记录";
 
@@ -347,7 +348,7 @@
 "onboarding.progress.name" = "第 1 步，共 2 步";
 "onboarding.progress.difficulty" = "第 2 步，共 2 步";
 "onboarding.name.title" = "我们怎么称呼你？";
-"onboarding.name.subtitle" = "只需要名字。它只保存在这台设备上。";
+"onboarding.name.subtitle" = "只需要名字。它保存在这台设备上；只有在你加入一起开始的房间时，同行的人才会看到它。";
 "onboarding.name.label" = "偏好的名字";
 "onboarding.name.placeholder" = "名字";
 "onboarding.name.count" = "%d / 40 个字符";
@@ -499,7 +500,7 @@
 "privacy.control1" = "在设置中删除本机的 StartKind 数据。";
 "privacy.control2" = "在你的 iCloud 设置中删除私有 iCloud 副本；StartKind 无法访问或删除它。";
 "privacy.control3" = "在设置中导出本机可用的数据。";
-"privacy.control4" = "删除 App 会移除匿名设备令牌；服务端记录会自动清理。";
+"privacy.control4" = "匿名设备令牌保存在系统钥匙串中，重新安装后订阅和免费额度仍然有效。仅删除 App 并不会移除服务器上的匿名记录。";
 "privacy.sensitiveTitle" = "敏感内容";
 "privacy.sensitive1" = "事务任务可能含财务、医疗或家庭信息；我们的服务端不会记录原始请求文字。";
 "privacy.sensitive2" = "图片在本机读取；只有你继续请求解析时，提取出的文字才会被中转。";

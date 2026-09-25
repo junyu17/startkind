@@ -62,15 +62,68 @@ final class FourthRetentionFeatureTests: XCTestCase {
         XCTAssertTrue(reloaded.scripts.isEmpty)
     }
 
-    func testCalendarSoftLandingAcceptsRelevantUpcomingEventsOnly() {
+    func testCalendarSoftLandingUsesCalendarDaysAndGenericFallback() {
         let planner = CalendarSoftLandingPlanner()
-        let now = Date(timeIntervalSince1970: 1_700_000_000)
-        let tomorrow = now.addingTimeInterval(86_400)
-        let farFuture = now.addingTimeInterval(9 * 86_400)
-        XCTAssertEqual(planner.proposal(for: CalendarSoftLandingEvent(title: "Dentist appointment", startDate: tomorrow), now: now, language: "en")?.category, .medical)
-        XCTAssertEqual(planner.proposal(for: CalendarSoftLandingEvent(title: "Electric bill due", startDate: tomorrow), now: now, language: "en")?.category, .bills)
-        XCTAssertNil(planner.proposal(for: CalendarSoftLandingEvent(title: "Random idea", startDate: tomorrow), now: now, language: "en"))
-        XCTAssertNil(planner.proposal(for: CalendarSoftLandingEvent(title: "Meeting", startDate: farFuture), now: now, language: "en"))
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = calendar.date(from: DateComponents(year: 2023, month: 11, day: 14, hour: 23, minute: 55))!
+        let sameDayPast = calendar.date(from: DateComponents(year: 2023, month: 11, day: 14, hour: 9))!
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: now)!
+        let sevenDays = calendar.date(byAdding: .day, value: 7, to: now)!
+        let eightDays = calendar.date(byAdding: .day, value: 8, to: now)!
+
+        XCTAssertEqual(
+            planner.proposal(
+                for: CalendarSoftLandingEvent(title: "Dentist appointment", startDate: tomorrow),
+                now: now,
+                calendar: calendar,
+                language: "en"
+            )?.category,
+            .medical
+        )
+        XCTAssertEqual(
+            planner.proposal(
+                for: CalendarSoftLandingEvent(title: "Electric bill due", startDate: tomorrow),
+                now: now,
+                calendar: calendar,
+                language: "en"
+            )?.category,
+            .bills
+        )
+
+        let generic = planner.proposal(
+            for: CalendarSoftLandingEvent(title: "Pick up package", startDate: sameDayPast),
+            now: now,
+            calendar: calendar,
+            language: "en"
+        )
+        XCTAssertEqual(generic?.category, .other)
+        XCTAssertEqual(generic?.timerMinutes, 5)
+        XCTAssertTrue(generic?.step.contains("entry point") == true)
+        XCTAssertNotNil(
+            planner.proposal(
+                for: CalendarSoftLandingEvent(title: "Random idea", startDate: sevenDays),
+                now: now,
+                calendar: calendar,
+                language: "en"
+            )
+        )
+        XCTAssertNil(
+            planner.proposal(
+                for: CalendarSoftLandingEvent(title: "Meeting", startDate: eightDays),
+                now: now,
+                calendar: calendar,
+                language: "en"
+            )
+        )
+        XCTAssertNil(
+            planner.proposal(
+                for: CalendarSoftLandingEvent(title: "  \n", startDate: tomorrow),
+                now: now,
+                calendar: calendar,
+                language: "en"
+            )
+        )
     }
 
     func testGentleReviewIsNonShaming() {

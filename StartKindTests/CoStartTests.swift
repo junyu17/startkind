@@ -40,4 +40,60 @@ final class CoStartTests: XCTestCase {
         XCTAssertTrue(sessions.contains { $0.coStartMode == .ai })
     }
 
+    func testQuietReadyDoesNotCountdownBeforeExplicitStart() {
+        var state = CoStartFlowState(roomType: .aiQuiet, participantCount: 2)
+        let initialSeconds = state.remainingSeconds
+
+        XCTAssertEqual(state.stage, .ready)
+        state.tick()
+
+        XCTAssertEqual(state.remainingSeconds, initialSeconds)
+    }
+
+    func testFriendHostWaitsForBackendParticipantWithoutCountdown() {
+        var state = CoStartFlowState(roomType: .friendLink, participantCount: 1)
+        let initialSeconds = state.remainingSeconds
+
+        XCTAssertEqual(state.stage, .waiting)
+        state.start()
+        state.tick()
+        XCTAssertEqual(state.stage, .waiting)
+        XCTAssertEqual(state.remainingSeconds, initialSeconds)
+
+        state.updateParticipantCount(2)
+        XCTAssertEqual(state.stage, .ready)
+    }
+
+    func testExplicitStartBeginsCountdown() {
+        var state = CoStartFlowState(roomType: .friendLink, participantCount: 2)
+        let initialSeconds = state.remainingSeconds
+
+        XCTAssertEqual(state.stage, .ready)
+        state.tick()
+        XCTAssertEqual(state.remainingSeconds, initialSeconds)
+
+        state.start()
+        state.tick()
+
+        XCTAssertEqual(state.stage, .focus)
+        XCTAssertEqual(state.remainingSeconds, initialSeconds - 1)
+    }
+
+    func testQuietRoomCreatesTimerOnlyAfterExplicitStart() async throws {
+        let env = AppEnvironment(inMemory: true)
+        let step = makeStep(in: env)
+
+        let room = try await env.startCoStart(
+            type: .aiQuiet,
+            step: step,
+            stepText: step.proposal.step
+        )
+
+        XCTAssertTrue(env.persistence.recentSessions().isEmpty)
+
+        let session = env.beginCoStart(room: room, step: step)
+        XCTAssertEqual(session.coStartMode, .ai)
+        XCTAssertEqual(env.persistence.recentSessions().count, 1)
+    }
+
 }

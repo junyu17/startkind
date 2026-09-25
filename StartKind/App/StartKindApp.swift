@@ -58,10 +58,9 @@ struct StartKindApp: App {
     @StateObject private var appearance = MainActor.assumeIsolated { AppearanceSettings() }
 
     init() {
-        let args = ProcessInfo.processInfo.arguments
-        let isUITest = args.contains("-UITEST") || args.contains("-UITEST_AUTH")
+        let isTestRuntime = StartKindRuntime.isTestRuntime
         let usageDefaults: UserDefaults
-        if isUITest {
+        if isTestRuntime {
             UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
             let suiteName = "ren.startkind.uitests.usage"
             usageDefaults = UserDefaults(suiteName: suiteName) ?? .standard
@@ -71,7 +70,7 @@ struct StartKindApp: App {
         }
         _env = StateObject(
             wrappedValue: MainActor.assumeIsolated {
-                AppEnvironment(inMemory: isUITest, usageDefaults: usageDefaults)
+                AppEnvironment(inMemory: isTestRuntime, usageDefaults: usageDefaults)
             }
         )
     }

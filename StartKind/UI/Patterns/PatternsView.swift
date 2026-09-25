@@ -9,39 +9,46 @@ struct PatternsView: View {
     private var frictionInsights: [FrictionInsight] { env.frictionInsights() }
     private var gentleReview: GentleReviewSummary { env.gentleReviewSummary() }
     private var startProfile: StartProfile { env.startProfile() }
+    @State private var advancedDetailsExpanded = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.spacing16) {
-                    gentleReviewCard
+                    recommendationCard
                     startProfileCard
-                    executionModelCard
-                    frictionMapSection
-
+                    gentleReviewCard
                     Text(verbatim: L("patterns.noShame"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    if insights.isEmpty && snapshots.isEmpty && frictionInsights.isEmpty {
-                        emptyState
+                    if env.isPlus {
+                        advancedDetails
                     } else {
-                        ForEach(Array(insights.enumerated()), id: \.offset) { _, insight in
-                            KindBanner(text: insight)
-                        }
-                        ForEach(snapshots) { snapshot in
-                            snapshotCard(snapshot)
-                        }
+                        plusPromo
                     }
-
-                    if !env.isPlus { plusPromo }
                 }
                 .padding()
             }
             .navigationTitle(L("patterns.title"))
             .background(Theme.background.ignoresSafeArea())
         }
+    }
+
+    private var recommendationCard: some View {
+        VStack(alignment: .leading, spacing: Theme.spacing8) {
+            Label(L("patterns.recommendation.title"), systemImage: "arrow.down.right.circle.fill")
+                .font(.headline)
+                .foregroundStyle(Theme.accent)
+            Text(verbatim: gentleReview.message)
+                .font(.body)
+                .fontWeight(.medium)
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .startKindCard()
+        .accessibilityIdentifier("patterns.recommendation")
     }
 
     private var emptyState: some View {
@@ -61,11 +68,6 @@ struct PatternsView: View {
                     .font(.headline)
                 Spacer()
             }
-
-            Text(verbatim: gentleReview.message)
-                .font(.subheadline)
-                .foregroundStyle(Theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: Theme.spacing8) {
                 modelMetric(title: L("gentleReview.starts"), value: "\(gentleReview.startsThisWeek)", icon: "play.circle.fill")
@@ -154,6 +156,40 @@ struct PatternsView: View {
         }
         .startKindCard()
         .accessibilityIdentifier("startProfile.card")
+    }
+
+    private var advancedDetails: some View {
+        DisclosureGroup(isExpanded: $advancedDetailsExpanded) {
+            if advancedDetailsExpanded {
+                VStack(alignment: .leading, spacing: Theme.spacing16) {
+                    executionModelCard
+                    frictionMapSection
+
+                    if insights.isEmpty && snapshots.isEmpty && frictionInsights.isEmpty {
+                        emptyState
+                    } else {
+                        ForEach(Array(insights.enumerated()), id: \.offset) { _, insight in
+                            KindBanner(text: insight)
+                        }
+                        ForEach(snapshots) { snapshot in
+                            snapshotCard(snapshot)
+                        }
+                    }
+                }
+                .padding(.top, Theme.spacing8)
+            }
+        } label: {
+            Label(
+                L("patterns.advanced.title"),
+                systemImage: advancedDetailsExpanded ? "chevron.down.circle" : "chevron.right.circle"
+            )
+            .font(.subheadline)
+            .fontWeight(.semibold)
+            .foregroundStyle(Theme.ink)
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget, alignment: .leading)
+            .accessibilityIdentifier("patterns.advanced")
+        }
+        .accessibilityHint(Text(verbatim: L("patterns.advanced.hint")))
     }
 
     private var startProfileSummary: String {

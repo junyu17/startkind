@@ -105,8 +105,9 @@ actor StartKindAPI {
         return token
     }
 
-    /// Forget this device entirely. The server row is orphaned and reaped; the
-    /// next call registers a fresh anonymous identity.
+    /// Forget this device entirely. The next call registers a fresh anonymous
+    /// identity; the previous server row is orphaned but not deleted, so do not
+    /// describe this to the user as removing the server record.
     func resetDevice() {
         TokenStore.set(nil as String?, for: Self.tokenKey)
         cachedToken = nil
@@ -141,8 +142,11 @@ actor StartKindAPI {
 
     // MARK: - Co-start
 
-    func createRoom() async throws -> RemoteRoom {
-        let body = try await send(path: "/v1/costart/rooms", method: "POST", json: [:])
+    func createRoom(stepText: String = "", displayName: String = "") async throws -> RemoteRoom {
+        let body = try await send(path: "/v1/costart/rooms", method: "POST", json: [
+            "step_text": stepText,
+            "display_name": displayName
+        ])
         guard let json = body["room"] as? [String: Any], let room = RemoteRoom(json: json) else {
             throw APIError.server
         }

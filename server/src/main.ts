@@ -75,7 +75,8 @@ Deno.serve(
 
       // Co-start: create room
       if (pathname === "/v1/costart/rooms" && method === "POST") {
-        const result = await createRoom(device);
+        const body = await parseJson(req);
+        const result = await createRoom(device, body);
         return json(result.body, result.status);
       }
 

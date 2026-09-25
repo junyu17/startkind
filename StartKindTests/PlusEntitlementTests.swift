@@ -80,14 +80,25 @@ final class PlusEntitlementTests: XCTestCase {
 
     func testPlusFeaturesAreGatedForFreeAndOpenForPlus() {
         let gated: [UsageLimits.PlusFeature] = [
-            .unlimitedSteps, .adminTaskReader, .screenshotPhoto, .calendarSync,
-            .emailParsing, .unlimitedRecovery, .aiCoStart, .friendCoStart,
-            .crossDeviceSync, .personalExecutionModel
+            .unlimitedDailyStarts,
+            .unlimitedAdminQuickStarts,
+            .unlimitedActiveRecoveryCapsules,
+            .unlimitedFriendRooms,
+            .advancedExecutionInsights
         ]
         for feature in gated {
             XCTAssertTrue(UsageLimits.isGated(feature, entitlement: .free), "\(feature) should be gated on Free")
             XCTAssertFalse(UsageLimits.isGated(feature, entitlement: .plusActive), "\(feature) should open on Plus")
             XCTAssertFalse(UsageLimits.isGated(feature, entitlement: .plusTrial), "\(feature) should open during the trial")
         }
+    }
+
+    func testDebugUITestOverrideDoesNotRepresentAStoreKitPurchase() {
+        let free = EntitlementService()
+        let plus = EntitlementService(forcePlusForUITest: true)
+
+        XCTAssertFalse(free.state.isPlus)
+        XCTAssertTrue(plus.state.isPlus)
+        XCTAssertTrue(plus.products.isEmpty, "The UI-test override must not fabricate StoreKit products")
     }
 }

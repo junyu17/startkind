@@ -1,0 +1,11 @@
+/* Permission prompts */
+"NSMicrophoneUsageDescription" = "StartKind は、話したことを聞き取って、いますぐ始められる小さな一歩にするためにマイクを使います。";
+"NSSpeechRecognitionUsageDescription" = "StartKind は、話したことを小さな一歩にするために音声認識を使います。";
+"NSCameraUsageDescription" = "StartKind は、請求書や手紙、予約の案内を読み取って、小さな一歩にするためにカメラを使います。";
+"NSPhotoLibraryUsageDescription" = "StartKind は、選んだスクリーンショットや写真から文字を読み取り、事務のタスクを小さな一歩にします。";
+
+/* Home Screen quick action titles */
+"I'm stuck" = "行き詰まった";
+"Start 5 minutes" = "5分だけ始める";
+"Rescue yesterday" = "昨日のレスキュー";
+"Paste admin text" = "事務の文章を貼り付け";

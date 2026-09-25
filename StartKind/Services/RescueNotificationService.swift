@@ -9,8 +9,7 @@ final class RescueNotificationService {
 
     init(center: UNUserNotificationCenter = .current()) {
         self.center = center
-        let args = ProcessInfo.processInfo.arguments
-        self.disabled = args.contains("-UITEST") || args.contains("-UITEST_AUTH")
+        self.disabled = StartKindRuntime.isTestRuntime
     }
 
     func scheduleRescue(after seconds: TimeInterval = 30 * 60) {

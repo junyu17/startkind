@@ -10,6 +10,8 @@ import StoreKit
 final class EntitlementService: ObservableObject {
     @Published private(set) var state: EntitlementState = .free
     @Published private(set) var products: [Product] = []
+    @Published private(set) var isLoadingProducts = false
+    @Published private(set) var productsLoadError: String?
     /// Apple-signed proof of the current Plus entitlement (StoreKit 2 JWS).
     /// The backend verifies this signature locally, so nothing here is trusted
     /// on the client's word.
@@ -18,7 +20,13 @@ final class EntitlementService: ObservableObject {
 
     private var updatesListener: Task<Void, Never>?
 
-    init() {}
+    init(forcePlusForUITest: Bool = false) {
+#if DEBUG
+        // This hook is only compiled into Debug builds and is used by UI tests
+        // to exercise Plus-only navigation without touching StoreKit truth.
+        if forcePlusForUITest { state = .plusActive }
+#endif
+    }
 
     deinit {
         updatesListener?.cancel()
@@ -26,6 +34,10 @@ final class EntitlementService: ObservableObject {
 
     /// Load products and current entitlements. Safe to call on launch.
     func load() async {
+        isLoadingProducts = true
+        productsLoadError = nil
+        lastError = nil
+        defer { isLoadingProducts = false }
         await loadProducts()
         await refreshEntitlements()
         startListening()
@@ -44,10 +56,13 @@ final class EntitlementService: ObservableObject {
     private func loadProducts() async {
         do {
             let storeProducts = try await Product.products(for: SubscriptionProductID.all)
+            guard !storeProducts.isEmpty else { throw ProductLoadError.noProducts }
             // Stable display order: annual first (best value), then monthly.
             products = storeProducts.sorted { $0.id == SubscriptionProductID.annual && $1.id != SubscriptionProductID.annual }
+            productsLoadError = nil
         } catch {
-            lastError = error.localizedDescription
+            products = []
+            productsLoadError = error.localizedDescription
         }
     }
 
@@ -92,12 +107,20 @@ final class EntitlementService: ObservableObject {
                 if case .verified(let txn) = verification {
                     await txn.finish()
                     await refreshEntitlements()
-                    return true
+                    if state.isPlus { return true }
+                    lastError = L("paywall.purchase.error")
+                    return false
+                } else if case .unverified(_, let error) = verification {
+                    lastError = error.localizedDescription
                 }
                 return false
-            case .userCancelled, .pending:
+            case .userCancelled:
+                return false
+            case .pending:
+                lastError = L("paywall.purchase.pending")
                 return false
             @unknown default:
+                lastError = L("paywall.purchase.error")
                 return false
             }
         } catch {
@@ -106,13 +129,18 @@ final class EntitlementService: ObservableObject {
         }
     }
 
-    func restore() async {
+    @discardableResult
+    func restore() async -> Bool {
+        lastError = nil
         do {
             try await AppStore.sync()
         } catch {
             lastError = error.localizedDescription
+            await refreshEntitlements()
+            return false
         }
         await refreshEntitlements()
+        return state.isPlus
     }
 
     // MARK: - Transaction listener
@@ -143,6 +171,16 @@ final class EntitlementService: ObservableObject {
         case .plusGracePeriod: return 2
         case .plusTrial: return 3
         case .plusActive: return 4
+        }
+    }
+}
+
+private enum ProductLoadError: LocalizedError {
+    case noProducts
+
+    var errorDescription: String? {
+        switch self {
+        case .noProducts: return L("paywall.products.unavailable")
         }
     }
 }

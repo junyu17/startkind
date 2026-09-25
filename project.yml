@@ -11,13 +11,14 @@ options:
   knownRegions:
     - en
     - zh-Hans
+    - ja
 settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: minimal
     DEVELOPMENT_TEAM: "255R6QQR97"
-    MARKETING_VERSION: "1.0.1"
-    CURRENT_PROJECT_VERSION: "8"
+    MARKETING_VERSION: "1.1"
+    CURRENT_PROJECT_VERSION: "9"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     CODE_SIGN_STYLE: Automatic
 targets:
@@ -25,6 +26,13 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "17.0"
+    # StartKind.xcodeproj is generated and gitignored, so a .swift file added
+    # since the last `xcodegen generate` is silently absent from the build.
+    # This fails the build instead, naming the file. See the script header.
+    preBuildScripts:
+      - name: Verify project is in sync with the files on disk
+        script: '"$SRCROOT/Scripts/verify-project-sync.sh"'
+        basedOnDependencyAnalysis: false
     sources:
       - path: StartKind
         excludes:
@@ -53,6 +61,7 @@ targets:
         CFBundleLocalizations:
           - en
           - zh-Hans
+          - ja
         UILaunchScreen:
           UIColorName: BackgroundColor
         UISupportedInterfaceOrientations:

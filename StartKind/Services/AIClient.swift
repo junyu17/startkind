@@ -58,7 +58,7 @@ final class CloudAIClient: AIClient {
                 language: input.language,
                 calibrationMultiplier: calibrationMultiplier
             )
-            if let json = Self.json(from: data), let proposal = Self.parseNextStep(json) { return proposal }
+            if let json = Self.json(from: data), let proposal = Self.parseNextStep(json, input: input) { return proposal }
             return try await fallback.generateNextStep(input: input, calibrationMultiplier: calibrationMultiplier)
         } catch APIError.limitReached {
             // The daily allowance is a product rule, not a failure: surface it
@@ -90,36 +90,58 @@ final class CloudAIClient: AIClient {
         (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
     }
 
-    private static func parseNextStep(_ json: [String: Any]) -> NextStepProposal? {
+    static func parseNextStep(_ json: [String: Any], input: CaptureInput) -> NextStepProposal? {
         guard let title = json["title"] as? String,
-              let step = json["step"] as? String else { return nil }
-        let category = (json["category"] as? String).flatMap(TaskCategory.init(rawValue:)) ?? .other
+              let step = json["step"] as? String,
+              let stopCondition = json["stop_condition"] as? String,
+              let timer = json["timer_minutes"] as? Int else { return nil }
+        let inferredCategory = NextStepEngine().detectCategory(in: input.rawText, preferred: nil)
+        let category = input.preferredCategory
+            ?? (json["category"] as? String).flatMap(TaskCategory.init(rawValue:))
+            ?? inferredCategory
         let shrink = (json["shrink_level"] as? Int).flatMap(ShrinkLevel.init(rawValue:)) ?? .zero
-        let timer = (json["timer_minutes"] as? Int) ?? category.defaultEstimateMinutes
-        return NextStepProposal(
+        let proposal = NextStepProposal(
             title: title,
             step: step,
-            timerMinutes: max(1, min(25, timer)),
-            stopCondition: (json["stop_condition"] as? String) ?? "",
+            timerMinutes: timer,
+            stopCondition: stopCondition,
             category: category,
             shrinkLevel: shrink,
             generatedBy: .cloudAI,
             whyThisStep: json["why_this_step"] as? String
         )
+        let intent = TaskIntentParser().parse(
+            text: input.rawText,
+            language: input.language,
+            categoryHint: inferredCategory
+        )
+        guard NextStepQualityGate.accepts(proposal, for: intent) else { return nil }
+        return proposal
     }
 
     private static func parseAdminResult(_ json: [String: Any]) -> AdminParseResult? {
         let type = (json["artifact_type"] as? String).flatMap(AdminArtifactType.init(rawValue:)) ?? .other
-        let nextJson = (json["one_next_step"] as? [String: Any]) ?? [:]
+        guard let nextJson = json["one_next_step"] as? [String: Any],
+              let title = nextJson["title"] as? String,
+              let step = nextJson["step"] as? String,
+              let timer = nextJson["timer_minutes"] as? Int,
+              let stopCondition = nextJson["stop_condition"] as? String else { return nil }
+        // The admin prompt asks for the smallest possible action and its own
+        // template shows 0 minutes, so the model routinely returns a duration
+        // outside the 5-15 the quality gate enforces. Clamping keeps a good
+        // parse instead of silently discarding it and dropping the paid cloud
+        // result back to the local regex reader.
+        let clampedTimer = min(15, max(5, timer))
         let nextStep = NextStepProposal(
-            title: (nextJson["title"] as? String) ?? "",
-            step: (nextJson["step"] as? String) ?? "",
-            timerMinutes: (nextJson["timer_minutes"] as? Int) ?? 5,
-            stopCondition: (nextJson["stop_condition"] as? String) ?? "",
+            title: title,
+            step: step,
+            timerMinutes: clampedTimer,
+            stopCondition: stopCondition,
             category: .other,
             shrinkLevel: .one,
             generatedBy: .cloudAI
         )
+        guard NextStepQualityGate.accepts(nextStep) else { return nil }
         let dueDate = (json["due_date"] as? String).flatMap { ISO8601DateFormatter().date(from: $0) }
         return AdminParseResult(
             artifactType: type,

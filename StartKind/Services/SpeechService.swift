@@ -2,7 +2,7 @@ import Foundation
 import Speech
 import AVFoundation
 
-enum SpeechError: LocalizedError {
+enum SpeechError: LocalizedError, Equatable {
     case notAuthorized, microphoneNotAuthorized, notAvailable, engineFailure
 
     var errorDescription: String? {
@@ -15,23 +15,27 @@ enum SpeechError: LocalizedError {
     }
 }
 
-/// On-device speech-to-text for voice capture. Uses the Speech framework with
-/// on-device recognition where supported so Free voice input works offline.
+/// System speech-to-text for voice capture, using on-device processing when available.
 @MainActor
 final class SpeechService: ObservableObject {
     @Published private(set) var isListening = false
+    @Published private(set) var isPreparing = false
     @Published private(set) var isAuthorized = false
     @Published private(set) var isMicrophoneAuthorized = false
     @Published var transcript = ""
+    @Published private(set) var lastError: SpeechError?
 
     private let audioEngine = AVAudioEngine()
-    private let preferredLocale: Locale
+    private var preferredLocale: Locale
     private var recognizer: SFSpeechRecognizer?
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
+    private var tapInstalled = false
+    private var startToken = UUID()
+    private var hasRecognizedTextThisSession = false
 
     init(locale: Locale = .current) {
-        preferredLocale = locale
+        preferredLocale = Self.normalizedLocale(for: locale)
     }
 
     /// Build the recognizer only once speech access has actually been granted.
@@ -40,14 +44,16 @@ final class SpeechService: ObservableObject {
     /// first tap after authorising silently do nothing.
     private func makeRecognizer() -> SFSpeechRecognizer? {
         if let recognizer, recognizer.isAvailable { return recognizer }
-        let candidates = [preferredLocale, Locale(identifier: "en-US")]
-        for locale in candidates {
-            if let candidate = SFSpeechRecognizer(locale: locale), candidate.isAvailable {
-                recognizer = candidate
-                return candidate
-            }
+        guard let candidate = SFSpeechRecognizer(locale: preferredLocale), candidate.isAvailable else {
+            return nil
         }
-        return nil
+        recognizer = candidate
+        return candidate
+    }
+
+    func updateLocale(_ languageOrLocale: String) {
+        preferredLocale = Self.normalizedLocale(for: Locale(identifier: languageOrLocale))
+        recognizer = nil
     }
 
     func refreshAuthorizationState() {
@@ -56,43 +62,67 @@ final class SpeechService: ObservableObject {
     }
 
     func start() async throws {
-        try await ensureAuthorization()
-        guard let recognizer = makeRecognizer() else {
-            throw SpeechError.notAvailable
+        guard !isListening && !isPreparing else { return }
+        stopInternal()
+        lastError = nil
+        isPreparing = true
+        let token = UUID()
+        startToken = token
+        defer {
+            if startToken == token {
+                isPreparing = false
+            }
         }
-        guard configureAudioSession() else { throw SpeechError.notAvailable }
+        do {
+            try await ensureAuthorization()
+            guard startToken == token else { return }
+            guard let recognizer = makeRecognizer() else {
+                throw SpeechError.notAvailable
+            }
+            guard configureAudioSession() else {
+                throw SpeechError.notAvailable
+            }
 
-        task?.cancel()
-        task = nil
-        transcript = ""
+            let request = SFSpeechAudioBufferRecognitionRequest()
+            request.shouldReportPartialResults = true
+            self.request = request
+            transcript = ""
+            hasRecognizedTextThisSession = false
 
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        if recognizer.supportsOnDeviceRecognition {
-            request.requiresOnDeviceRecognition = true
+            let inputNode = audioEngine.inputNode
+            let format = inputNode.outputFormat(forBus: 0)
+            guard format.sampleRate > 0, format.channelCount > 0 else {
+                throw SpeechError.notAvailable
+            }
+            // This helper is nonisolated so AVAudioEngine never inherits
+            // SpeechService's MainActor isolation for its realtime callback.
+            Self.installAudioTap(on: inputNode, request: request)
+            tapInstalled = true
+
+            audioEngine.prepare()
+            try audioEngine.start()
+            task = recognizer.recognitionTask(with: request, resultHandler: handleRecognition)
+            guard startToken == token else { return }
+            isListening = true
+        } catch let error as SpeechError {
+            stopInternal()
+            throw error
+        } catch {
+            stopInternal()
+            throw SpeechError.engineFailure
         }
-        self.request = request
+    }
 
-        let inputNode = audioEngine.inputNode
-        let format = inputNode.outputFormat(forBus: 0)
-        guard format.sampleRate > 0, format.channelCount > 0 else {
-            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-            throw SpeechError.notAvailable
-        }
-        inputNode.removeTap(onBus: 0)
+    /// Creates the AVAudioEngine callback outside SpeechService's global actor.
+    /// AVFoundation invokes this block on a realtime queue, where touching a
+    /// MainActor-isolated closure would trigger Swift's isolation assertion.
+    private nonisolated static func installAudioTap(
+        on inputNode: AVAudioInputNode,
+        request: SFSpeechAudioBufferRecognitionRequest
+    ) {
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: nil) { buffer, _ in
             request.append(buffer)
         }
-
-        audioEngine.prepare()
-        do {
-            try audioEngine.start()
-        } catch {
-            throw SpeechError.engineFailure
-        }
-
-        task = recognizer.recognitionTask(with: request, resultHandler: handleRecognition)
-        isListening = true
     }
 
     private func ensureAuthorization() async throws {
@@ -147,14 +177,26 @@ final class SpeechService: ObservableObject {
     /// Nonisolated recognition handler. SFSpeech may call this on a background
     /// queue, so it must not be MainActor-isolated; it hops to MainActor to
     /// update transcript and stop state.
+    internal func receiveRecognition(text: String?, isFinal: Bool, hasError: Bool) {
+        if let text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            transcript = text
+            hasRecognizedTextThisSession = true
+            lastError = nil
+        } else if hasError && !hasRecognizedTextThisSession {
+            lastError = .engineFailure
+        }
+        if (hasError || isFinal) && (isListening || isPreparing) {
+            stopInternal()
+        }
+    }
+
     nonisolated private func handleRecognition(_ result: SFSpeechRecognitionResult?, error: Error?) {
         // Extract Sendable values on the calling queue; the result itself is not Sendable.
         let text = result?.bestTranscription.formattedString
         let isFinal = result?.isFinal ?? false
         let hasError = error != nil
         Task { @MainActor in
-            if let text { self.transcript = text }
-            if hasError || isFinal { self.stopInternal() }
+            self.receiveRecognition(text: text, isFinal: isFinal, hasError: hasError)
         }
     }
 
@@ -168,13 +210,29 @@ final class SpeechService: ObservableObject {
     }
 
     private func stopInternal() {
+        startToken = UUID()
         audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
+        if tapInstalled {
+            audioEngine.inputNode.removeTap(onBus: 0)
+            tapInstalled = false
+        }
         request?.endAudio()
         task?.cancel()
         request = nil
         task = nil
         isListening = false
+        isPreparing = false
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    static func normalizedLocaleIdentifier(for locale: Locale) -> String {
+        let identifier = locale.identifier.lowercased()
+        if identifier.hasPrefix("zh") { return "zh-CN" }
+        if identifier.hasPrefix("ja") { return "ja-JP" }
+        return "en-US"
+    }
+
+    private static func normalizedLocale(for locale: Locale) -> Locale {
+        Locale(identifier: normalizedLocaleIdentifier(for: locale))
     }
 }

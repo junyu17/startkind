@@ -29,20 +29,26 @@ struct Rescheduler: Sendable {
     }
 
     private func message(for reason: SkipReason, language: String) -> String {
-        let zh = language.lowercased().hasPrefix("zh")
+        let lang = ContentLanguage(language)
         switch reason {
         case .skipped:
-            return zh
-                ? "没关系。这里有个更轻的版本，留着以后。"
-                : "No problem. Here's a lighter version for later."
+            return lang.pick(
+                en: "No problem. Here's a lighter version for later.",
+                zh: "没关系。这里有个更轻的版本，留着以后。",
+                ja: "大丈夫です。もっと軽い版を、あとのために残しておきます。"
+            )
         case .paused:
-            return zh
-                ? "已轻轻暂停。回来时这里有个更小的步骤。"
-                : "Paused gently. A smaller step is here when you return."
+            return lang.pick(
+                en: "Paused gently. A smaller step is here when you return.",
+                zh: "已轻轻暂停。回来时这里有个更小的步骤。",
+                ja: "そっと一時停止しました。戻ってきたら、もっと小さな一歩がここで待っています。"
+            )
         case .tooLarge:
-            return zh
-                ? "这一步现在可能有点大。试试更小的版本。"
-                : "This step may be too large right now. Try the smaller version."
+            return lang.pick(
+                en: "This step may be too large right now. Try the smaller version.",
+                zh: "这一步现在可能有点大。试试更小的版本。",
+                ja: "この一歩は今は少し大きいかもしれません。もっと小さな版を試してみましょう。"
+            )
         }
     }
 }

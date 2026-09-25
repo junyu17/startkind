@@ -13,8 +13,7 @@ final class LocalizationManager: ObservableObject {
     @Published private(set) var locale: Locale
 
     init() {
-        let preferred = Locale.preferredLanguages.first ?? "en"
-        let lang = preferred.lowercased().hasPrefix("zh") ? "zh-Hans" : "en"
+        let lang = Self.normalize(Locale.preferredLanguages.first ?? "en")
         self.language = lang
         self.locale = Locale(identifier: lang)
     }
@@ -29,9 +28,18 @@ final class LocalizationManager: ObservableObject {
     }
 
     func setLanguage(_ language: String) {
-        let normalized = language.lowercased().hasPrefix("zh") ? "zh-Hans" : "en"
+        let normalized = Self.normalize(language)
         self.language = normalized
         self.locale = Locale(identifier: normalized)
+    }
+
+    /// The app ships English, Simplified Chinese, and Japanese; anything else
+    /// falls back to English.
+    private static func normalize(_ language: String) -> String {
+        let lowered = language.lowercased()
+        if lowered.hasPrefix("zh") { return "zh-Hans" }
+        if lowered.hasPrefix("ja") { return "ja" }
+        return "en"
     }
 
     /// Localized string for `key` in the active language, with format args.

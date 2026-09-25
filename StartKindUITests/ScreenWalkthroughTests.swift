@@ -3,27 +3,44 @@ import XCTest
 /// A pre-submission sweep: open every screen, panel and sheet the app can
 /// reach and assert it actually renders. Written after device testing turned up
 /// three separate problems that no existing test covered.
+@MainActor
 final class ScreenWalkthroughTests: XCTestCase {
 
-    private func launch() -> XCUIApplication {
+    private func launch(plus: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments += ["-UITEST"]
+        app.launchArguments = ["-UITEST"]
+        if plus { app.launchArguments.append("-UITEST_PLUS") }
         app.launch()
         return app
     }
 
+    private func scrollToHittable(_ app: XCUIApplication, _ element: XCUIElement, label: String) {
+        for _ in 0..<8 where !element.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.isHittable, "\(label) should be hittable")
+    }
+
     private func expandMoreWays(_ app: XCUIApplication) {
-        let admin = app.buttons["start.kind.admin"]
-        if admin.exists { return }
+        let scanGroup = app.buttons["start.moreWays.scan"].firstMatch
+        if scanGroup.exists { return }
         let disclosure = app.buttons["start.moreWays"].firstMatch
         XCTAssertTrue(disclosure.waitForExistence(timeout: 15), "More ways disclosure missing")
+        scrollToHittable(app, disclosure, label: "More ways disclosure")
         disclosure.tap()
-        var attempts = 1
-        while !admin.waitForExistence(timeout: 5), attempts < 3 {
-            disclosure.tap()
-            attempts += 1
+        XCTAssertTrue(scanGroup.waitForExistence(timeout: 5), "More ways did not expand")
+    }
+
+    private func expandMoreWaysGroup(_ app: XCUIApplication, _ groupID: String, childID: String) {
+        let group = app.buttons[groupID].firstMatch
+        XCTAssertTrue(group.waitForExistence(timeout: 10), "More ways group \(groupID) missing")
+        let child = app.descendants(matching: .any)[childID]
+        if !child.exists {
+            scrollToHittable(app, group, label: "More ways group \(groupID)")
+            group.tap()
         }
-        XCTAssertTrue(admin.waitForExistence(timeout: 5), "More ways did not expand")
+        XCTAssertTrue(child.waitForExistence(timeout: 10), "\(childID) missing after expanding \(groupID)")
+        scrollToHittable(app, child, label: "More ways child \(childID)")
     }
 
     /// Settings is a Form, which virtualises its rows: anything below the fold
@@ -47,12 +64,16 @@ final class ScreenWalkthroughTests: XCTestCase {
 
     func testStartFirstViewportShowsEveryPrimaryControl() throws {
         let app = launch()
-        for id in ["start.voice", "start.input", "global.stuck", "start.autopilot"] {
+        for id in ["start.voice", "start.input", "global.stuck", "start.moreWays"] {
             XCTAssertTrue(
                 app.descendants(matching: .any)[id].waitForExistence(timeout: 15),
                 "\(id) missing from the Start first viewport"
             )
         }
+        XCTAssertTrue(app.staticTexts["One kind step to start."].waitForExistence(timeout: 10), "Start guidance should remain visible as text")
+        XCTAssertFalse(app.buttons["One kind step to start."].exists, "Start guidance must not be exposed as a control")
+        XCTAssertFalse(app.descendants(matching: .any)["start.autopilot"].exists, "Autopilot belongs in More ways")
+        XCTAssertFalse(app.descendants(matching: .any)["start.yesterdayRescue"].exists, "Yesterday Rescue belongs in More ways")
         // The decorative header arrow read as a control and was removed; it
         // must not come back.
         XCTAssertFalse(app.buttons["start.header.arrow"].exists)
@@ -61,22 +82,39 @@ final class ScreenWalkthroughTests: XCTestCase {
     func testEveryMoreWaysPanelRenders() throws {
         let app = launch()
         expandMoreWays(app)
-        let expected = [
-            "start.kind.admin", "start.kind.photo", "start.templates", "start.vault",
-            "start.costart.friend", "start.join.code", "adminInbox.input",
-            "start.daypart", "start.emergency", "calendarSoft.input"
-        ]
-        for id in expected {
-            XCTAssertTrue(
-                app.descendants(matching: .any)[id].waitForExistence(timeout: 10),
-                "\(id) missing from More ways to start"
-            )
+        for id in ["start.moreWays.scan", "start.moreWays.reuse", "start.moreWays.costart", "start.moreWays.match", "start.moreWays.plan"] {
+            XCTAssertTrue(app.descendants(matching: .any)[id].waitForExistence(timeout: 10), "\(id) group missing")
         }
+        XCTAssertFalse(app.descendants(matching: .any)["start.kind.admin"].exists, "Admin tools should not be eager")
+        XCTAssertFalse(app.descendants(matching: .any)["start.join.code"].exists, "Co-start tools should not be eager")
+        XCTAssertFalse(app.descendants(matching: .any)["start.costart.quiet"].exists, "Quiet co-start should not be eager")
+        XCTAssertFalse(app.descendants(matching: .any)["energy.low"].exists, "Match tools should not be eager")
+        XCTAssertFalse(app.descendants(matching: .any)["calendarSoft.input"].exists, "Plan tools should not be eager")
+
+        expandMoreWaysGroup(app, "start.moreWays.scan", childID: "start.kind.admin")
+        for id in ["start.kind.photo", "adminInbox.input"] {
+            XCTAssertTrue(app.descendants(matching: .any)[id].waitForExistence(timeout: 10), "\(id) missing from Scan or paste")
+        }
+        XCTAssertFalse(app.buttons["start.templates"].exists, "Templates should not be in Scan or paste")
+        XCTAssertFalse(app.buttons["start.vault"].exists, "Saved starts should not be in Scan or paste")
+        expandMoreWaysGroup(app, "start.moreWays.reuse", childID: "start.templates")
+        XCTAssertTrue(app.buttons["start.vault"].waitForExistence(timeout: 10), "Saved starts missing from Reuse a start")
+        XCTAssertTrue(app.descendants(matching: .any)["startScript.title"].waitForExistence(timeout: 10), "Reusable scripts missing from Reuse a start")
+        expandMoreWaysGroup(app, "start.moreWays.costart", childID: "start.costart.friend")
+        XCTAssertTrue(app.buttons["start.costart.quiet"].waitForExistence(timeout: 10), "Quiet co-start missing from Start with someone")
+        XCTAssertTrue(app.descendants(matching: .any)["start.join.code"].waitForExistence(timeout: 10))
+        expandMoreWaysGroup(app, "start.moreWays.match", childID: "energy.low")
+        for id in ["frictionPreset.need_login", "start.daypart", "start.emergency"] {
+            XCTAssertTrue(app.descendants(matching: .any)[id].waitForExistence(timeout: 10), "\(id) missing from Match how I feel")
+        }
+        expandMoreWaysGroup(app, "start.moreWays.plan", childID: "start.autopilot")
+        XCTAssertTrue(app.descendants(matching: .any)["calendarSoft.input"].waitForExistence(timeout: 10))
     }
 
     func testEnergyAndFrictionChipsRender() throws {
         let app = launch()
         expandMoreWays(app)
+        expandMoreWaysGroup(app, "start.moreWays.match", childID: "energy.low")
         for id in ["energy.low", "energy.overwhelmed", "frictionPreset.need_login", "frictionPreset.too_vague"] {
             XCTAssertTrue(app.buttons[id].waitForExistence(timeout: 10), "\(id) chip missing")
         }
@@ -87,7 +125,8 @@ final class ScreenWalkthroughTests: XCTestCase {
     func testTemplatesSheetOpensAndCloses() throws {
         let app = launch()
         expandMoreWays(app)
-        app.descendants(matching: .any)["start.templates"].tap()
+        expandMoreWaysGroup(app, "start.moreWays.reuse", childID: "start.templates")
+        app.buttons["start.templates"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Close"].waitForExistence(timeout: 10), "Templates sheet did not open")
         app.buttons["Close"].tap()
         XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10), "Closing templates did not return to Start")
@@ -96,7 +135,8 @@ final class ScreenWalkthroughTests: XCTestCase {
     func testVaultSheetOpensAndCloses() throws {
         let app = launch()
         expandMoreWays(app)
-        app.descendants(matching: .any)["start.vault"].tap()
+        expandMoreWaysGroup(app, "start.moreWays.reuse", childID: "start.vault")
+        app.buttons["start.vault"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Close"].waitForExistence(timeout: 10), "Vault sheet did not open")
         app.buttons["Close"].tap()
         XCTAssertTrue(app.buttons["start.voice"].waitForExistence(timeout: 10))
@@ -111,22 +151,33 @@ final class ScreenWalkthroughTests: XCTestCase {
     }
 
     func testPatternsTabRendersEveryCard() throws {
-        let app = launch()
+        let app = launch(plus: true)
         selectTab(app, 2)
-        for id in ["gentleReview.card", "startProfile.card", "patterns.model.summary"] {
+        for id in ["patterns.recommendation", "gentleReview.card", "startProfile.card", "patterns.advanced"] {
             XCTAssertTrue(
                 app.descendants(matching: .any)[id].waitForExistence(timeout: 10),
                 "\(id) missing from Patterns"
             )
         }
+        XCTAssertFalse(app.descendants(matching: .any)["patterns.model.summary"].exists, "Plus details should start collapsed")
+        let advanced = app.buttons["patterns.advanced"].firstMatch
+        for _ in 0..<8 where !advanced.isHittable { app.swipeUp() }
+        XCTAssertTrue(advanced.isHittable, "Plus details disclosure should be tappable")
+        advanced.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["patterns.model.summary"].waitForExistence(timeout: 10))
     }
 
     func testSettingsTabRendersEverySection() throws {
         let app = launch()
         selectTab(app, 3)
         XCTAssertTrue(app.segmentedControls["settings.theme"].waitForExistence(timeout: 10), "Theme control missing")
-        XCTAssertTrue(app.segmentedControls["settings.textSize"].exists, "Text size control missing")
-        XCTAssertTrue(app.buttons["StartKind Plus"].exists, "Subscription row missing")
+        let textSize = app.descendants(matching: .any)["settings.textSize"]
+        XCTAssertTrue(textSize.waitForExistence(timeout: 10), "Text size control missing")
+        textSize.tap()
+        XCTAssertTrue(app.buttons["Smaller"].waitForExistence(timeout: 5), "Text size menu should expose the smaller levels")
+        app.buttons["Standard"].tap()
+        XCTAssertTrue(app.buttons["settings.subscription.upgrade"].exists, "Free upgrade action missing")
+        XCTAssertTrue(app.descendants(matching: .any)["settings.subscription.status"].exists, "Subscription status missing")
         XCTAssertTrue(revealInSettings(app, "settings.deleteData").exists, "Delete-data row missing")
         // Account rows were removed with the account system; they must not return.
         XCTAssertFalse(app.buttons["Sign out"].exists)
@@ -139,7 +190,8 @@ final class ScreenWalkthroughTests: XCTestCase {
         let privacy = revealInSettings(app, "settings.privacy")
         XCTAssertTrue(privacy.exists, "Privacy row missing")
         privacy.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["privacy.email"].waitForExistence(timeout: 10), "Privacy screen did not render")
+        XCTAssertTrue(app.descendants(matching: .any)["privacy.policy"].waitForExistence(timeout: 10), "Full privacy policy link missing")
+        XCTAssertTrue(app.descendants(matching: .any)["privacy.terms"].exists, "Terms link missing")
     }
 
     func testDataExportOpensAndIsShareable() throws {
@@ -157,22 +209,44 @@ final class ScreenWalkthroughTests: XCTestCase {
 
     // MARK: - Paywall
 
-    func testPaywallShowsPlansCtaAndHighlightedSaving() throws {
+    func testPaywallShowsProductErrorRetryAndLegalLinks() throws {
         let app = launch()
         selectTab(app, 3)
-        XCTAssertTrue(app.buttons["StartKind Plus"].waitForExistence(timeout: 10))
-        app.buttons["StartKind Plus"].tap()
+        let upgrade = revealInSettings(app, "settings.subscription.upgrade")
+        XCTAssertTrue(upgrade.exists && upgrade.isHittable, "Free upgrade action missing")
+        upgrade.tap()
 
         XCTAssertTrue(app.buttons["paywall.annual"].waitForExistence(timeout: 10), "Annual plan missing")
         XCTAssertTrue(app.buttons["paywall.monthly"].exists, "Monthly plan missing")
-        XCTAssertTrue(app.buttons["paywall.subscribe"].exists, "Subscribe CTA missing")
-        XCTAssertTrue(
-            app.descendants(matching: .any)["paywall.annual.save"].exists,
-            "The annual saving should be called out"
-        )
+        let retry = app.buttons["paywall.products.retry"]
+        let subscribe = app.buttons["paywall.subscribe"]
+        if retry.exists {
+            XCTAssertFalse(app.buttons["paywall.annual"].isEnabled, "Unavailable annual plan must be disabled")
+            XCTAssertFalse(app.buttons["paywall.monthly"].isEnabled, "Unavailable monthly plan must be disabled")
+            XCTAssertFalse(subscribe.exists, "A failed product load must not leave a dead subscribe CTA")
+        } else {
+            XCTAssertTrue(subscribe.waitForExistence(timeout: 10), "Loaded products must expose the subscribe action")
+            XCTAssertTrue(app.buttons["paywall.annual"].isEnabled)
+            XCTAssertTrue(app.buttons["paywall.monthly"].isEnabled)
+        }
+        XCTAssertTrue(app.buttons["paywall.privacy"].exists, "Privacy link missing")
+        XCTAssertTrue(app.buttons["paywall.terms"].exists, "Terms link missing")
+    }
+
+    func testPlusSettingsShowsManageSubscriptionWithoutUpgrade() throws {
+        let app = launch(plus: true)
+        selectTab(app, 3)
+
+        let manage = revealInSettings(app, "settings.subscription.manage")
+        XCTAssertTrue(manage.exists && manage.isHittable, "Plus manage action missing")
+        XCTAssertTrue(app.descendants(matching: .any)["settings.subscription.status"].exists)
+        let restore = revealInSettings(app, "settings.subscription.restore")
+        XCTAssertTrue(restore.exists, "Plus restore action missing")
+        XCTAssertFalse(app.buttons["settings.subscription.upgrade"].exists, "Plus must not show the upgrade action")
     }
 }
 
+@MainActor
 /// The report that produced these tests: "I tapped the buttons on the home
 /// page and there was no feedback - I didn't know whether I'd missed the
 /// button or it hadn't responded, so I kept tapping, and only after scrolling
@@ -187,12 +261,28 @@ final class StartFeedbackTests: XCTestCase {
         return app
     }
 
+    private func scrollToHittable(_ app: XCUIApplication, _ element: XCUIElement, label: String) {
+        for _ in 0..<8 where !element.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.isHittable, "\(label) should be hittable")
+    }
+
     /// The card is taller than the screen, so its container is never fully
     /// hittable. The title is the part that has to be readable the instant
     /// the step exists.
     private func produceStepAndReturnTitle(_ app: XCUIApplication) -> XCUIElement {
-        let autopilot = app.descendants(matching: .any)["start.autopilot"]
+        let autopilot = app.buttons["start.autopilot"].firstMatch
+        let moreWays = app.buttons["start.moreWays"].firstMatch
+        XCTAssertTrue(moreWays.waitForExistence(timeout: 15), "More ways disclosure missing")
+        scrollToHittable(app, moreWays, label: "More ways disclosure")
+        moreWays.tap()
+        let plan = app.buttons["start.moreWays.plan"].firstMatch
+        XCTAssertTrue(plan.waitForExistence(timeout: 10), "Plan group missing")
+        scrollToHittable(app, plan, label: "Plan group")
+        plan.tap()
         XCTAssertTrue(autopilot.waitForExistence(timeout: 15), "Autopilot missing")
+        scrollToHittable(app, autopilot, label: "Autopilot")
         autopilot.tap()
         let title = app.descendants(matching: .any)["nextstep.title"]
         XCTAssertTrue(title.waitForExistence(timeout: 15), "No step was produced")

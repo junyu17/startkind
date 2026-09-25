@@ -41,8 +41,10 @@ enum ScreenshotMode {
     /// entirely on a fresh install - exactly the case every screenshot run
     /// starts from after `simctl uninstall`.
     static var systemPreferredLanguage: String {
-        let preferred = Locale.preferredLanguages.first ?? "en"
-        return preferred.lowercased().hasPrefix("zh") ? "zh-Hans" : "en"
+        let preferred = Locale.preferredLanguages.first?.lowercased() ?? "en"
+        if preferred.hasPrefix("zh") { return "zh-Hans" }
+        if preferred.hasPrefix("ja") { return "ja" }
+        return "en"
     }
 }
 
@@ -51,45 +53,69 @@ enum ScreenshotMode {
 /// only ever seen by whoever is capturing the shots, never a real user, so it
 /// does not belong in Localizable.strings.
 enum ScreenshotDemoContent {
-    private static var isChinese: Bool { ScreenshotMode.systemPreferredLanguage == "zh-Hans" }
+    private static var language: ContentLanguage {
+        ContentLanguage(ScreenshotMode.systemPreferredLanguage)
+    }
 
     /// The step shown on the Start screen, and reused for the Timer screen so
     /// the two shots read as the same moment.
     static var mainStep: NextStepProposal {
-        isChinese
-            ? NextStepProposal(
+        switch language {
+        case .zhHans:
+            return NextStepProposal(
                 title: "回复学校的邮件",
                 step: "打开邮件，只回复老师发来的那一封。",
                 timerMinutes: 10,
                 stopCondition: "发送之后就可以停。",
                 category: .email
             )
-            : NextStepProposal(
+        case .ja:
+            return NextStepProposal(
+                title: "学校からのメールに返信する",
+                step: "メールを開いて、先生から届いた1通にだけ返信しましょう。",
+                timerMinutes: 10,
+                stopCondition: "送信できたら止めて大丈夫です。",
+                category: .email
+            )
+        case .en:
+            return NextStepProposal(
                 title: "Reply to the school email",
                 step: "Open Mail and answer just the one from Emma's teacher.",
                 timerMinutes: 10,
                 stopCondition: "Stop once you've hit send.",
                 category: .email
             )
+        }
     }
 
     /// The paused step behind the Recover ("I'm stuck") screen.
     static var stuckStep: NextStepProposal {
-        isChinese
-            ? NextStepProposal(
+        switch language {
+        case .zhHans:
+            return NextStepProposal(
                 title: "整理那堆信件",
                 step: "先清掉厨房台面上的五个信封。",
                 timerMinutes: 8,
                 stopCondition: "清完五个就可以停，堆没清完也没关系。",
                 category: .household
             )
-            : NextStepProposal(
+        case .ja:
+            return NextStepProposal(
+                title: "郵便物の山を片づける",
+                step: "キッチンの台から封筒を5通どけましょう。",
+                timerMinutes: 8,
+                stopCondition: "5通どけたら止めて大丈夫です。山が残っていても構いません。",
+                category: .household
+            )
+        case .en:
+            return NextStepProposal(
                 title: "Sort the mail pile",
                 step: "Clear five envelopes off the kitchen counter.",
                 timerMinutes: 8,
                 stopCondition: "Stop after five, even if the pile isn't gone.",
                 category: .household
             )
+        }
     }
 
     static var stuckBlocker: BlockerReason { .tooBig }
@@ -97,7 +123,16 @@ enum ScreenshotDemoContent {
     /// A small, varied history so Patterns has real snapshots, a real
     /// recommendation, and a non-zero "starts this week" count to show.
     static var historyEntries: [(proposal: NextStepProposal, outcome: TimerOutcome)] {
-        if isChinese {
+        switch language {
+        case .ja:
+            return [
+                (NextStepProposal(title: "歯科検診を予約する", step: "電話して、いちばん近い空きを聞きましょう。", timerMinutes: 8, stopCondition: "日付が決まったら止めて大丈夫です。", category: .appointments), .completed),
+                (NextStepProposal(title: "受信トレイを空にする", step: "今日届いたお知らせメールをすべてアーカイブしましょう。", timerMinutes: 10, stopCondition: "一覧が空になったら止めて大丈夫です。", category: .email), .completed),
+                (NextStepProposal(title: "図書館の本を返す", step: "今夜のうちに玄関に置いておきましょう。", timerMinutes: 5, stopCondition: "玄関に置けたら止めて大丈夫です。", category: .errands), .completed),
+                (NextStepProposal(title: "明日の通学かばんを用意する", step: "宿題のファイルが入っているか確かめましょう。", timerMinutes: 6, stopCondition: "ファイルが入っていたら止めて大丈夫です。", category: .school), .completed),
+                (NextStepProposal(title: "クラスの保護者グループに返信する", step: "短く返信して、やりとりを終えられるようにしましょう。", timerMinutes: 5, stopCondition: "返信できたら止めて大丈夫です。", category: .familyAdmin), .partial)
+            ]
+        case .zhHans:
             return [
                 (NextStepProposal(title: "预约牙医体检", step: "打电话约最近的空档。", timerMinutes: 8, stopCondition: "约到时间就可以停。", category: .appointments), .completed),
                 (NextStepProposal(title: "清空收件箱", step: "把今天的推送邮件都归档。", timerMinutes: 10, stopCondition: "清空后就可以停。", category: .email), .completed),
@@ -105,6 +140,8 @@ enum ScreenshotDemoContent {
                 (NextStepProposal(title: "收拾明天的书包", step: "检查作业文件夹在不在里面。", timerMinutes: 6, stopCondition: "文件夹在里面就可以停。", category: .school), .completed),
                 (NextStepProposal(title: "回复班级群消息", step: "简单回复一句，让话题能收尾。", timerMinutes: 5, stopCondition: "回复完就可以停。", category: .familyAdmin), .partial)
             ]
+        case .en:
+            break
         }
         return [
             (NextStepProposal(title: "Book the dentist checkup", step: "Call and ask for the next free slot.", timerMinutes: 8, stopCondition: "Stop once you have a date.", category: .appointments), .completed),
@@ -117,18 +154,42 @@ enum ScreenshotDemoContent {
 
     /// The text a person would paste into the Admin Task Reader.
     static var adminPastedText: String {
-        isChinese
-            ? "Emma 班级郊游的同意书周四截止。请签字后放进书包带回学校。有问题请联系学校办公室。"
-            : "Emma's class trip permission slip is due Thursday. Please sign and send it back in her backpack. Contact the school office with any questions."
+        switch language {
+        case .zhHans:
+            return "Emma 班级郊游的同意书周四截止。请签字后放进书包带回学校。有问题请联系学校办公室。"
+        case .ja:
+            return "エマのクラスの遠足の同意書は木曜が締め切りです。署名のうえ、通学かばんに入れて学校へお持たせください。ご不明な点は学校事務室までご連絡ください。"
+        case .en:
+            return "Emma's class trip permission slip is due Thursday. Please sign and send it back in her backpack. Contact the school office with any questions."
+        }
     }
 
     /// The parsed result the Admin Task Reader would normally get from the
     /// AI backend. No `amount` on purpose - the simulator always renders
     /// currency as US dollars regardless of locale, which would be wrong on
-    /// a Simplified Chinese listing.
+    /// a Simplified Chinese or Japanese listing.
     static var adminResult: AdminParseResult {
         let dueDate = Calendar.current.date(byAdding: .day, value: 3, to: .now) ?? .now
-        if isChinese {
+        switch language {
+        case .ja:
+            return AdminParseResult(
+                artifactType: .school,
+                dueDate: dueDate,
+                amount: nil,
+                contact: "学校事務室",
+                linkOrPhone: nil,
+                requiredDocuments: ["署名済みの同意書"],
+                oneNextStep: NextStepProposal(
+                    title: "同意書に署名する",
+                    step: "署名して、明日のためにエマのかばんに入れましょう。",
+                    timerMinutes: 5,
+                    stopCondition: "署名してかばんに入れたら止めて大丈夫です。",
+                    category: .school
+                ),
+                confidence: 0.92,
+                missingInfo: []
+            )
+        case .zhHans:
             return AdminParseResult(
                 artifactType: .school,
                 dueDate: dueDate,
@@ -146,6 +207,8 @@ enum ScreenshotDemoContent {
                 confidence: 0.92,
                 missingInfo: []
             )
+        case .en:
+            break
         }
         return AdminParseResult(
             artifactType: .school,

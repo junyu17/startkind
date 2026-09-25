@@ -36,6 +36,7 @@ struct SettingsView: View {
                     )) {
                         Text(verbatim: L("settings.language.en")).tag("en")
                         Text(verbatim: L("settings.language.zh")).tag("zh-Hans")
+                        Text(verbatim: L("settings.language.ja")).tag("ja")
                     }
                     .accessibilityIdentifier("settings.language")
                 } header: {

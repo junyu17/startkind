@@ -1,16 +1,38 @@
 import SwiftUI
 import StoreKit
 
-enum PaywallTrigger { case stepLimit, adminLimit, friendCoStartLimit, feature }
+enum PaywallTrigger: Equatable {
+    case stepLimit, adminLimit, friendCoStartLimit, feature
+
+    /// Automatic presentation is reserved for an actual limit error returned
+    /// by a feature operation. Settings uses `.feature` directly as its
+    /// intentional subscription entry point.
+    static func fromReturnedLimitError(_ error: Error) -> PaywallTrigger? {
+        if let usageError = error as? UsageError {
+            switch usageError {
+            case .stepLimitReached: return .stepLimit
+            case .adminLimitReached: return .adminLimit
+            }
+        }
+        if let coStartError = error as? CoStartError,
+           case .friendLimitReached = coStartError {
+            return .friendCoStartLimit
+        }
+        return nil
+    }
+}
 
 struct PaywallView: View {
     let trigger: PaywallTrigger
     @EnvironmentObject var env: AppEnvironment
     @EnvironmentObject private var loc: LocalizationManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var selected: String = SubscriptionProductID.annual
     @State private var purchasing = false
     @State private var restoring = false
+    @State private var purchaseFeedback: String?
+    @State private var restoreFeedback: String?
 
     var body: some View {
         NavigationStack {
@@ -21,22 +43,35 @@ struct PaywallView: View {
                     }
 
                     planPicker
+                    productAction
                     contextLine
-                    PrimaryButton(
-                        verbatim: ctaTitle,
-                        enabled: selectedProduct != nil && !purchasing,
-                        busy: purchasing,
-                        action: { purchase() }
-                    )
-                    .accessibilityIdentifier("paywall.subscribe")
+                    if let purchaseFeedback {
+                        KindBanner(text: purchaseFeedback, tone: .warning)
+                            .accessibilityIdentifier("paywall.purchase.error")
+                    }
+                    if let restoreFeedback {
+                        KindBanner(
+                            text: restoreFeedback,
+                            tone: env.entitlement.lastError == nil ? .kind : .warning
+                        )
+                        .accessibilityIdentifier("paywall.restore.feedback")
+                    }
                     Divider().background(Theme.line)
                     planComparison
 
                     Button {
                         guard !restoring else { return }
+                        restoreFeedback = nil
                         restoring = true
                         Task {
-                            await env.entitlement.restore()
+                            let restored = await env.entitlement.restore()
+                            if let error = env.entitlement.lastError {
+                                restoreFeedback = error
+                            } else if restored {
+                                restoreFeedback = L("paywall.restore.success")
+                            } else {
+                                restoreFeedback = L("paywall.restore.none")
+                            }
                             restoring = false
                         }
                     } label: {
@@ -49,6 +84,8 @@ struct PaywallView: View {
                     .disabled(restoring)
                     .accessibilityIdentifier("paywall.restore")
 
+                    legalLinks
+
                     Button(L("paywall.dismiss")) { dismiss() }
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -59,7 +96,47 @@ struct PaywallView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .task {
+            guard !env.isUITestMode else { return }
             await env.entitlement.load()
+        }
+    }
+
+    @ViewBuilder
+    private var productAction: some View {
+        if env.entitlement.isLoadingProducts {
+            HStack(spacing: Theme.spacing8) {
+                ProgressView()
+                Text(verbatim: L("paywall.products.loading"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget + 4)
+            .accessibilityIdentifier("paywall.products.loading")
+        } else if let error = env.entitlement.productsLoadError {
+            VStack(alignment: .leading, spacing: Theme.spacing8) {
+                KindBanner(text: error, tone: .warning)
+                    .accessibilityIdentifier("paywall.products.error")
+                QuietButton("paywall.products.retry", systemImage: "arrow.clockwise", accessibilityId: "paywall.products.retry") {
+                    Task { await env.entitlement.load() }
+                }
+                .disabled(env.entitlement.isLoadingProducts)
+            }
+        } else if selectedProduct != nil {
+            PrimaryButton(
+                verbatim: ctaTitle,
+                enabled: !purchasing,
+                busy: purchasing,
+                action: { purchase() }
+            )
+            .accessibilityIdentifier("paywall.subscribe")
+        } else {
+            VStack(alignment: .leading, spacing: Theme.spacing8) {
+                KindBanner(text: L("paywall.products.unavailable"), tone: .warning)
+                    .accessibilityIdentifier("paywall.products.error")
+                QuietButton("paywall.products.retry", systemImage: "arrow.clockwise", accessibilityId: "paywall.products.retry") {
+                    Task { await env.entitlement.load() }
+                }
+            }
         }
     }
 
@@ -102,22 +179,22 @@ struct PaywallView: View {
                 title: L("paywall.free.title"),
                 price: L("paywall.free.price"),
                 points: [
-                    L("paywall.free.stepLimit"),
-                    L("paywall.free.adminLimit"),
-                    L("paywall.free.recovery"),
-                    L("paywall.free.costart")
+                    L("paywall.free.starts"),
+                    L("paywall.free.admin"),
+                    L("paywall.free.personal"),
+                    L("paywall.free.sync")
                 ],
                 highlighted: false
             )
             comparisonCard(
                 title: L("paywall.plus.title"),
-                price: L("paywall.plus.price"),
+                price: plusPrice,
                 points: [
-                    L("paywall.plus.unlimited"),
+                    L("paywall.plus.starts"),
                     L("paywall.plus.admin"),
-                    L("paywall.plus.calibration"),
-                    L("paywall.plus.sync"),
-                    L("paywall.plus.coStart")
+                    L("paywall.plus.recovery"),
+                    L("paywall.plus.costart"),
+                    L("paywall.plus.insights")
                 ],
                 highlighted: true
             )
@@ -170,26 +247,29 @@ struct PaywallView: View {
 
     private func planButton(id: String) -> some View {
         let product = env.entitlement.products.first { $0.id == id }
-        let isSelected = selected == id
+        let isAvailable = product != nil
+        let isSelected = isAvailable && selectedProduct?.id == id
         let isAnnual = id == SubscriptionProductID.annual
         return Button {
+            guard isAvailable else { return }
             selected = id
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: L(isAnnual ? "paywall.annual" : "paywall.monthly"))
                         .fontWeight(.semibold)
+                        .foregroundStyle(isAvailable ? Theme.ink : .secondary)
                     if let product {
                         Text(verbatim: product.displayPrice)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text(verbatim: isAnnual ? L("paywall.annual.price") : L("paywall.monthly.price"))
+                        Text(verbatim: L("paywall.products.priceUnavailable"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if isAnnual {
-                        Text(verbatim: L("paywall.annual.monthlyEquivalent"))
+                    if isAnnual, product != nil {
+                        Text(verbatim: L("paywall.annual.bestValue"))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Text(verbatim: L("paywall.annual.save"))
@@ -206,41 +286,87 @@ struct PaywallView: View {
                 }
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(isAvailable && isSelected ? Theme.accent : .secondary)
             }
             .padding()
-            .background(isSelected ? Theme.softAccent : Theme.surfaceRaised)
+            .background(isSelected ? Theme.softAccent : Theme.surfaceRaised.opacity(isAvailable ? 1 : 0.6))
             .clipShape(RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.radius12, style: .continuous)
-                    .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.line, lineWidth: 1)
+                    .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.line.opacity(isAvailable ? 1 : 0.55), lineWidth: 1)
             )
         }
         .pressableCard()
+        .disabled(!isAvailable || purchasing)
+        .opacity(isAvailable ? 1 : 0.55)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityValue(Text(verbatim: product?.displayPrice ?? L("paywall.products.unavailable")))
         .accessibilityIdentifier(isAnnual ? "paywall.annual" : "paywall.monthly")
     }
 
     private var selectedProduct: Product? {
         env.entitlement.products.first { $0.id == selected }
+            ?? env.entitlement.products.first
+    }
+
+    private var plusPrice: String {
+        guard let monthly = env.entitlement.monthlyProduct,
+              let annual = env.entitlement.annualProduct else {
+            return L("paywall.products.priceUnavailable")
+        }
+        return L("paywall.plus.price", monthly.displayPrice, annual.displayPrice)
     }
 
     private var ctaTitle: String {
-        (selected == SubscriptionProductID.annual && env.entitlement.annualHasFreeTrial)
+        (selectedProduct?.id == SubscriptionProductID.annual && env.entitlement.annualHasFreeTrial)
             ? L("paywall.cta") : L("paywall.cta.buy")
     }
 
     private func purchase() {
-        guard let product = selectedProduct else { return }
+        guard let product = selectedProduct else {
+            purchaseFeedback = L("paywall.products.unavailable")
+            return
+        }
+        purchaseFeedback = nil
         purchasing = true
         Task {
             let success = await env.entitlement.purchase(product)
             purchasing = false
             if success {
-                await env.syncEntitlementToBackend()
                 dismiss()
+                Task { await env.syncEntitlementToBackend() }
+            } else if let error = env.entitlement.lastError {
+                purchaseFeedback = error
+            } else {
+                purchaseFeedback = L("paywall.purchase.notCompleted")
             }
         }
+    }
+
+    private var legalLinks: some View {
+        HStack(spacing: Theme.spacing16) {
+            Button {
+                open(StartKindLegalLinks.privacy)
+            } label: {
+                Text(verbatim: L("legal.privacy"))
+            }
+            .accessibilityIdentifier("paywall.privacy")
+
+            Button {
+                open(StartKindLegalLinks.terms)
+            } label: {
+                Text(verbatim: L("legal.terms"))
+            }
+            .accessibilityIdentifier("paywall.terms")
+        }
+        .font(.footnote)
+        .foregroundStyle(Theme.accent)
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func open(_ rawURL: String) {
+        guard let url = URL(string: rawURL) else { return }
+        openURL(url)
     }
 
     private var limitTitle: String {

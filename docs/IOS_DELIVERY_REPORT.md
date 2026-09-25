@@ -72,7 +72,7 @@ The latest pass adds the third retention set: Global Stuck Button, Yesterday Res
 | Micro-Templates | Local, no-server templates for bills, email, appointments, documents, home reset, and bad-day reset | Unit tests cover template proposals |
 | Widget | WidgetKit extension deep-links to `startkind://start` for quick restart | Build verifies widget target and Info.plist |
 | Shareable Start Card | Next step can be shared as a simple encouragement card/message | UI test covers share button presence |
-| Personal Vault | Local reusable tiny-start snippets saved in UserDefaults, managed from Start and Settings | Unit and UI tests cover save/pick/delete flows |
+| Saved starts | Local reusable tiny-start snippets saved in UserDefaults by `PersonalVaultStore`, managed from Start and Settings | Unit and UI tests cover save/pick/delete flows and empty-state guidance |
 
 ## 5. Build & Test Results
 

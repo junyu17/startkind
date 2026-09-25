@@ -1,0 +1,14 @@
+/* StartKind watchOS quick starts */
+"watch.stop" = "停止";
+
+"watch.emergency.title" = "緊急の3分";
+"watch.emergency.step" = "まず息を吐いて。必要なものをひとつ手の届くところに。";
+
+"watch.startFive.title" = "5分だけ始める";
+"watch.startFive.step" = "いちばん入りやすいところを開いて、5分だけ。";
+
+"watch.stuck.title" = "行き詰まった";
+"watch.stuck.step" = "目に見えるいちばん小さい動作に書き直しましょう。";
+
+"watch.rescue.title" = "レスキュー";
+"watch.rescue.step" = "昨日のことの、いちばん小さな出だしだけ。";
