@@ -48,7 +48,13 @@ struct RootView: View {
             .onChange(of: env.pendingReviewPrompt) { _, shouldPrompt in
                 guard shouldPrompt else { return }
                 env.pendingReviewPrompt = false
-                requestReview()
+                // A completed step dismisses the timer sheet and may present the
+                // save-start sheet behind it. A review request made mid-transition
+                // is dropped by iOS, so wait for the churn to settle.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
+                    requestReview()
+                }
             }
 #if DEBUG
             .onAppear {

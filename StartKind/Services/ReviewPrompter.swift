@@ -14,7 +14,15 @@ import Foundation
 @MainActor
 enum ReviewPrompter {
     /// How many completed steps before we ask for the first time.
-    private static let momentsBeforeAsking = 5
+    ///
+    /// One, not five. Five is the right number for an app that already has
+    /// users, where the scarce resource is Apple's three-prompts-a-year budget.
+    /// Here the scarce resource is users: at this install count nobody reached
+    /// five completed steps, so the prompt never fired at all. The first
+    /// completed step is the product's whole promise delivered - the person was
+    /// stuck, took one small step, and finished it - and it happens in session
+    /// one. The per-version gate and the 90-day floor below still stop nagging.
+    private static let momentsBeforeAsking = 1
     /// Floor between asks, even if the version changed in between.
     private static let minimumDaysBetweenPrompts = 90
 
