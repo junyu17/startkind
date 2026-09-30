@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://startk.livepet.ren/sitemap.xml
