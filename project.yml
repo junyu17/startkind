@@ -11,14 +11,16 @@ options:
   knownRegions:
     - en
     - zh-Hans
+    - zh-Hant
     - ja
+    - ko
 settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: minimal
     DEVELOPMENT_TEAM: "255R6QQR97"
-    MARKETING_VERSION: "1.2"
-    CURRENT_PROJECT_VERSION: "10"
+    MARKETING_VERSION: "1.4"
+    CURRENT_PROJECT_VERSION: "12"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     CODE_SIGN_STYLE: Automatic
 targets:
@@ -61,7 +63,9 @@ targets:
         CFBundleLocalizations:
           - en
           - zh-Hans
+          - zh-Hant
           - ja
+          - ko
         UILaunchScreen:
           UIColorName: BackgroundColor
         UISupportedInterfaceOrientations:

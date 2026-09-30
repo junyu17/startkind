@@ -72,21 +72,23 @@ struct TaskIntent: Equatable, Sendable {
         return anchorTokens.contains { responseTokens.contains($0) }
     }
 
-    /// Chinese and Japanese are written without spaces between words, so the
-    /// anchor is kept as one whole phrase and matched by substring. Splitting
-    /// either on whitespace would yield a single token that exact-set matching
-    /// then fails to find in a cloud response.
+    /// Chinese and Japanese are written without spaces between words, and
+    /// Korean glues its particles onto the noun, so the anchor is kept as one
+    /// whole phrase and matched by substring. Splitting on whitespace would
+    /// yield a single token that exact-set matching then fails to find in a
+    /// cloud response.
     private var usesUnspacedScript: Bool {
         switch ContentLanguage(language) {
-        case .zhHans, .ja: return true
+        case .zhHans, .zhHant, .ja, .ko: return true
         case .en: return false
         }
     }
 
     private static func functionWords(for language: String) -> Set<String> {
         switch ContentLanguage(language) {
-        case .zhHans: return chineseFunctionWords
+        case .zhHans, .zhHant: return chineseFunctionWords
         case .ja: return japaneseFunctionWords
+        case .ko: return koreanFunctionWords
         case .en: return englishFunctionWords
         }
     }
@@ -100,7 +102,13 @@ struct TaskIntent: Equatable, Sendable {
 
     private static let chineseFunctionWords: Set<String> = [
         "我", "你", "他", "她", "它", "的", "了", "要", "想", "去", "把",
-        "给", "在", "是", "这", "那", "一个", "一件", "一下"
+        "给", "在", "是", "这", "那", "一个", "一件", "一下",
+        // Traditional forms.
+        "給", "這", "一個"
+    ]
+
+    private static let koreanFunctionWords: Set<String> = [
+        "나", "내", "저", "이", "그", "것", "거", "일", "하나", "한", "좀"
     ]
 
     private static let japaneseFunctionWords: Set<String> = [
@@ -148,7 +156,7 @@ struct TaskIntentParser: Sendable {
                 categoryHint: categoryHint
             )
         }
-        // Japanese has no structured parser: the patterns rely on Chinese phrase
+        // Japanese and Korean have no structured parser: the patterns rely on Chinese phrase
         // shapes or English word order, and neither maps onto Japanese
         // conjugation. It still routes to the domain composer, which is driven
         // by the task category rather than by a parsed verb and object, so a
@@ -156,7 +164,7 @@ struct TaskIntentParser: Sendable {
         // user gets. Without this it reached genericStep for every input and
         // every Japanese next step was "find an official guide", leaving
         // japaneseDomainStep's per-category copy unreachable.
-        if language.lowercased().hasPrefix("ja") {
+        if language.lowercased().hasPrefix("ja") || language.lowercased().hasPrefix("ko") {
             return TaskIntent(
                 sourceText: text,
                 actionPhrase: normalized,
@@ -289,7 +297,27 @@ private extension TaskIntentParser {
         ChinesePattern(phrase: "阅读", strategy: .directAction),
         ChinesePattern(phrase: "读", strategy: .directAction),
         ChinesePattern(phrase: "填写", strategy: .domain),
-        ChinesePattern(phrase: "提交", strategy: .domain)
+        ChinesePattern(phrase: "提交", strategy: .domain),
+        // Traditional forms of the phrases above that are spelled differently.
+        ChinesePattern(phrase: "購買", strategy: .purchase),
+        ChinesePattern(phrase: "郵寄", strategy: .mailing),
+        ChinesePattern(phrase: "發送", strategy: .domain),
+        ChinesePattern(phrase: "維修", strategy: .repair),
+        ChinesePattern(phrase: "修復", strategy: .repair),
+        ChinesePattern(phrase: "拋光", strategy: .surfaceCare),
+        ChinesePattern(phrase: "清潔", strategy: .surfaceCare),
+        ChinesePattern(phrase: "繳費", strategy: .domain),
+        ChinesePattern(phrase: "回覆", strategy: .domain),
+        ChinesePattern(phrase: "預約", strategy: .domain),
+        ChinesePattern(phrase: "預訂", strategy: .domain),
+        ChinesePattern(phrase: "退貨", strategy: .domain),
+        ChinesePattern(phrase: "買", strategy: .purchase),
+        ChinesePattern(phrase: "賣", strategy: .sale),
+        ChinesePattern(phrase: "餵", strategy: .feeding),
+        ChinesePattern(phrase: "打開", strategy: .directAction),
+        ChinesePattern(phrase: "閱讀", strategy: .directAction),
+        ChinesePattern(phrase: "讀", strategy: .directAction),
+        ChinesePattern(phrase: "填寫", strategy: .domain)
     ]
 
     static let englishLeadingPhrases: [[String]] = [
@@ -321,16 +349,18 @@ private extension TaskIntentParser {
     ]
 
     static let chineseLeadingPhrases = [
-        "我想", "我需要", "我得", "请帮我", "帮我", "帮忙", "需要", "请"
+        "我想", "我需要", "我得", "请帮我", "帮我", "帮忙", "需要", "请",
+        "請幫我", "幫我", "幫忙", "請"
     ]
 
     static let chineseLeadingObjectWords = [
         "我的", "我们的", "你的", "这个", "那个", "这台", "那台", "这件", "那件",
-        "一部", "一台", "一个", "一件", "一只", "一份", "一些", "把", "给", "掉"
+        "一部", "一台", "一个", "一件", "一只", "一份", "一些", "把", "给", "掉",
+        "我們的", "這個", "那個", "這台", "這件", "一個", "一隻", "給"
     ]
 
     static let chineseTrailingWords = [
-        "一下", "一修", "出去", "出来", "掉", "好", "吧", "呀", "呢", "了"
+        "一下", "一修", "出去", "出来", "出來", "掉", "好", "吧", "呀", "呢", "了"
     ]
 
     func parseEnglish(
@@ -554,6 +584,7 @@ private extension TaskIntentParser {
         let beforeWithoutWrappers = before
             .replacingOccurrences(of: "把", with: "")
             .replacingOccurrences(of: "给", with: "")
+            .replacingOccurrences(of: "給", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return (beforeWithoutWrappers, after)
     }
@@ -596,7 +627,7 @@ private extension TaskIntentParser {
         object: String?,
         categoryHint: TaskCategory?
     ) -> TaskIntentStrategy {
-        if initial == .mailing && phrase.contains("邮件") {
+        if initial == .mailing && (phrase.contains("邮件") || phrase.contains("郵件")) {
             return .domain
         }
         return initial

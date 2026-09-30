@@ -144,7 +144,11 @@ final class AuditFixTests: XCTestCase {
         )
         XCTAssertEqual(
             SpeechService.normalizedLocaleIdentifier(for: Locale(identifier: "zh-TW")),
-            "zh-CN"
+            "zh-TW"
+        )
+        XCTAssertEqual(
+            SpeechService.normalizedLocaleIdentifier(for: Locale(identifier: "ko")),
+            "ko-KR"
         )
         XCTAssertEqual(
             SpeechService.normalizedLocaleIdentifier(for: Locale(identifier: "ja")),

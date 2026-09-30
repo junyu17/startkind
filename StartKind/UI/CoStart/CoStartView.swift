@@ -572,6 +572,13 @@ struct CoStartRoomView: View {
         return components?.url
     }
 
+    /// What the invite sends: the room code and the App Store link for someone
+    /// without the app, plus the scheme link that opens the room for someone who
+    /// has it.
+    private func inviteMessage(code: String, link: URL) -> String {
+        L("costart.invite.message", code, AppStoreLinks.shareURL("invite").absoluteString, link.absoluteString)
+    }
+
     @ViewBuilder
     private func inviteSection(_ link: URL?) -> some View {
         VStack(alignment: .leading, spacing: Theme.spacing8) {
@@ -589,8 +596,8 @@ struct CoStartRoomView: View {
                     .foregroundStyle(.secondary)
             }
             HStack(spacing: Theme.spacing8) {
-                if let link {
-                    ShareLink(item: link) {
+                if let link, let code = room.roomCode {
+                    ShareLink(item: inviteMessage(code: code, link: link)) {
                         Label(L("costart.share"), systemImage: "square.and.arrow.up")
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, minHeight: Theme.minTapTarget)

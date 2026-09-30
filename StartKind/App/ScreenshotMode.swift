@@ -18,6 +18,7 @@ import Foundation
 enum ScreenshotMode {
     enum Screen: String {
         case start, timer, stuck, patterns, admin, settingsPrivacy
+        case costart, settingsLanguage
     }
 
     private static var arguments: [String] { ProcessInfo.processInfo.arguments }
@@ -53,8 +54,16 @@ enum ScreenshotMode {
 /// only ever seen by whoever is capturing the shots, never a real user, so it
 /// does not belong in Localizable.strings.
 enum ScreenshotDemoContent {
-    private static var language: ContentLanguage {
-        ContentLanguage(ScreenshotMode.systemPreferredLanguage)
+    /// Demo content exists only for the three original store locales; the newer
+    /// ones borrow the nearest set until their shots are captured.
+    private enum DemoLanguage { case en, zhHans, ja }
+
+    private static var language: DemoLanguage {
+        switch ContentLanguage(ScreenshotMode.systemPreferredLanguage) {
+        case .zhHans, .zhHant: return .zhHans
+        case .ja: return .ja
+        case .en, .ko: return .en
+        }
     }
 
     /// The step shown on the Start screen, and reused for the Timer screen so

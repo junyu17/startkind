@@ -33,13 +33,16 @@ final class LocalizationManager: ObservableObject {
         self.locale = Locale(identifier: normalized)
     }
 
-    /// The app ships English, Simplified Chinese, and Japanese; anything else
-    /// falls back to English.
+    /// The app ships English, Simplified and Traditional Chinese, Japanese, and
+    /// Korean; anything else falls back to English.
     private static func normalize(_ language: String) -> String {
-        let lowered = language.lowercased()
-        if lowered.hasPrefix("zh") { return "zh-Hans" }
-        if lowered.hasPrefix("ja") { return "ja" }
-        return "en"
+        switch ContentLanguage(language) {
+        case .zhHans: return "zh-Hans"
+        case .zhHant: return "zh-Hant"
+        case .ja: return "ja"
+        case .ko: return "ko"
+        case .en: return "en"
+        }
     }
 
     /// Localized string for `key` in the active language, with format args.

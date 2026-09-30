@@ -90,7 +90,8 @@ struct NextStepCard: View {
             proposal.title,
             proposal.step,
             L("timer.stopHint", proposal.stopCondition),
-            L("nextstep.timer.minutes", proposal.timerMinutes)
+            L("nextstep.timer.minutes", proposal.timerMinutes),
+            AppStoreLinks.shareURL("step").absoluteString
         ].joined(separator: "\n")
     }
 

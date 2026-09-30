@@ -12,40 +12,40 @@ struct CrossPromoApp: Identifiable {
 
 let otherDeveloperApps: [CrossPromoApp] = [
     CrossPromoApp(
-        id: "maren",
-        name: "Maren",
-        taglineKey: "settings.moreApps.maren",
-        storeURL: URL(string: "https://apps.apple.com/app/id6795029983")!
-    ),
-    CrossPromoApp(
-        id: "dogcat",
-        name: "Dog & Cat Nutrition Coach",
-        taglineKey: "settings.moreApps.dogcat",
-        storeURL: URL(string: "https://apps.apple.com/app/id6800743305")!
-    ),
-    CrossPromoApp(
         id: "taskkin",
         name: "TaskKin",
         taglineKey: "settings.moreApps.taskkin",
-        storeURL: URL(string: "https://apps.apple.com/app/id6794837934")!
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6794837934")
     ),
     CrossPromoApp(
-        id: "livepet",
-        name: "Live Pet AI",
-        taglineKey: "settings.moreApps.livepet",
-        storeURL: URL(string: "https://apps.apple.com/app/id6794836674")!
-    ),
-    CrossPromoApp(
-        id: "virtualpets",
-        name: "Virtual Pets",
-        taglineKey: "settings.moreApps.virtualpets",
-        storeURL: URL(string: "https://apps.apple.com/app/id6784545568")!
+        id: "maren",
+        name: "Maren",
+        taglineKey: "settings.moreApps.maren",
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6795029983")
     ),
     CrossPromoApp(
         id: "platepace",
         name: "PlatePace",
         taglineKey: "settings.moreApps.platepace",
-        storeURL: URL(string: "https://apps.apple.com/app/id6799087226")!
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6799087226")
+    ),
+    CrossPromoApp(
+        id: "livepet",
+        name: "Live Pet AI",
+        taglineKey: "settings.moreApps.livepet",
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6794836674")
+    ),
+    CrossPromoApp(
+        id: "virtualpets",
+        name: "Virtual Pets",
+        taglineKey: "settings.moreApps.virtualpets",
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6784545568")
+    ),
+    CrossPromoApp(
+        id: "dogcat",
+        name: "Dog & Cat Nutrition Coach",
+        taglineKey: "settings.moreApps.dogcat",
+        storeURL: AppStoreLinks.crossPromoURL(appID: "6800743305")
     ),
 ]
 

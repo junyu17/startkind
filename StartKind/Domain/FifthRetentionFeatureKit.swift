@@ -28,17 +28,23 @@ struct StartLadderPlanner: Sendable {
         let title = lang.pick(
             en: "\(selected)-minute start: \(source.title)",
             zh: "\(selected) 分钟开始：\(source.title)",
-            ja: "\(selected)分の開始：\(source.title)"
+            zhHant: "\(selected) 分鐘開始：\(source.title)",
+            ja: "\(selected)分の開始：\(source.title)",
+            ko: "\(selected)분 시작: \(source.title)"
         )
         let step = lang.pick(
             en: "For the next \(selected) minutes, do only this: \(source.step)",
             zh: "接下来的 \(selected) 分钟，只做这一件事：\(source.step)",
-            ja: "これからの\(selected)分は、これだけをやりましょう：\(source.step)"
+            zhHant: "接下來的 \(selected) 分鐘，只做這一件事：\(source.step)",
+            ja: "これからの\(selected)分は、これだけをやりましょう：\(source.step)",
+            ko: "앞으로 \(selected)분 동안은 이것만 해 보세요: \(source.step)"
         )
         let stop = lang.pick(
             en: "Stop at \(selected) minutes. You do not need to decide what comes next.",
             zh: "\(selected) 分钟到就停，不需要决定下一步。",
-            ja: "\(selected)分たったら止めましょう。次を決めなくて大丈夫です。"
+            zhHant: "\(selected) 分鐘到就停，不需要決定下一步。",
+            ja: "\(selected)分たったら止めましょう。次を決めなくて大丈夫です。",
+            ko: "\(selected)분이 되면 멈춰요. 다음에 뭘 할지는 정하지 않아도 돼요."
         )
         return NextStepProposal(
             title: title,
@@ -51,7 +57,9 @@ struct StartLadderPlanner: Sendable {
             whyThisStep: lang.pick(
                 en: "You chose a start length that fits right now.",
                 zh: "你选择了一个可承受的开始时长。",
-                ja: "今の自分に合う長さを選びました。"
+                zhHant: "你選擇了一個可承受的開始時長。",
+                ja: "今の自分に合う長さを選びました。",
+                ko: "지금 나에게 맞는 시간으로 골랐어요."
             )
         )
     }
@@ -75,11 +83,13 @@ struct ActionPrepPlanner: Sendable {
         if let email = firstEmail(in: text), let url = URL(string: "mailto:\(email)") {
             return ActionPrepPlan(
                 kind: .email,
-                label: lang.pick(en: "Prepare an email", zh: "准备一封邮件", ja: "メールの下書きを用意する"),
+                label: lang.pick(en: "Prepare an email", zh: "准备一封邮件", zhHant: "準備一封郵件", ja: "メールの下書きを用意する", ko: "이메일 준비하기"),
                 instruction: lang.pick(
                     en: "This opens a draft. Nothing is sent automatically.",
                     zh: "将打开邮件草稿，不会自动发送。",
-                    ja: "下書きが開きます。自動で送信されることはありません。"
+                    zhHant: "將開啟郵件草稿，不會自動傳送。",
+                    ja: "下書きが開きます。自動で送信されることはありません。",
+                    ko: "임시 보관 메일이 열려요. 자동으로 보내지지는 않아요."
                 ),
                 url: url
             )
@@ -87,11 +97,13 @@ struct ActionPrepPlanner: Sendable {
         if let phone = firstPhone(in: text), let url = URL(string: "tel:\(phone)") {
             return ActionPrepPlan(
                 kind: .phone,
-                label: lang.pick(en: "Prepare a call", zh: "准备拨号", ja: "電話の準備をする"),
+                label: lang.pick(en: "Prepare a call", zh: "准备拨号", zhHant: "準備撥號", ja: "電話の準備をする", ko: "전화 준비하기"),
                 instruction: lang.pick(
                     en: "This opens Phone. You decide whether to place the call.",
                     zh: "将打开电话；由你决定是否拨出。",
-                    ja: "電話アプリが開きます。かけるかどうかは、あなたが決めて大丈夫です。"
+                    zhHant: "將開啟電話；由你決定是否撥出。",
+                    ja: "電話アプリが開きます。かけるかどうかは、あなたが決めて大丈夫です。",
+                    ko: "전화 앱이 열려요. 전화를 걸지는 직접 정하면 돼요."
                 ),
                 url: url
             )
@@ -99,11 +111,13 @@ struct ActionPrepPlanner: Sendable {
         if let url = firstURL(in: text) {
             return ActionPrepPlan(
                 kind: .website,
-                label: lang.pick(en: "Open the related site", zh: "打开相关网站", ja: "関係するサイトを開く"),
+                label: lang.pick(en: "Open the related site", zh: "打开相关网站", zhHant: "開啟相關網站", ja: "関係するサイトを開く", ko: "관련 사이트 열기"),
                 instruction: lang.pick(
                     en: "The site is ready. You decide whether to continue.",
                     zh: "网站已准备好；由你决定是否继续。",
-                    ja: "サイトの準備ができました。進むかどうかは、あなたが決めて大丈夫です。"
+                    zhHant: "網站已準備好；由你決定是否繼續。",
+                    ja: "サイトの準備ができました。進むかどうかは、あなたが決めて大丈夫です。",
+                    ko: "사이트가 준비됐어요. 계속할지는 직접 정하면 돼요."
                 ),
                 url: url
             )
@@ -112,11 +126,13 @@ struct ActionPrepPlanner: Sendable {
         if proposal.category == .appointments || lower.contains("appointment") || lower.contains("预约") || lower.contains("calendar") || lower.contains("日历") || lower.contains("予約") || lower.contains("カレンダー") {
             return ActionPrepPlan(
                 kind: .appointment,
-                label: lang.pick(en: "Prepare the appointment", zh: "准备预约入口", ja: "予約の入り口を用意する"),
+                label: lang.pick(en: "Prepare the appointment", zh: "准备预约入口", zhHant: "準備預約入口", ja: "予約の入り口を用意する", ko: "예약 준비하기"),
                 instruction: lang.pick(
                     en: "Confirm one thing: the time, place, or contact method.",
                     zh: "先确认时间、地点或联系方式中的一项。",
-                    ja: "時間か場所、連絡方法のどれかひとつだけを確かめましょう。"
+                    zhHant: "先確認時間、地點或聯絡方式中的一項。",
+                    ja: "時間か場所、連絡方法のどれかひとつだけを確かめましょう。",
+                    ko: "시간, 장소, 연락 방법 중 하나만 확인해 보세요."
                 ),
                 url: nil
             )
@@ -124,22 +140,26 @@ struct ActionPrepPlanner: Sendable {
         if lower.contains("document") || lower.contains("form") || lower.contains("file") || lower.contains("文件") || lower.contains("表格") || lower.contains("書類") || lower.contains("用紙") || lower.contains("ファイル") {
             return ActionPrepPlan(
                 kind: .document,
-                label: lang.pick(en: "Prepare the document", zh: "准备文件入口", ja: "書類の入り口を用意する"),
+                label: lang.pick(en: "Prepare the document", zh: "准备文件入口", zhHant: "準備檔案入口", ja: "書類の入り口を用意する", ko: "서류 준비하기"),
                 instruction: lang.pick(
                     en: "Find the document or form first; you do not need to fill it out yet.",
                     zh: "先找到文件名或表格入口，不需要填写。",
-                    ja: "まず書類か用紙を見つけましょう。まだ記入しなくて大丈夫です。"
+                    zhHant: "先找到檔名或表格入口，不需要填寫。",
+                    ja: "まず書類か用紙を見つけましょう。まだ記入しなくて大丈夫です。",
+                    ko: "먼저 서류나 양식을 찾아보세요. 아직 작성하지 않아도 돼요."
                 ),
                 url: nil
             )
         }
         return ActionPrepPlan(
             kind: .instruction,
-            label: lang.pick(en: "Prepare your starting place", zh: "准备开始环境", ja: "始める場所を整える"),
+            label: lang.pick(en: "Prepare your starting place", zh: "准备开始环境", zhHant: "準備開始環境", ja: "始める場所を整える", ko: "시작할 자리 마련하기"),
             instruction: lang.pick(
                 en: "Open only the first app or page this step needs.",
                 zh: "只打开完成这一步需要的第一个应用或页面。",
-                ja: "この一歩に必要な最初のアプリかページだけを開きましょう。"
+                zhHant: "只打開完成這一步需要的第一個應用或頁面。",
+                ja: "この一歩に必要な最初のアプリかページだけを開きましょう。",
+                ko: "이 단계에 필요한 첫 앱이나 페이지만 열어 보세요."
             ),
             url: nil
         )
@@ -320,18 +340,24 @@ struct UrgentAdminPlanner: Sendable {
             title: lang.pick(
                 en: "Contact the original sender first",
                 zh: "先联系原始发送方",
-                ja: "まず差出人に連絡する"
+                zhHant: "先聯絡原始傳送方",
+                ja: "まず差出人に連絡する",
+                ko: "먼저 원래 보낸 곳에 연락하기"
             ),
             step: lang.pick(
                 en: "Open the original letter, email, or site and only find its contact or reply path.",
                 zh: "打开原始信件、邮件或网站，只找到联系入口或回复按钮。",
-                ja: "元の手紙かメール、サイトを開いて、連絡先か返信の入り口だけを見つけましょう。"
+                zhHant: "開啟原始信件、郵件或網站，只找到聯絡入口或回覆按鈕。",
+                ja: "元の手紙かメール、サイトを開いて、連絡先か返信の入り口だけを見つけましょう。",
+                ko: "원래 편지나 이메일, 사이트를 열고 연락처나 답장할 방법만 찾아보세요."
             ),
             timerMinutes: 5,
             stopCondition: lang.pick(
                 en: "Stop after finding the contact path. You decide whether to contact them.",
                 zh: "找到联系入口就停；是否联系由你决定。",
-                ja: "連絡先が見つかったら止めましょう。連絡するかどうかは、あなたが決めて大丈夫です。"
+                zhHant: "找到聯絡入口就停；是否聯絡由你決定。",
+                ja: "連絡先が見つかったら止めましょう。連絡するかどうかは、あなたが決めて大丈夫です。",
+                ko: "연락할 방법을 찾았으면 멈춰요. 연락할지는 직접 정하면 돼요."
             ),
             category: selectedCategory,
             shrinkLevel: .two,
@@ -339,15 +365,19 @@ struct UrgentAdminPlanner: Sendable {
             whyThisStep: lang.pick(
                 en: "This appears time-sensitive. Start by finding the original contact; StartKind does not advise on the content.",
                 zh: "这看起来有时间提示；先找到原始联系人，不提供建议。",
-                ja: "急ぎのようです。まず元の連絡先を見つけましょう。内容についてStartKindは判断しません。"
+                zhHant: "這看起來有時間提示；先找到原始聯絡人，不提供建議。",
+                ja: "急ぎのようです。まず元の連絡先を見つけましょう。内容についてStartKindは判断しません。",
+                ko: "급한 일로 보여요. 먼저 원래 연락처를 찾아보세요. 내용에 대해서는 StartKind가 조언하지 않아요."
             )
         )
         return UrgentAdminSignal(
-            title: lang.pick(en: "Time-sensitive", zh: "时间敏感", ja: "急ぎのようです"),
+            title: lang.pick(en: "Time-sensitive", zh: "时间敏感", zhHant: "時間敏感", ja: "急ぎのようです", ko: "급한 일로 보여요"),
             detail: lang.pick(
                 en: "Find the original sender's contact path first.",
                 zh: "先找到原始发送方的联系入口。",
-                ja: "まず差出人の連絡先を見つけましょう。"
+                zhHant: "先找到原始傳送方的聯絡入口。",
+                ja: "まず差出人の連絡先を見つけましょう。",
+                ko: "먼저 보낸 곳의 연락처를 찾아보세요."
             ),
             proposal: proposal
         )

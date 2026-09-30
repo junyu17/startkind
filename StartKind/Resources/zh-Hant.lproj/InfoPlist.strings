@@ -1,0 +1,11 @@
+/* Permission prompts */
+"NSMicrophoneUsageDescription" = "StartKind 使用麥克風記錄你說出的想法，並把它變成一個可以開始的小步驟。";
+"NSSpeechRecognitionUsageDescription" = "StartKind 使用語音辨識把你說出的想法變成一個可以開始的小步驟。";
+"NSCameraUsageDescription" = "StartKind 可以掃描帳單、信件或預約通知，把它們變成一個可以開始的小步驟。";
+"NSPhotoLibraryUsageDescription" = "StartKind 可以讀取你選擇的截圖或照片，提取文字並把事務任務變成一個可以開始的小步驟。";
+
+/* Home Screen quick action titles */
+"I'm stuck" = "我卡住了";
+"Start 5 minutes" = "開始 5 分鐘";
+"Rescue yesterday" = "救回昨天";
+"Paste admin text" = "貼上事務文字";

@@ -1,0 +1,567 @@
+/* StartKind 本地化字串 - 繁體中文 */
+
+/* MARK: - 標籤欄 */
+"tab.start" = "開始";
+"tab.recover" = "恢復";
+"tab.patterns" = "規律";
+"tab.settings" = "設定";
+
+/* MARK: - 開始頁 */
+"start.title" = "開始";
+"start.subtitle" = "邁出溫和的一小步。";
+"start.greeting" = "嗨，%@。";
+"start.difficultyHint.getting_started" = "試著寫下你能碰到的第一件事。";
+"start.difficultyHint.tasks_too_big" = "如果這一步太大，點「縮小一步」。";
+"start.difficultyHint.interruptions" = "如果被打斷，留下一句簡短的返回備註。";
+"start.difficultyHint.admin_pile_up" = "帳單和表格可以試試「掃描或貼上」。";
+"start.voice.listening" = "正在聆聽…";
+"start.voice.tap" = "點按說話";
+"start.voice.preparing" = "準備中…";
+"start.text.placeholder" = "腦子裡一團亂？隨便打幾個字就好。";
+"start.text.submit" = "給我一步";
+"start.category.section" = "再選一個分類";
+"start.category.selected" = "已加入分類：%@";
+"start.empty.hint" = "說出或寫下讓你發愁的事，你會得到一個小步驟。";
+"start.kindStart.title" = "今天先這樣開始";
+"start.kindStart.admin" = "貼上帳單、郵件或預約";
+"start.kindStart.photo" = "掃描照片或截圖";
+"start.kindStart.resume" = "從上次繼續";
+"start.kindStart.adminLeft" = "剩 %d 次事務";
+"start.moreWays" = "更多開始方式";
+"start.moreWays.scan" = "掃描或貼上";
+"start.moreWays.reuse" = "複用一個啟動";
+"start.moreWays.costart" = "和別人一起開始";
+"start.moreWays.match" = "匹配我的感受";
+"start.moreWays.plan" = "提前計劃";
+"start.moreWays.admin" = "事務與已儲存工具";
+"frictionForecast.title" = "可能卡點";
+"frictionForecast.loaded" = "StartKind 已把這個卡點縮小。";
+
+/* MARK: - 自動駕駛 */
+"autopilot.open" = "現在告訴我先做什麼";
+"autopilot.loaded" = "自動駕駛已選出一個小啟動。";
+"autopilot.source" = "自動駕駛";
+"autopilot.why.recovery" = "回到上次未完成的線頭，通常比重新選擇更容易。";
+"autopilot.why.note" = "你的返回備註寫著：%@";
+"autopilot.why.vault" = "儲存過的啟動可以省掉決定成本。";
+"autopilot.why.default" = "一個看得見的小動作，足夠重新啟動。";
+"autopilot.stop.saved" = "碰一下這個儲存啟動就停。";
+"autopilot.default.title" = "極小重啟";
+"autopilot.default.step" = "把一樣東西放到面前，說出下一步極小動作。";
+"autopilot.default.stop" = "說出下一步極小動作後就停。";
+
+/* MARK: - 返回備註與救援 */
+"returnNote.title" = "返回備註";
+"returnNote.placeholder" = "下次從哪裡繼續？";
+"returnNote.hint" = "可選。一句短線索就夠。";
+"returnNote.resume" = "備註：%@";
+"rescue.notification.title" = "要不要最小重啟？";
+"rescue.notification.body" = "StartKind 可以直接開啟一個極小下一步，沒有補任務清單。";
+
+/* MARK: - 微模板與保險箱 */
+"template.open" = "極小模板";
+"template.title" = "極小模板";
+"template.applied" = "模板已載入。準備好就開始計時。";
+"template.bill.title" = "帳單啟動";
+"template.bill.subtitle" = "只找金額、截止日或付款入口。";
+"template.email.title" = "回覆啟動";
+"template.email.subtitle" = "只寫一句，不是整封回覆。";
+"template.appointment.title" = "預約啟動";
+"template.appointment.subtitle" = "只找一個預約入口。";
+"template.document.title" = "檔案啟動";
+"template.document.subtitle" = "只搜尋一個地方。";
+"template.home.title" = "家裡重置";
+"template.home.subtitle" = "從一個位置拿走三樣東西。";
+"template.badDay.title" = "糟糕日重置";
+"template.badDay.subtitle" = "5 分鐘，先讓身體進入狀態。";
+"vault.open" = "已儲存的啟動步驟";
+"vault.title" = "已儲存的啟動步驟";
+"vault.defaultTitle" = "已儲存的開始";
+"vault.saved" = "已儲存，之後可以再次使用。";
+"vault.applied" = "已載入儲存的啟動步驟。從小處開始。";
+"vault.stop" = "碰一下這個儲存步驟就停。";
+"vault.why" = "儲存好的啟動步驟可以省掉再次決定的力氣。";
+"vault.empty.title" = "還沒有儲存的啟動步驟";
+"vault.empty.body" = "StartKind 給出有用的下一步後，開啟「更多操作」，點「儲存這個啟動步驟」。之後可在這裡一鍵再次使用。";
+
+/* 分類 */
+"category.bills" = "帳單";
+"category.email" = "郵件";
+"category.appointments" = "預約";
+"category.returns" = "退貨";
+"category.insurance" = "保險";
+"category.banking" = "銀行";
+"category.taxes" = "稅務";
+"category.household" = "家務";
+"category.family_admin" = "家庭事務";
+"category.medical" = "醫療";
+"category.work_admin" = "工作事務";
+"category.school" = "學校";
+"category.cleaning" = "清潔";
+"category.errands" = "跑腿";
+"category.other" = "其他";
+
+/* MARK: - 下一步卡片 */
+"nextstep.genericLabel" = "你的下一步";
+"nextstep.timer.label" = "開始";
+"nextstep.timer.minutes" = "%d 分鐘";
+"nextstep.makeSmaller" = "縮小一步";
+"nextstep.showPlan" = "看看計劃";
+"nextstep.hidePlan" = "收起計劃";
+"nextstep.shrink.level" = "更小的版本";
+"nextstep.share" = "分享";
+"nextstep.saveVault" = "儲存這個啟動步驟";
+"nextstep.moreActions" = "更多操作";
+"nextstep.moreActions.hint" = "分享、儲存、檢視計劃、陪伴啟動或換一步。";
+"nextstep.actionPrep.title" = "開始準備";
+
+/* MARK: - 計時器 */
+"timer.title" = "只專注這一步";
+"timer.paused" = "已暫停";
+"timer.done" = "完成了";
+"timer.pause" = "暫停";
+"timer.resume" = "繼續";
+"timer.makeSmaller" = "縮小一步";
+"timer.interrupted" = "我被打斷了";
+"timer.continueFive" = "再加 5 分鐘";
+"timer.stopHint" = "停在這裡：%@";
+"timer.finished.title" = "很好，你已經開始了。";
+"timer.finished.subtitle" = "感覺怎麼樣？";
+"timer.outcome.skipped" = "換一個";
+
+/* MARK: - 恢復 */
+"recover.title" = "恢復";
+"recover.empty" = "現在沒有需要恢復的步驟。\n暫停的步驟會安靜地在這裡等你。";
+"recover.lastStep" = "從上次的地方繼續";
+"recover.startTimer" = "開始計時";
+"recover.related" = "備註：%@";
+"recover.blocker" = "卡點：%@";
+"recover.clear" = "清掉這個膠囊";
+
+/* MARK: - 卡點 */
+"blocker.title.pause" = "剛才卡在哪裡？";
+"blocker.title.skip" = "是什麼擋住了？";
+"blocker.subtitle" = "這不是打分。只是幫 StartKind 下次把重新開始做得更小。";
+"blocker.skip" = "不確定";
+"blocker.need_login" = "需要登入";
+"blocker.need_document" = "需要檔案";
+"blocker.too_vague" = "太模糊";
+"blocker.too_big" = "太大";
+"blocker.emotionally_hard" = "情緒上很難";
+"blocker.need_another_person" = "需要另一個人";
+
+/* MARK: - 規律 */
+"patterns.title" = "規律";
+"patterns.empty" = "做過幾個步驟後，溫和的規律會出現在這裡。";
+"patterns.noShame" = "這只是觀察，不是打分。";
+"patterns.recommendation.title" = "下一步試試";
+"patterns.advanced.title" = "Plus 詳細資訊";
+"patterns.advanced.hint" = "個人執行模型、摩擦地圖和更長時間的歷史。";
+"patterns.sample.count" = "%d 個步驟";
+"patterns.model.title" = "個人執行模型";
+"patterns.model.samples" = "%d 個樣本";
+"patterns.model.empty" = "開始幾個計時器後，StartKind 會學習你的最佳啟動時段、預估偏差、步長和陪伴啟動效果。";
+"patterns.model.stepSize" = "建議步長";
+"patterns.model.stepSize.default" = "5-10 分鐘";
+"patterns.model.stepSize.tiny" = "先做 2-5 分鐘";
+"patterns.model.stepSize.small" = "先做 5 分鐘";
+"patterns.model.stepSize.steady" = "10 分鐘可行";
+"patterns.model.bestWindow" = "最佳時段";
+"patterns.model.bestWindow.pending" = "學習中";
+"patterns.model.summary.longer" = "%@ 通常需要你預估的 %@ 左右，所以 StartKind 會先給更小一步。";
+"patterns.model.summary.tiny" = "%@ 先切得很小時更容易開始。";
+"patterns.model.summary.window" = "%@ 在 %@ 更容易啟動。";
+"patterns.model.summary.steady" = "%@ 已逐漸穩定，適合普通 10 分鐘啟動。";
+"patterns.model.blocker" = "當前重啟卡點：%@";
+"window.morning" = "上午";
+"window.afternoon" = "下午";
+"window.evening" = "晚上";
+"patterns.insight.longer" = "%@ 類步驟通常比你預估的稍久一點。";
+"patterns.insight.window" = "你在中午前更容易開始 %@ 類事務。";
+"patterns.insight.costart" = "陪伴啟動幫你完成了最近 %d 個事務步驟。";
+"patterns.medianActual" = "實際用時約 %@";
+"patterns.estimateMultiplier" = "預估校正：%@";
+"patterns.bestWindow" = "最佳啟動時段：%@";
+"patterns.completion" = "這個分類你開始了 %d / %d 個步驟。";
+"patterns.recommendation.buffer" = "下次 StartKind 會按 %@ 左右留時間，並先給更小動作。";
+"patterns.recommendation.tiny" = "下次先從 2-5 分鐘版本開始。";
+"patterns.recommendation.window" = "這個分類適合放在%@。";
+"patterns.recommendation.keep" = "繼續用計時器，校準會更準。";
+"patterns.unlock.title" = "個人執行模型";
+"patterns.unlock.body" = "StartKind Plus 會學習你的最佳啟動時段、迴避規律和陪伴啟動的效果。";
+
+/* MARK: - 摩擦地圖 */
+"friction.title" = "摩擦地圖";
+"friction.empty" = "幾次被打斷或暫停後，卡點規律會出現在這裡。";
+"friction.blocker.title" = "常見卡點：%@";
+"friction.blocker.body" = "這裡顯示的是摩擦點，不是性格問題。";
+"friction.category.title" = "%@ 需要更小入口";
+"friction.category.body" = "這個分類完成起來更難，StartKind 應該先給更小的入口。";
+"friction.category.step" = "先做一個 5 分鐘入口步驟，再碰真正任務。";
+"friction.step.login" = "只找到登入頁面，先不要輸入資訊。";
+"friction.step.document" = "只找一個可能放檔案的位置，然後停止。";
+"friction.step.vague" = "把任務改寫成一個看得見的動詞和一個物件。";
+"friction.step.big" = "只碰第一層：開啟、展開，或搜尋一個詞。";
+"friction.step.emotion" = "設 5 分鐘計時，只看任務標題。";
+"friction.step.person" = "先寫一句話，向對方要缺失的資訊。";
+
+/* MARK: - 事務閱讀器 */
+"admin.title" = "事務閱讀器";
+"admin.kicker" = "帳單、郵件、預約、表格";
+"admin.subtitle" = "貼上文字或選擇截圖。StartKind 提取關鍵事實，只給一個能開始的小步驟。";
+"admin.freeAllowance" = "今天剩餘 %d / %d 次免費事務快速啟動";
+"admin.input.placeholder" = "把凌亂資訊貼上到這裡，或選擇截圖/照片。";
+"admin.paste" = "貼上";
+"admin.photo" = "照片";
+"admin.parse" = "找出一步";
+"admin.ocr.loading" = "正在讀取圖片...";
+"admin.parse.loading" = "正在找下一步...";
+"admin.ocr.empty" = "沒有辨識到可讀文字。可以手動輸入幾個字。";
+"admin.ocr.error" = "無法讀取這張圖片。請換清晰截圖或貼上文字。";
+"admin.scan.title" = "掃描帳單、信件或截圖";
+"admin.scan.body" = "選擇一個圖片來源。這個頁面隨時可以關閉。";
+"admin.scan.replaceBody" = "可以選擇新圖片，也可以保留已經辨識的文字。";
+"admin.scan.paste" = "改為貼上文字";
+"admin.camera" = "使用相機";
+"admin.photoLibrary" = "選擇照片或截圖";
+"admin.cameraUnavailable" = "這臺裝置沒有可用相機。可以選擇照片或貼上文字。";
+"admin.review.title" = "檢查 StartKind 讀到的內容";
+"admin.review.body" = "先檢查圖片並編輯文字，再找出一個小步驟。";
+"admin.review.selectedImage" = "已選圖片";
+"admin.review.text" = "辨識出的文字";
+"admin.review.empty" = "沒有辨識到文字。輸入幾個字就可以繼續。";
+"admin.replace" = "替換圖片";
+"admin.remove" = "移除圖片";
+"admin.result.title" = "關鍵資訊";
+"admin.confidence" = "%d%% 可信度";
+"admin.fact.type" = "型別";
+"admin.fact.due" = "截止";
+"admin.fact.amount" = "金額";
+"admin.fact.contact" = "聯絡人";
+"admin.fact.link" = "連結或電話";
+"admin.documents" = "放在手邊";
+"admin.missing" = "缺失資訊";
+"admin.nextStep" = "下一步";
+"admin.artifact.bill" = "帳單";
+"admin.artifact.email" = "郵件";
+"admin.artifact.appointment" = "預約";
+"admin.artifact.return" = "退貨";
+"admin.artifact.insurance" = "保險";
+"admin.artifact.banking" = "銀行";
+"admin.artifact.school" = "學校";
+"admin.artifact.household" = "家務";
+"admin.artifact.medical" = "醫療";
+"admin.artifact.other" = "其他";
+
+/* MARK: - 設定 */
+"settings.title" = "設定";
+"settings.language" = "語言";
+"settings.language.en" = "English";
+"settings.language.zh" = "簡體中文";
+"settings.language.zhHant" = "繁體中文";
+"settings.language.ja" = "日本語";
+"settings.language.ko" = "한국어";
+"settings.profile" = "你的資料";
+"settings.editProfile" = "編輯資料";
+"settings.subscription" = "訂閱";
+"settings.subscription.free" = "免費版";
+"settings.subscription.plus" = "StartKind Plus";
+"settings.subscription.upgrade" = "升級到 StartKind Plus";
+"settings.subscription.manage" = "管理訂閱";
+"settings.subscription.manage.error" = "訂閱設定暫時無法開啟。";
+"settings.subscription.restore" = "恢復購買";
+"settings.subscription.restore.success" = "StartKind Plus 已恢復。";
+"settings.subscription.restore.none" = "沒有找到有效的 StartKind Plus 訂閱。";
+"settings.privacy" = "隱私";
+"settings.dataExport" = "匯出我的資料";
+"settings.deleteData" = "刪除本機資料";
+"settings.deleteConfirm.body" = "這會清除本機儲存的 StartKind 資料。你的私有 iCloud 資料仍由你在 iCloud 設定中管理。此操作無法撤銷。";
+"settings.contact" = "聯絡";
+"settings.contactEmail" = "billy.yu@me.com";
+"settings.about" = "關於";
+"settings.version" = "版本 %@";
+"settings.medical" = "醫療提示";
+"settings.medical.body" = "StartKind 可以幫你整理和開始任務，但不能診斷或治療注意缺陷多動障礙(ADHD)。如需診斷、用藥或治療決定，請諮詢合格的臨床醫生。";
+"settings.moreApps" = "更多 App";
+"settings.moreApps.maren" = "經期與圍絕經期記錄";
+"settings.moreApps.dogcat" = "貓狗餵食計算器";
+"settings.moreApps.taskkin" = "家庭協作照護";
+"settings.moreApps.livepet" = "把一張照片變成會動的寵物";
+"settings.moreApps.virtualpets" = "溫馨養寵換裝遊戲";
+"settings.moreApps.platepace" = "GLP-1 飲食節奏的 AI 營養記錄";
+"settings.rate" = "給 StartKind 評分";
+"settings.shareApp" = "分享 StartKind";
+"share.app.text" = "StartKind 幫我把一直拖著的事，拆成一小步開始做起來。%@";
+
+/* MARK: - 付費牆 */
+"paywall.title" = "StartKind Plus";
+"paywall.monthly" = "按月";
+"paywall.annual" = "按年";
+"paywall.annual.save" = "省約 25%";
+"paywall.annual.bestValue" = "更划算";
+"paywall.cta" = "開始免費試用";
+"paywall.cta.buy" = "訂閱";
+"paywall.restore" = "恢復購買";
+"paywall.restore.success" = "StartKind Plus 已恢復。";
+"paywall.restore.none" = "沒有找到有效的 StartKind Plus 訂閱。";
+"paywall.dismiss" = "以後再說";
+"paywall.compare.title" = "免費版 / Plus";
+"paywall.free.title" = "免費版";
+"paywall.free.price" = "$0";
+"paywall.free.starts" = "每天 5 次「下一步」啟動。";
+"paywall.free.admin" = "每天 1 次事務快速啟動，包含照片 OCR。";
+"paywall.free.personal" = "基礎 Start Profile、靜默陪伴啟動、計時器、模板和已儲存的啟動步驟。";
+"paywall.free.sync" = "個人資料儲存在你的裝置和私有 iCloud 中。";
+"paywall.plus.title" = "Plus";
+"paywall.plus.price" = "%@ / 月或 %@ / 年";
+"paywall.plus.starts" = "每天不限次數啟動。";
+"paywall.plus.admin" = "事務快速啟動不限次數，每次都包含照片 OCR。";
+"paywall.plus.recovery" = "不限數量的有效恢復膠囊。";
+"paywall.plus.costart" = "不限次數建立好友房間。";
+"paywall.plus.insights" = "解鎖超過 14 天的高階執行洞察和歷史。";
+"paywall.limit.title" = "今天的免費步驟已用完";
+"paywall.limit.title.admin" = "今天事務快速啟動已用完";
+"paywall.limit.title.friend" = "好友陪伴啟動屬於每週一次免費額度";
+"paywall.limit.body" = "計時器、模板、已儲存的啟動步驟、靜默陪伴啟動、基礎 Start Profile、私有 iCloud 同步和恢復功能仍免費。Plus 會移除每日啟動限制。";
+"paywall.limit.body.admin" = "免費版每天包含 1 次事務快速啟動和照片 OCR。升級 Plus 後事務快速啟動不限次數。";
+"paywall.limit.body.friend" = "加入房間和靜默陪伴啟動仍免費。升級 Plus 後可不限次數建立好友房間。";
+"paywall.limit.keepFree" = "繼續用免費版";
+"paywall.value.statement" = "Plus 幫你把啟動門檻降下來：少一次決策，更容易開始。";
+"paywall.products.loading" = "正在載入訂閱選項……";
+"paywall.products.unavailable" = "訂閱選項暫時無法使用。";
+"paywall.products.priceUnavailable" = "價格暫無法使用";
+"paywall.products.retry" = "再試一次";
+"paywall.purchase.error" = "無法驗證購買。請再試一次。";
+"paywall.purchase.pending" = "購買正在等待批准。";
+"paywall.purchase.notCompleted" = "購買尚未完成。";
+
+/* MARK: - 用量 */
+"usage.stepsLeft" = "今天剩餘 %d / %d 個免費步驟";
+
+/* MARK: - 通用 */
+"common.cancel" = "取消";
+"common.close" = "關閉";
+"common.delete" = "刪除";
+"common.done" = "完成";
+"common.error" = "出了點小狀況。可以再試一次。";
+"legal.privacy" = "隱私";
+"legal.terms" = "條款";
+
+/* MARK: - 引導 */
+"onboarding.title" = "溫和地開始";
+"profile.title" = "你的資料";
+"onboarding.progress.name" = "第 1 步，共 2 步";
+"onboarding.progress.difficulty" = "第 2 步，共 2 步";
+"onboarding.name.title" = "我們怎麼稱呼你？";
+"onboarding.name.subtitle" = "只需要名字。它儲存在這臺裝置上；只有在你加入一起開始的房間時，同行的人才會看到它。";
+"onboarding.name.label" = "偏好的名字";
+"onboarding.name.placeholder" = "名字";
+"onboarding.name.count" = "%d / 40 個字元";
+"onboarding.name.tooLong" = "請控制在 40 個字元以內。";
+"onboarding.continue" = "繼續";
+"onboarding.difficulty.title" = "通常是什麼讓你難以開始？";
+"onboarding.difficulty.subtitle" = "選一個就好。StartKind 只會給你一個小提示，不會變成另一款 App。";
+"onboarding.difficulty.getting_started.title" = "難以開始";
+"onboarding.difficulty.getting_started.detail" = "很難找到第一步。";
+"onboarding.difficulty.tasks_too_big.title" = "任務感覺太大";
+"onboarding.difficulty.tasks_too_big.detail" = "知道要做什麼，但感覺太多了。";
+"onboarding.difficulty.interruptions.title" = "總被打斷";
+"onboarding.difficulty.interruptions.detail" = "注意力總是被打斷。";
+"onboarding.difficulty.admin_pile_up.title" = "事務堆積";
+"onboarding.difficulty.admin_pile_up.detail" = "帳單、表格、訊息和跑腿越堆越多。";
+"onboarding.choice.selected" = "已選擇";
+"onboarding.choice.notSelected" = "未選擇";
+"onboarding.finish" = "完成設定";
+"profile.save" = "儲存資料";
+"onboarding.back" = "返回";
+
+/* MARK: - 捕獲反饋 */
+"capture.generating" = "正在整理一個小步驟…";
+
+/* MARK: - 登入 */
+
+/* MARK: - 陪伴啟動 */
+"costart.title" = "陪伴啟動";
+"costart.subtitle" = "一個人太難時，一起開始。";
+"costart.cta" = "陪伴啟動";
+"costart.aiQuiet" = "AI 靜默陪伴";
+"costart.friend" = "邀請好友(25 分鐘)";
+"costart.you" = "你";
+"costart.ai" = "AI";
+"costart.aiQuietPresence" = "靜默陪伴中";
+"costart.roomTitle" = "安靜房間";
+"costart.yourStep" = "你的步驟";
+"costart.waitingForFriend" = "等待好友加入…";
+"costart.joinByCode" = "輸入房間碼加入";
+"costart.enterCode" = "輸入房間碼";
+"costart.code.placeholder" = "6 位數字";
+"costart.code.hint" = "朋友可以從 TA 的安靜房間讀出這 6 位數字。";
+"costart.roomCodeHint" = "好友輸入這個號碼即可加入。";
+"costart.share" = "分享";
+"costart.invite.message" = "一起在 StartKind 開始吧。房間號：%@\n下載 App：%@\n已安裝？點此加入：%@";
+"costart.copy" = "複製";
+"costart.copied" = "已複製";
+"costart.guestSubtitle" = "好友邀請你一起開始。說一個小步驟，加入。";
+"costart.yourName" = "你的名字(可選)";
+"costart.yourStep.optional" = "你的步驟(可選)";
+"costart.defaultGuestStep" = "現在開始";
+"costart.host" = "房主";
+"costart.stage.createOrJoin" = "1. 建立或加入房間";
+"costart.stage.waiting" = "2. 等待參與者";
+"costart.stage.ready" = "2. 可以開始";
+"costart.stage.focus" = "3. 專注中";
+"costart.roomCode" = "房間碼";
+"costart.participantStatus" = "參與者狀態";
+"costart.participants.count" = "當前參與者：%d 人";
+"costart.participants.pending" = "正在檢視房間……";
+"costart.waitingForParticipant" = "等待另一位參與者。";
+"costart.friendReady" = "另一位參與者已在房間。準備好後即可開始。";
+"costart.guestReady" = "你已加入房間。準備好後即可開始。";
+"costart.quietReady" = "這臺裝置上的靜默陪伴已準備好。";
+"costart.focusStatus" = "這臺裝置上的 25 分鐘專注正在進行。";
+"costart.participantStatusUnavailable" = "暫時無法更新參與者狀態；我們不會推斷有新參與者。";
+"costart.syncNote" = "房間只共享參與狀態和結果；每臺裝置都要在本地開始。";
+"costart.start25" = "開始 25 分鐘";
+"costart.leave" = "離開房間";
+
+/* MARK: - 完成後儲存啟動步驟 */
+"savedStart.prompt.title" = "要把這一步留到下次嗎？";
+"savedStart.prompt.message" = "你完成了「%@」。要儲存標題和步驟，之後一鍵再次使用嗎？";
+"savedStart.prompt.save" = "儲存";
+"savedStart.prompt.notNow" = "暫時不用";
+"savedStart.confirmed" = "已儲存「%@」，下次可以繼續。";
+"savedStart.view" = "檢視已儲存的啟動步驟";
+"costart.join" = "加入";
+"costart.roomNotFound" = "找不到那個房間，可能已結束。";
+"costart.offline" = "現在連不上 StartKind。請檢查網路後再試。";
+"costart.createError" = "房間暫時沒能啟動。你的免費邀請額度仍保留，可以再試一次。";
+
+/* MARK: - 留存輔助 */
+"stuck.button" = "我卡住了";
+"stuck.loaded" = "沒關係。先從更小版本開始。";
+"stuck.rungCompleted" = "準備完成，下面是下一小步。";
+"stuck.source" = "卡住後重啟";
+"energy.title" = "匹配能量";
+"energy.low" = "低";
+"energy.medium" = "中";
+"energy.wired" = "很亢奮";
+"energy.overwhelmed" = "過載";
+"frictionPreset.title" = "阻力預設";
+"frictionPreset.need_login" = "登入";
+"frictionPreset.need_document" = "檔案";
+"frictionPreset.too_vague" = "太模糊";
+"frictionPreset.too_many_tabs" = "標籤頁";
+"frictionPreset.need_another_person" = "需要別人";
+"frictionPreset.loaded" = "已準備一個只降低阻力的開頭。";
+"proof.started" = "我已經開始了";
+"proof.saved" = "開始過就算。最近 7 天已開始 %d 次。";
+"proof.count" = "本週開始 %d 次";
+"adminInbox.title" = "極小事務收件箱";
+"adminInbox.placeholder" = "貼上帳單、郵件、預約或表格文字";
+"adminInbox.hint" = "StartKind 只會從中保留一個很小的下一步。";
+"adminInbox.saved" = "已儲存成一個小事務步驟。";
+"yesterday.rescue.open" = "昨天恢復";
+"yesterday.rescue.loaded" = "昨天的事已變成 3 分鐘重啟。";
+"yesterday.source" = "昨天恢復";
+"daypart.open" = "現在最適合的一步";
+"daypart.loaded" = "已按當前時段準備好一個啟動。";
+"daypart.source" = "時段啟動";
+"emergency.open" = "緊急 3 分鐘";
+"emergency.loaded" = "緊急極小模式已準備好。";
+"emergency.source" = "緊急極小模式";
+"frictionMemory.source" = "摩擦記憶";
+"frictionMemory.loaded" = "StartKind 已按常見卡點幫你降低阻力。";
+"startScript.title" = "儲存的啟動";
+"startScript.save" = "儲存這個啟動";
+"startScript.saved" = "已儲存為可複用啟動。";
+"startScript.empty" = "有用的啟動可儲存在這裡；本地儲存且沒有運營成本。";
+"startScript.loaded" = "已載入儲存啟動。";
+"startScript.source" = "儲存啟動";
+"calendarSoft.title" = "日程準備";
+"calendarSoft.placeholder" = "會議、牙醫、帳單截止...";
+"calendarSoft.days" = "%d 天后";
+"calendarSoft.hint" = "輸入今天到未來 7 天內的任意日程。StartKind 會生成一個有用的 5 分鐘準備步驟。";
+"calendarSoft.submit" = "建立準備步驟";
+"calendarSoft.loaded" = "日程準備好了。";
+"calendarSoft.noMatch" = "請選擇今天或未來 7 天內的日期。";
+"quickAction.source" = "主螢幕快捷動作";
+"quickAction.loaded" = "快捷啟動已載入。";
+"gentleReview.title" = "溫和回顧";
+"gentleReview.starts" = "本週啟動";
+"gentleReview.friction" = "常見卡點";
+"gentleReview.none" = "學習中";
+
+/* MARK: - 隱私 */
+"privacy.title" = "隱私";
+"privacy.principlesTitle" = "原則";
+"privacy.principle1" = "StartKind 不要求帳號或登入。";
+"privacy.principle2" = "個人資料儲存在本機和你的私有 iCloud CloudKit 資料庫中。";
+"privacy.principle3" = "沒有廣告、追蹤或分析 SDK，也不會在背景存取日曆、通訊錄或照片。";
+"privacy.dataTitle" = "可能儲存的資料";
+"privacy.data1" = "任務文字、步驟、計時歷史、恢復膠囊、個人資料和已儲存的啟動方式會儲存在本機和私有 iCloud CloudKit 中。";
+"privacy.data2" = "當你請求 AI 或事務快速啟動解析時，你選擇的文字或 OCR 文字會通過一次性中轉服務傳送；我們不會儲存請求文字。";
+"privacy.data3" = "陪伴房間會使用臨時房間資訊、你選擇的暱稱和你說出的一句話步驟，讓參與者能夠配合；房間會過期。";
+"privacy.data4" = "Apple 簽名的訂閱憑證會用於權益驗證；服務端只儲存最終等級和匿名裝置令牌的雜湊。";
+"privacy.controlsTitle" = "你的控制";
+"privacy.control1" = "在設定中刪除本機的 StartKind 資料。";
+"privacy.control2" = "在你的 iCloud 設定中刪除私有 iCloud 副本；StartKind 無法存取或刪除它。";
+"privacy.control3" = "在設定中匯出本機可用的資料。";
+"privacy.control4" = "匿名裝置令牌儲存在系統鑰匙串中，重新安裝後訂閱和免費額度仍然有效。僅刪除 App 並不會移除伺服器上的匿名記錄。";
+"privacy.sensitiveTitle" = "敏感內容";
+"privacy.sensitive1" = "事務任務可能含財務、醫療或家庭資訊；我們的服務端不會記錄原始請求文字。";
+"privacy.sensitive2" = "圖片在本機讀取；只有你繼續請求解析時，提取出的文字才會被中轉。";
+"privacy.legalTitle" = "法律資訊";
+"privacy.fullPolicy" = "閱讀完整隱私政策";
+"privacy.contactTitle" = "聯絡";
+
+/* MARK: - Fifth retention release */
+"ladder.title" = "選擇開始時長";
+"ladder.minutes" = "%d 分鐘";
+"dailyOne.title" = "今天溫和地只做一件";
+"dailyOne.source.recovery" = "繼續";
+"dailyOne.source.admin" = "事務";
+"dailyOne.source.vault" = "已儲存";
+"dailyOne.start" = "就做這一件";
+"dailyOne.replace" = "換一件";
+"dailyOne.dismiss" = "今天先不做";
+"dailyOne.stop" = "完成最小的有用開頭就停。";
+"dailyOne.why" = "這是你之前儲存過的啟動方式。";
+"dailyOne.source" = "今日一件事";
+"dailyOne.loaded" = "今天溫和的一件事已經準備好。";
+"urgentAdmin.start" = "找到聯絡入口";
+"startProfile.title" = "你的啟動畫像";
+"startProfile.empty" = "它會從真實開始中學習，不要求你完美規劃。";
+"startProfile.summary" = "這是關於何時、以何種方式更容易開始的安靜總結。";
+"startProfile.window" = "時段";
+"startProfile.duration" = "時長";
+"startProfile.category" = "常見";
+"startProfile.learning" = "學習中";
+"startProfile.minutes" = "%d 分鐘";
+"costart.again" = "再和 %@ 共做 25 分鐘";
+"costart.saveFriend" = "儲存這位朋友";
+"costart.friendSaved" = "已儲存，之後可快速再約";
+
+/* Error messages surfaced from LocalizedError types */
+"error.usage.stepLimit" = "今天的免費步驟已經用完了。";
+"error.usage.adminLimit" = "今天的免費事務快速開始已經用完了。";
+"error.speech.notAuthorized" = "請在 iOS「設定」>「隱私權與安全性」>「語音辨識」中開啟「語音辨識」。不需要 Siri。";
+"error.speech.microphoneNotAuthorized" = "請在 iOS「設定」>「隱私權與安全性」>「麥克風」中開啟「麥克風」。不需要 Siri。";
+"error.speech.notAvailable" = "語音辨識暫時無法使用。不需要 Siri；請在 iOS「設定」中檢查「語音辨識」和「麥克風」。";
+"error.speech.engineFailure" = "語音辨識未能繼續，請重試。";
+"error.api.notConfigured" = "還沒有配置雲端功能。";
+"error.auth.network" = "無法連線伺服器，請稍後再試。";
+
+/* Display preferences */
+"settings.display" = "顯示";
+"settings.theme" = "主題";
+"settings.theme.system" = "跟隨系統";
+"settings.theme.light" = "淺色";
+"settings.theme.dark" = "深色";
+"settings.textSize" = "字型大小";
+"settings.textSize.smaller" = "更小";
+"settings.textSize.small" = "小";
+"settings.textSize.standard" = "標準";
+"settings.textSize.large" = "大";
+"settings.textSize.larger" = "更大";
+"settings.textSize.largest" = "最大";
+"settings.textSize.sample" = "開啟帳單，找到截止日期。";

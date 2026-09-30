@@ -8,7 +8,7 @@ SIM="$1"; OUT="$2"; APP="$3"
 # Activity outlives the process (simctl terminate does not end it) - if it
 # were captured earlier, its Dynamic Island pill would still be showing over
 # every screenshot taken after it in the same locale.
-SCREENS="start stuck patterns admin settingsPrivacy timer"
+SCREENS="start stuck patterns admin settingsPrivacy costart settingsLanguage timer"
 BUNDLE=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist")
 
 file_number() {
@@ -19,6 +19,8 @@ file_number() {
     patterns) echo 04;;
     admin) echo 05;;
     settingsPrivacy) echo 06;;
+    costart) echo 07;;
+    settingsLanguage) echo 08;;
   esac
 }
 
@@ -26,10 +28,11 @@ boot_wait() {
   xcrun simctl bootstatus "$SIM" -b >/dev/null 2>&1 || { xcrun simctl boot "$SIM" >/dev/null 2>&1; xcrun simctl bootstatus "$SIM" -b >/dev/null 2>&1; }
 }
 
-for loc in ${LOCALES:-en-US zh-Hans}; do
+for loc in ${LOCALES:-en-US zh-Hans ja}; do
   case "$loc" in
     en-US) L=en; R=US;;
     zh-Hans) L=zh-Hans; R=CN;;
+    ja) L=ja; R=JP;;
   esac
   mkdir -p "$OUT/$loc"
   # The simulator's own language has to follow the screenshot language too,

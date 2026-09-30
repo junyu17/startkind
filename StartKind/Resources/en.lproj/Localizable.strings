@@ -258,7 +258,9 @@
 "settings.language" = "Language";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.language.zhHant" = "繁體中文";
 "settings.language.ja" = "日本語";
+"settings.language.ko" = "한국어";
 "settings.profile" = "Your profile";
 "settings.editProfile" = "Edit profile";
 "settings.subscription" = "Subscription";
@@ -287,6 +289,9 @@
 "settings.moreApps.livepet" = "One photo of your pet, gently animated";
 "settings.moreApps.virtualpets" = "Cosy pet care and dress-up";
 "settings.moreApps.platepace" = "AI-assisted nutrition tracker for GLP-1 routines";
+"settings.rate" = "Rate StartKind";
+"settings.shareApp" = "Share StartKind";
+"share.app.text" = "StartKind helps me start the thing I keep putting off, one tiny step at a time. %@";
 
 /* MARK: - Paywall */
 "paywall.title" = "StartKind Plus";
@@ -393,6 +398,7 @@
 "costart.code.hint" = "Your friend can read the 6 digits from their quiet room.";
 "costart.roomCodeHint" = "Friend enters this code to join.";
 "costart.share" = "Share";
+"costart.invite.message" = "Start together on StartKind. Room code: %@\nGet the app: %@\nAlready have it? Join here: %@";
 "costart.copy" = "Copy";
 "costart.copied" = "Copied";
 "costart.guestSubtitle" = "A friend invited you to co-start. State one small step and join.";

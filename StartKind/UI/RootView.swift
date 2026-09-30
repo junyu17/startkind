@@ -23,6 +23,7 @@ struct RootView: View {
         switch ScreenshotMode.screen {
         case .stuck: return .recover
         case .patterns: return .patterns
+        case .settingsLanguage: return .settings
         default: return .start
         }
 #else
@@ -58,7 +59,8 @@ struct RootView: View {
             }
 #if DEBUG
             .onAppear {
-                if ScreenshotMode.screen == .timer, screenshotTimerRoute == nil {
+                if ScreenshotMode.screen == .timer || ScreenshotMode.screen == .costart,
+                   screenshotTimerRoute == nil {
                     screenshotTimerRoute = env.makeScreenshotTimerRoute()
                 }
             }
@@ -71,7 +73,7 @@ struct RootView: View {
         Binding(
             get: {
                 switch ScreenshotMode.screen {
-                case .timer: return screenshotTimerRoute != nil
+                case .timer, .costart: return screenshotTimerRoute != nil
                 case .admin, .settingsPrivacy: return true
                 default: return false
                 }
@@ -87,6 +89,10 @@ struct RootView: View {
             if let route = screenshotTimerRoute {
                 TimerView(session: route.session, step: route.step) { _, _, _ in }
                     .environmentObject(env)
+            }
+        case .costart:
+            if let route = screenshotTimerRoute {
+                CoStartView(step: route.step).environmentObject(env)
             }
         case .admin:
             AdminQuickReaderView(initialMode: .text)

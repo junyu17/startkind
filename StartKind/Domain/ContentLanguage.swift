@@ -14,17 +14,26 @@ import Foundation
 enum ContentLanguage: String, Sendable, CaseIterable {
     case en
     case zhHans
+    case zhHant
     case ja
+    case ko
 
-    /// Maps a stored language tag (`"en"`, `"zh-Hans"`, `"ja"`, or a system
-    /// identifier like `"ja-JP"`) onto a supported content language.
+    /// Maps a stored language tag (`"en"`, `"zh-Hans"`, `"zh-Hant"`, `"ja"`,
+    /// `"ko"`, or a system identifier like `"ja-JP"`) onto a supported content language.
     /// Anything unrecognised falls back to English, matching the UI bundle.
     init(_ language: String) {
-        let lowered = language.lowercased()
+        let lowered = language.lowercased().replacingOccurrences(of: "_", with: "-")
         if lowered.hasPrefix("zh") {
-            self = .zhHans
+            // Traditional script: an explicit Hant tag, or a Taiwan / Hong Kong /
+            // Macau region with no script (`zh-TW`, `zh-HK`, `zh-MO`).
+            let traditional = lowered.contains("hant")
+                || (!lowered.contains("hans")
+                    && ["-tw", "-hk", "-mo"].contains { lowered.contains($0) })
+            self = traditional ? .zhHant : .zhHans
         } else if lowered.hasPrefix("ja") {
             self = .ja
+        } else if lowered.hasPrefix("ko") {
+            self = .ko
         } else {
             self = .en
         }
@@ -32,17 +41,21 @@ enum ContentLanguage: String, Sendable, CaseIterable {
 
     /// Choose the wording for this language.
     ///
-    /// Arguments are autoclosures so the string interpolation for the two
+    /// Arguments are autoclosures so the string interpolation for the
     /// languages that were not selected is never evaluated.
     func pick(
         en english: @autoclosure () -> String,
         zh chinese: @autoclosure () -> String,
-        ja japanese: @autoclosure () -> String
+        zhHant traditional: @autoclosure () -> String,
+        ja japanese: @autoclosure () -> String,
+        ko korean: @autoclosure () -> String
     ) -> String {
         switch self {
         case .en: return english()
         case .zhHans: return chinese()
+        case .zhHant: return traditional()
         case .ja: return japanese()
+        case .ko: return korean()
         }
     }
 }

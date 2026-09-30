@@ -35,19 +35,25 @@ struct Rescheduler: Sendable {
             return lang.pick(
                 en: "No problem. Here's a lighter version for later.",
                 zh: "没关系。这里有个更轻的版本，留着以后。",
-                ja: "大丈夫です。もっと軽い版を、あとのために残しておきます。"
+                zhHant: "沒關係。這裡有個更輕的版本，留著以後。",
+                ja: "大丈夫です。もっと軽い版を、あとのために残しておきます。",
+                ko: "괜찮아요. 나중을 위해 더 가벼운 버전을 남겨 둘게요."
             )
         case .paused:
             return lang.pick(
                 en: "Paused gently. A smaller step is here when you return.",
                 zh: "已轻轻暂停。回来时这里有个更小的步骤。",
-                ja: "そっと一時停止しました。戻ってきたら、もっと小さな一歩がここで待っています。"
+                zhHant: "已輕輕暫停。回來時這裡有個更小的步驟。",
+                ja: "そっと一時停止しました。戻ってきたら、もっと小さな一歩がここで待っています。",
+                ko: "살며시 멈췄어요. 돌아오면 더 작은 걸음이 여기서 기다리고 있어요."
             )
         case .tooLarge:
             return lang.pick(
                 en: "This step may be too large right now. Try the smaller version.",
                 zh: "这一步现在可能有点大。试试更小的版本。",
-                ja: "この一歩は今は少し大きいかもしれません。もっと小さな版を試してみましょう。"
+                zhHant: "這一步現在可能有點大。試試更小的版本。",
+                ja: "この一歩は今は少し大きいかもしれません。もっと小さな版を試してみましょう。",
+                ko: "이 걸음은 지금 조금 클 수 있어요. 더 작은 버전을 해 봐요."
             )
         }
     }

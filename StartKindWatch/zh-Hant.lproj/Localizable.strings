@@ -1,0 +1,14 @@
+/* StartKind watchOS quick starts */
+"watch.stop" = "停止";
+
+"watch.emergency.title" = "緊急 3 分鐘";
+"watch.emergency.step" = "先呼氣。把需要的一樣東西放到手邊。";
+
+"watch.startFive.title" = "開始 5 分鐘";
+"watch.startFive.step" = "開啟最容易的那個入口，做 5 分鐘。";
+
+"watch.stuck.title" = "我卡住了";
+"watch.stuck.step" = "把它改寫成一個看得見的極小動作。";
+
+"watch.rescue.title" = "救回昨天";
+"watch.rescue.step" = "只做昨天那件事最小的開頭。";

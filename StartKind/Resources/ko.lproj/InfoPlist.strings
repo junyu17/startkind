@@ -1,0 +1,11 @@
+/* Permission prompts */
+"NSMicrophoneUsageDescription" = "StartKind는 말씀하신 생각을 듣고 바로 시작할 수 있는 작은 한 걸음으로 바꾸기 위해 마이크를 사용해요.";
+"NSSpeechRecognitionUsageDescription" = "StartKind는 말씀하신 생각을 작은 한 걸음으로 바꾸기 위해 음성 인식을 사용해요.";
+"NSCameraUsageDescription" = "StartKind는 청구서, 편지, 예약 안내를 스캔해서 작은 한 걸음으로 바꾸기 위해 카메라를 사용해요.";
+"NSPhotoLibraryUsageDescription" = "StartKind는 선택하신 스크린샷이나 사진에서 글자를 읽어 처리해야 할 행정 업무를 작은 한 걸음으로 바꿔 드려요.";
+
+/* Home Screen quick action titles */
+"I'm stuck" = "막혔어요";
+"Start 5 minutes" = "5분만 시작";
+"Rescue yesterday" = "어제 구하기";
+"Paste admin text" = "행정 문서 붙여넣기";

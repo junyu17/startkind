@@ -18,6 +18,7 @@ private enum SettingsSheet: Identifiable {
 
 struct SettingsView: View {
     @EnvironmentObject var env: AppEnvironment
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject private var loc: LocalizationManager
     @EnvironmentObject private var appearance: AppearanceSettings
     @State private var sheet: SettingsSheet?
@@ -36,7 +37,9 @@ struct SettingsView: View {
                     )) {
                         Text(verbatim: L("settings.language.en")).tag("en")
                         Text(verbatim: L("settings.language.zh")).tag("zh-Hans")
+                        Text(verbatim: L("settings.language.zhHant")).tag("zh-Hant")
                         Text(verbatim: L("settings.language.ja")).tag("ja")
+                        Text(verbatim: L("settings.language.ko")).tag("ko")
                     }
                     .accessibilityIdentifier("settings.language")
                 } header: {
@@ -165,6 +168,16 @@ struct SettingsView: View {
 
                 Section {
                     LabeledContent(L("settings.contact"), value: L("settings.contactEmail"))
+                    Button {
+                        openURL(AppStoreLinks.writeReviewURL)
+                    } label: {
+                        Label(L("settings.rate"), systemImage: "star")
+                    }
+                    .accessibilityIdentifier("settings.rate")
+                    ShareLink(item: L("share.app.text", AppStoreLinks.shareURL("app").absoluteString)) {
+                        Label(L("settings.shareApp"), systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("settings.shareApp")
                     medicalRow
                     versionRow
                 } header: {

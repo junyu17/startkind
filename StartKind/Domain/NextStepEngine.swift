@@ -59,18 +59,24 @@ struct NextStepEngine: Sendable {
             title: lang.pick(
                 en: "Come back to this minute",
                 zh: "先回到这一分钟",
-                ja: "まず、この一分に戻りましょう"
+                zhHant: "先回到這一分鐘",
+                ja: "まず、この一分に戻りましょう",
+                ko: "먼저 지금 이 순간으로 돌아와요"
             ),
             step: lang.pick(
                 en: "Sit down, put one hand on your phone, and take one slow breath out.",
                 zh: "坐下，把一只手放在手机上，慢慢呼气一次。",
-                ja: "座って、スマホに片手を置いて、ゆっくり息を吐きましょう。"
+                zhHant: "坐下，把一隻手放在手機上，慢慢呼氣一次。",
+                ja: "座って、スマホに片手を置いて、ゆっくり息を吐きましょう。",
+                ko: "자리에 앉아 한 손을 휴대폰에 올리고, 천천히 숨을 한 번 내쉬세요."
             ),
             timerMinutes: 5,
             stopCondition: lang.pick(
                 en: "Stop after that one breath. The next step can wait.",
                 zh: "呼完这一口气就停。下一步等会儿再说。",
-                ja: "その一息で止めて大丈夫です。次の一歩は、あとで。"
+                zhHant: "呼完這一口氣就停。下一步等會兒再說。",
+                ja: "その一息で止めて大丈夫です。次の一歩は、あとで。",
+                ko: "숨 한 번이면 충분해요. 다음 걸음은 나중에 해도 돼요."
             ),
             category: category,
             shrinkLevel: .two,
@@ -78,7 +84,9 @@ struct NextStepEngine: Sendable {
             whyThisStep: lang.pick(
                 en: "On a bad day, the first step should require almost no decisions.",
                 zh: "状态很乱时，先把入口降到几乎不用决定。",
-                ja: "調子が整わない日は、最初の一歩に決めることがほとんど要らないほうが動きやすくなります。"
+                zhHant: "狀態很亂時，先把入口降到幾乎不用決定。",
+                ja: "調子が整わない日は、最初の一歩に決めることがほとんど要らないほうが動きやすくなります。",
+                ko: "컨디션이 안 좋은 날에는 첫 걸음에 결정할 게 거의 없어야 움직이기 쉬워요."
             )
         )
     }

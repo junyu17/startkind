@@ -226,10 +226,13 @@ final class SpeechService: ObservableObject {
     }
 
     static func normalizedLocaleIdentifier(for locale: Locale) -> String {
-        let identifier = locale.identifier.lowercased()
-        if identifier.hasPrefix("zh") { return "zh-CN" }
-        if identifier.hasPrefix("ja") { return "ja-JP" }
-        return "en-US"
+        switch ContentLanguage(locale.identifier) {
+        case .zhHans: return "zh-CN"
+        case .zhHant: return "zh-TW"
+        case .ja: return "ja-JP"
+        case .ko: return "ko-KR"
+        case .en: return "en-US"
+        }
     }
 
     private static func normalizedLocale(for locale: Locale) -> Locale {

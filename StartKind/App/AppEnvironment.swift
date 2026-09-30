@@ -498,10 +498,13 @@ final class AppEnvironment: ObservableObject {
         onboarding.firstName.isEmpty ? L("costart.friend") : onboarding.firstName
     }
     var currentLocale: Locale {
-        let language = currentLanguage.lowercased()
-        if language.hasPrefix("zh") { return Locale(identifier: "zh-Hans") }
-        if language.hasPrefix("ja") { return Locale(identifier: "ja") }
-        return Locale(identifier: "en")
+        switch ContentLanguage(currentLanguage) {
+        case .zhHans: return Locale(identifier: "zh-Hans")
+        case .zhHant: return Locale(identifier: "zh-Hant")
+        case .ja: return Locale(identifier: "ja")
+        case .ko: return Locale(identifier: "ko")
+        case .en: return Locale(identifier: "en")
+        }
     }
 
     func setLanguage(_ language: String) {
@@ -959,14 +962,18 @@ final class AppEnvironment: ObservableObject {
     }
 }
 
-/// The app ships English, Simplified Chinese, and Japanese; anything else
-/// falls back to English. Used on first launch, before the person has chosen
-/// a language.
+/// The app ships English, Simplified and Traditional Chinese, Japanese, and
+/// Korean; anything else falls back to English. Used on first launch, before
+/// the person has chosen a language.
 enum StartKindLanguage {
     static var systemPreferred: String {
-        let preferred = Locale.preferredLanguages.first?.lowercased() ?? "en"
-        if preferred.hasPrefix("zh") { return "zh-Hans" }
-        if preferred.hasPrefix("ja") { return "ja" }
-        return "en"
+        let preferred = Locale.preferredLanguages.first ?? "en"
+        switch ContentLanguage(preferred) {
+        case .zhHans: return "zh-Hans"
+        case .zhHant: return "zh-Hant"
+        case .ja: return "ja"
+        case .ko: return "ko"
+        case .en: return "en"
+        }
     }
 }

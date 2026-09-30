@@ -91,9 +91,12 @@ struct VisionAdminQuickReaderOCRService: Sendable, AdminQuickReaderTextRecognizi
     }
 
     static func recognitionLanguages(for language: String) -> [String] {
-        let lowered = language.lowercased()
-        if lowered.hasPrefix("zh") { return ["zh-Hans", "en-US"] }
-        if lowered.hasPrefix("ja") { return ["ja-JP", "en-US"] }
-        return ["en-US"]
+        switch ContentLanguage(language) {
+        case .zhHans: return ["zh-Hans", "en-US"]
+        case .zhHant: return ["zh-Hant", "en-US"]
+        case .ja: return ["ja-JP", "en-US"]
+        case .ko: return ["ko-KR", "en-US"]
+        case .en: return ["en-US"]
+        }
     }
 }

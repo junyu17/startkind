@@ -258,7 +258,9 @@
 "settings.language" = "语言";
 "settings.language.en" = "English";
 "settings.language.zh" = "简体中文";
+"settings.language.zhHant" = "繁體中文";
 "settings.language.ja" = "日本語";
+"settings.language.ko" = "한국어";
 "settings.profile" = "你的资料";
 "settings.editProfile" = "编辑资料";
 "settings.subscription" = "订阅";
@@ -287,6 +289,9 @@
 "settings.moreApps.livepet" = "把一张照片变成会动的宠物";
 "settings.moreApps.virtualpets" = "温馨养宠换装游戏";
 "settings.moreApps.platepace" = "GLP-1 饮食节奏的 AI 营养记录";
+"settings.rate" = "给 StartKind 评分";
+"settings.shareApp" = "分享 StartKind";
+"share.app.text" = "StartKind 帮我把一直拖着的事，拆成一小步开始做起来。%@";
 
 /* MARK: - 付费墙 */
 "paywall.title" = "StartKind Plus";
@@ -393,6 +398,7 @@
 "costart.code.hint" = "朋友可以从 TA 的安静房间读出这 6 位数字。";
 "costart.roomCodeHint" = "好友输入这个号码即可加入。";
 "costart.share" = "分享";
+"costart.invite.message" = "一起在 StartKind 开始吧。房间号：%@\n下载 App：%@\n已安装？点此加入：%@";
 "costart.copy" = "复制";
 "costart.copied" = "已复制";
 "costart.guestSubtitle" = "好友邀请你一起开始。说一个小步骤，加入。";

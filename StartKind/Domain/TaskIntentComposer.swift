@@ -80,6 +80,14 @@ private extension TaskIntentComposer {
                 why: "先完成一个小区域，能让这件事从想法变成可见的开始。",
                 baseMinutes: 10
             )
+        case .zhHant:
+            return ComposedStep(
+                title: "刷一小塊\(chineseObject(intent, fallback: "牆"))",
+                step: "把油漆和一把刷子或滾筒放到\(chineseObject(intent, fallback: "牆"))旁邊，只刷一小塊手掌大小的區域。",
+                stop: "刷完這一小塊就停，剩下的\(chineseObject(intent, fallback: "牆面"))以後再做。",
+                why: "先完成一個小區域，能讓這件事從想法變成可見的開始。",
+                baseMinutes: 10
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "壁")
             return ComposedStep(
@@ -89,7 +97,7 @@ private extension TaskIntentComposer {
                 why: "目に見える一区画ができると、全体に取りかからなくてもこのことが具体的になります。",
                 baseMinutes: 10
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -114,6 +122,15 @@ private extension TaskIntentComposer {
                 why: "先看到一个具体选项，再决定是否购买。",
                 baseMinutes: 10
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "要買的東西")
+            return ComposedStep(
+                title: "找一個\(chinese)選項",
+                step: "在一個可信的商店裡搜尋\(chinese)，儲存一個選項，先不購買。",
+                stop: "儲存一個選項後就停，暫時不用付款。",
+                why: "先看到一個具體選項，再決定是否購買。",
+                baseMinutes: 10
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "買いたいもの")
             return ComposedStep(
@@ -123,7 +140,7 @@ private extension TaskIntentComposer {
                 why: "保存した候補があれば、買う判断の前に戻れる出発点ができます。",
                 baseMinutes: 10
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -147,6 +164,15 @@ private extension TaskIntentComposer {
                 why: "一张照片是出售流程中可撤回、看得见的第一步。",
                 baseMinutes: 10
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "要賣的東西")
+            return ComposedStep(
+                title: "給\(chinese)拍一張照片",
+                step: "把\(chinese)放到光線好的地方，拍一張用於出售的照片。",
+                stop: "拍好一張照片就停，暫時不用釋出。",
+                why: "一張照片是出售流程中可撤回、看得見的第一步。",
+                baseMinutes: 10
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "売りたいもの")
             return ComposedStep(
@@ -156,7 +182,7 @@ private extension TaskIntentComposer {
                 why: "写真が1枚あれば、出品や値段を決めなくても売る準備が始まります。",
                 baseMinutes: 10
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -180,6 +206,15 @@ private extension TaskIntentComposer {
                 why: "把食物放到位，就是一个清楚而有限的照顾动作。",
                 baseMinutes: 5
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "寵物")
+            return ComposedStep(
+                title: "給\(chinese)準備食物",
+                step: "把\(chinese)的食物放進碗裡，把碗放到它面前。",
+                stop: "碗放好後就停，餵食這一步完成了。",
+                why: "把食物放到位，就是一個清楚而有限的照顧動作。",
+                baseMinutes: 5
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "ペット")
             return ComposedStep(
@@ -189,7 +224,7 @@ private extension TaskIntentComposer {
                 why: "用意した器ひとつで、区切りのあるお世話がひとつ終わります。",
                 baseMinutes: 5
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -213,6 +248,15 @@ private extension TaskIntentComposer {
                 why: "先把寄件所需的东西放到一起，下一步会更清楚。",
                 baseMinutes: 7
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "包裹")
+            return ComposedStep(
+                title: "準備寄出\(chinese)",
+                step: "把\(chinese)和寄件標籤放在門口，先不要寄出。",
+                stop: "包裹和標籤放在一起後就停，寄出可以稍後再做。",
+                why: "先把寄件所需的東西放到一起，下一步會更清楚。",
+                baseMinutes: 7
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "荷物")
             return ComposedStep(
@@ -222,7 +266,7 @@ private extension TaskIntentComposer {
                 why: "送るものをまとめておくだけなら、いつでも戻せて、このことが目に入ります。",
                 baseMinutes: 7
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -246,6 +290,15 @@ private extension TaskIntentComposer {
                 why: "先找到看得见的症状，不需要马上拆开或修完。",
                 baseMinutes: 10
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "這件物品")
+            return ComposedStep(
+                title: "檢查\(chinese)",
+                step: "走到\(chinese)所在的位置，讓它進入視線；先不拆開，只找一個明顯的症狀。",
+                stop: "找到一個明顯的症狀就停，先保持\(chinese)完整。",
+                why: "先找到看得見的症狀，不需要馬上拆開或修完。",
+                baseMinutes: 10
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "この品物")
             return ComposedStep(
@@ -255,7 +308,7 @@ private extension TaskIntentComposer {
                 why: "見えている症状がひとつ分かれば、分解しなくても修理が具体的になります。",
                 baseMinutes: 10
             )
-        case .en:
+        case .en, .ko:
             break
         }
         return ComposedStep(
@@ -281,6 +334,16 @@ private extension TaskIntentComposer {
                 why: "先做一个小而安全的区域，不需要一次完成整件事。",
                 baseMinutes: 8
             )
+        case .zhHant:
+            let chinese = chineseObject(intent, fallback: "這個表面")
+            let action = intent.verb ?? "處理"
+            return ComposedStep(
+                title: "處理\(chinese)的一小塊",
+                step: "把\(chinese)放到面前，只用合適的工具\(action)一個小的、安全區域。",
+                stop: "處理完這一小塊就停，剩下的\(chinese)以後再做。",
+                why: "先做一個小而安全的區域，不需要一次完成整件事。",
+                baseMinutes: 8
+            )
         case .ja:
             let japanese = japaneseObject(intent, fallback: "この面")
             return ComposedStep(
@@ -290,7 +353,7 @@ private extension TaskIntentComposer {
                 why: "小さく安全なところから始めれば、全体を引き受けなくても取りかかれます。",
                 baseMinutes: 8
             )
-        case .en:
+        case .en, .ko:
             break
         }
         let area = verb == "polish" || verb == "buff"
@@ -325,6 +388,24 @@ private extension TaskIntentComposer {
                 why: "先完成一个清楚、可见的开始。",
                 baseMinutes: 5
             )
+        case .zhHant:
+            let object = chineseObject(intent, fallback: "這件事")
+            if intent.verb == "讀" || intent.verb == "閱讀" {
+                return ComposedStep(
+                    title: "讀\(object)的一小段",
+                    step: "開啟\(object)，讀第一頁或第一小段。",
+                    stop: "讀完這一頁或這一小段就停。",
+                    why: "先讓閱讀真正開始，不要求一次讀完。",
+                    baseMinutes: 8
+                )
+            }
+            return ComposedStep(
+                title: "開啟\(object)",
+                step: "找到\(object)，開啟它，讓裡面的內容進入視線。",
+                stop: "開啟後就停，先不用做別的。",
+                why: "先完成一個清楚、可見的開始。",
+                baseMinutes: 5
+            )
         case .ja:
             let object = japaneseObject(intent, fallback: "このこと")
             if intent.verb == "読む" || intent.verb == "読書" {
@@ -343,7 +424,7 @@ private extension TaskIntentComposer {
                 why: "開いて見えるようになれば、次の選択がしやすくなります。",
                 baseMinutes: 5
             )
-        case .en:
+        case .en, .ko:
             break
         }
 
@@ -370,8 +451,12 @@ private extension TaskIntentComposer {
         switch language(intent) {
         case .zhHans:
             return chineseDomainStep(intent: intent, category: category)
+        case .zhHant:
+            return traditionalDomainStep(intent: intent, category: category)
         case .ja:
             return japaneseDomainStep(intent: intent, category: category)
+        case .ko:
+            return koreanDomainStep(intent: intent, category: category)
         case .en:
             break
         }
@@ -607,6 +692,111 @@ private extension TaskIntentComposer {
         }
     }
 
+    static func traditionalDomainStep(intent: TaskIntent, category: TaskCategory) -> ComposedStep {
+        let target = chineseObject(intent, fallback: "這件事")
+        switch category {
+        case .bills:
+            return ComposedStep(
+                title: "找到帳單",
+                step: "開啟郵件，搜尋與\(target)有關的帳單或付款通知。",
+                stop: "看到一條匹配的帳單或通知就停，先不用付款。",
+                why: "先找到金額或截止日期，下一步會更清楚。",
+                baseMinutes: 10
+            )
+        case .email:
+            if intent.verb == "回覆" || intent.verb == "傳送" {
+                return ComposedStep(
+                    title: "寫下第一句話",
+                    step: "開啟與\(target)有關的郵件，寫下第一句話，先不要傳送。",
+                    stop: "寫完第一句話就停，傳送可以稍後再做。",
+                    why: "草稿可以隨時修改，是可撤回的開始。",
+                    baseMinutes: 10
+                )
+            }
+            return ComposedStep(
+                title: "開啟一封相關郵件",
+                step: "開啟收件箱，找到一封與\(target)有關的郵件。",
+                stop: "開啟這一封郵件就停。",
+                why: "先讓一封郵件出現在眼前，就有了清楚的入口。",
+                baseMinutes: 8
+            )
+        case .appointments:
+            return ComposedStep(
+                title: "找一個預約選項",
+                step: "開啟日曆或服務方頁面，找到與\(target)有關的一個日期或時間。",
+                stop: "看到一個日期或時間就停，暫時不用預約。",
+                why: "先看到一個選項，安排預約會更容易。",
+                baseMinutes: 10
+            )
+        case .returns:
+            return ComposedStep(
+                title: "找到退貨資訊",
+                step: "開啟\(target)的訂單詳情，找到退貨說明或標籤。",
+                stop: "看到一條退貨說明或標籤就停。",
+                why: "先找到說明，不需要馬上打包或寄出。",
+                baseMinutes: 10
+            )
+        case .insurance:
+            return ComposedStep(
+                title: "找到保險的一項資訊",
+                step: "開啟與\(target)有關的保險記錄，找到截止日期或下一項要求。",
+                stop: "看到一個日期或要求就停。",
+                why: "先找到一個事實，下一步會更具體。",
+                baseMinutes: 10
+            )
+        case .banking:
+            return ComposedStep(
+                title: "開啟相關帳戶",
+                step: "開啟銀行 App，找到與\(target)有關的帳戶或金額，先不要轉帳。",
+                stop: "看到相關帳戶或金額就停。",
+                why: "先確認一個事實，第一步保持可撤回。",
+                baseMinutes: 10
+            )
+        case .taxes:
+            return ComposedStep(
+                title: "找到第一份稅務檔案",
+                step: "開啟稅務資料夾或網站，把今年的一份相關檔案放到眼前。",
+                stop: "看到一份相關檔案就停。",
+                why: "先看到一份檔案，不需要開啟整個稅務任務。",
+                baseMinutes: 12
+            )
+        case .household, .cleaning:
+            return ComposedStep(
+                title: "清理一個小區域",
+                step: "選一個與\(target)有關的小區域，只清理這一個區域。",
+                stop: "這一個小區域清好後就停。",
+                why: "限定一個區域，家務就更容易開始和結束。",
+                baseMinutes: 10
+            )
+        case .familyAdmin, .workAdmin, .school:
+            return ComposedStep(
+                title: "開啟相關內容",
+                step: "開啟與\(target)有關的表格、檔案或訊息，讀清第一項要求。",
+                stop: "看清第一項要求就停。",
+                why: "先看清第一項，不需要馬上完成整份內容。",
+                baseMinutes: 10
+            )
+        case .medical:
+            return ComposedStep(
+                title: "找到一項事實",
+                step: "開啟與\(target)有關的診所、處方或健康記錄，找到一項事實資訊。",
+                stop: "看到一項事實資訊就停，這裡不用做醫療決定。",
+                why: "先整理事實，不提供醫療建議。",
+                baseMinutes: 10
+            )
+        case .errands:
+            return ComposedStep(
+                title: "準備一件物品",
+                step: "把與\(target)有關的一件物品放到門口或要使用的地方。",
+                stop: "這一件物品放好後就停。",
+                why: "先準備一件物品，跑腿會更容易繼續。",
+                baseMinutes: 7
+            )
+        case .other:
+            return genericStep(intent)
+        }
+    }
+
     static func japaneseDomainStep(intent: TaskIntent, category: TaskCategory) -> ComposedStep {
         let target = japaneseObject(intent, fallback: "このこと")
         switch category {
@@ -712,9 +902,107 @@ private extension TaskIntentComposer {
         }
     }
 
+    static func koreanDomainStep(intent: TaskIntent, category: TaskCategory) -> ComposedStep {
+        // The slot follows a noun (`\(target) 관련`) rather than a particle, so no
+        // 은/는 or 을/를 has to agree with the last syllable of the object.
+        let target = koreanObject(intent, fallback: "이 일")
+        switch category {
+        case .bills:
+            return ComposedStep(
+                title: "청구서 찾기",
+                step: "메일을 열고 \(target) 관련 청구서나 결제 안내를 찾아보세요.",
+                stop: "맞는 청구서나 안내가 하나 보이면 멈춰요. 아직 결제하지 않아도 돼요.",
+                why: "금액이나 기한을 알면 다음 걸음이 분명해져요.",
+                baseMinutes: 10
+            )
+        case .email:
+            return ComposedStep(
+                title: "관련 메일 하나 열기",
+                step: "받은편지함을 열고 \(target) 관련 메일을 하나 찾아보세요.",
+                stop: "그 메일을 열면 멈춰요.",
+                why: "메일 하나가 눈앞에 있으면 시작할 곳이 분명해져요.",
+                baseMinutes: 8
+            )
+        case .appointments:
+            return ComposedStep(
+                title: "예약 후보 하나 찾기",
+                step: "캘린더나 상대방 페이지를 열고 \(target) 관련 날짜나 시간을 하나 찾아보세요.",
+                stop: "날짜나 시간이 하나 보이면 멈춰요. 아직 예약하지 않아도 돼요.",
+                why: "후보가 하나 보이면 예약을 정하기 쉬워져요.",
+                baseMinutes: 10
+            )
+        case .returns:
+            return ComposedStep(
+                title: "반품 안내 찾기",
+                step: "\(target) 관련 주문 내역을 열고 반품 방법이나 라벨을 찾아보세요.",
+                stop: "반품 방법이나 라벨이 하나 보이면 멈춰요.",
+                why: "먼저 안내만 찾으면 충분해요. 포장과 발송은 나중에 해도 돼요.",
+                baseMinutes: 10
+            )
+        case .insurance:
+            return ComposedStep(
+                title: "보험 정보 하나 찾기",
+                step: "\(target) 관련 보험 기록을 열고 기한이나 다음에 필요한 것을 찾아보세요.",
+                stop: "날짜나 필요한 것이 하나 보이면 멈춰요.",
+                why: "사실 하나를 알면 다음 걸음이 구체적이 돼요.",
+                baseMinutes: 10
+            )
+        case .banking:
+            return ComposedStep(
+                title: "관련 계좌 열기",
+                step: "은행 앱을 열고 \(target) 관련 계좌나 금액을 찾아보세요. 아직 이체하지 않아도 돼요.",
+                stop: "관련 계좌나 금액이 보이면 멈춰요.",
+                why: "사실 하나만 확인하는 거라 첫 걸음은 언제든 되돌릴 수 있어요.",
+                baseMinutes: 10
+            )
+        case .taxes:
+            return ComposedStep(
+                title: "세금 서류 하나 찾기",
+                step: "세금 폴더나 사이트를 열고 올해 관련 서류 하나를 눈앞에 꺼내 보세요.",
+                stop: "관련 서류가 하나 보이면 멈춰요.",
+                why: "서류 하나가 보이면 충분해요. 세금 작업 전체를 열지 않아도 돼요.",
+                baseMinutes: 12
+            )
+        case .household, .cleaning:
+            return ComposedStep(
+                title: "작은 공간 하나 치우기",
+                step: "\(target) 관련 작은 공간을 하나 골라 그곳만 치워 보세요.",
+                stop: "그 작은 공간이 정리되면 멈춰요.",
+                why: "공간을 나누면 집안일은 시작하기도, 끝내기도 쉬워져요.",
+                baseMinutes: 10
+            )
+        case .familyAdmin, .workAdmin, .school:
+            return ComposedStep(
+                title: "관련 자료 열기",
+                step: "\(target) 관련 서류나 파일, 메시지를 열고 첫 항목을 읽어 보세요.",
+                stop: "첫 항목을 읽으면 멈춰요.",
+                why: "첫 항목만 알면 충분해요. 오늘 전부 끝내지 않아도 돼요.",
+                baseMinutes: 10
+            )
+        case .medical:
+            return ComposedStep(
+                title: "사실 하나 찾기",
+                step: "\(target) 관련 병원, 처방, 건강 기록을 열고 사실 하나를 찾아보세요.",
+                stop: "사실이 하나 보이면 멈춰요. 여기서 의학적 판단은 하지 않아요.",
+                why: "사실을 정리하는 데까지만 해요. 의학적 조언은 하지 않아요.",
+                baseMinutes: 10
+            )
+        case .errands:
+            return ComposedStep(
+                title: "챙길 것 하나 준비하기",
+                step: "\(target) 관련해서 필요한 것을 하나, 현관이나 쓸 곳에 놓아 두세요.",
+                stop: "그것 하나를 놓아 뒀으면 멈춰요.",
+                why: "물건이 하나 준비돼 있으면 볼일을 이어 가기 쉬워요.",
+                baseMinutes: 7
+            )
+        case .other:
+            return genericStep(intent)
+        }
+    }
+
     static func genericStep(_ intent: TaskIntent) -> ComposedStep {
         let lang = language(intent)
-        let fallbackAction = lang.pick(en: "this task", zh: "这件事", ja: "このこと")
+        let fallbackAction = lang.pick(en: "this task", zh: "这件事", zhHant: "這件事", ja: "このこと", ko: "이 일")
         let action = intent.actionPhrase.isEmpty ? fallbackAction : intent.actionPhrase
         switch lang {
         case .zhHans:
@@ -725,12 +1013,28 @@ private extension TaskIntentComposer {
                 why: "先找到一个与这件事直接相关的可靠起点，不要求继续执行。",
                 baseMinutes: 5
             )
+        case .zhHant:
+            return ComposedStep(
+                title: "查詢「\(action)」的官方指南",
+                step: "開啟瀏覽器，搜尋準確短語「\(action)」和「官方指南」，開啟一個相關結果。",
+                stop: "看到指南的第一條說明就停。",
+                why: "先找到一個與這件事直接相關的可靠起點，不要求繼續執行。",
+                baseMinutes: 5
+            )
         case .ja:
             return ComposedStep(
                 title: "「\(action)」の公式な案内を探す",
                 step: "ブラウザを開いて、「\(action)」と「公式」で検索し、関係のありそうな結果をひとつ開きましょう。",
                 stop: "案内の最初の手順が見えたら止めましょう。",
                 why: "関係のある案内がひとつあれば、慣れないことでも落ち着いた出発点になります。",
+                baseMinutes: 5
+            )
+        case .ko:
+            return ComposedStep(
+                title: "“\(action)” 공식 안내 찾기",
+                step: "브라우저를 열고 “\(action)”과 “공식”으로 검색한 뒤, 관련 있어 보이는 결과 하나를 열어 보세요.",
+                stop: "안내의 첫 단계가 보이면 멈춰요.",
+                why: "관련된 안내가 하나 있으면 낯선 일도 차분하게 시작할 수 있어요.",
                 baseMinutes: 5
             )
         case .en:
@@ -756,7 +1060,9 @@ private extension TaskIntentComposer {
             "bill", "payment", "invoice", "account", "claim", "insurance", "form",
             "email", "message", "appointment", "booking", "tax", "report", "school",
             "账单", "付款", "发票", "账户", "保险", "表格", "邮件", "预约", "税",
-            "請求", "支払", "口座", "保険", "書類", "メール", "予約", "税金", "申請"
+            "請求", "支払", "口座", "保険", "書類", "メール", "予約", "税金", "申請",
+            "賬單", "付款", "發票", "帳戶", "保險", "郵件", "預約", "稅",
+            "청구서", "결제", "계좌", "보험", "서류", "메일", "예약", "세금", "신청"
         ]
         return administrativeAnchors.contains(where: text.contains)
     }
@@ -788,6 +1094,11 @@ private extension TaskIntentComposer {
     /// Japanese, like Chinese, takes the object as-is: there is no article to
     /// prepend, and the templates supply the particle around it.
     static func japaneseObject(_ intent: TaskIntent, fallback: String) -> String {
+        intent.objectPhrase ?? intent.object ?? fallback
+    }
+
+    /// Korean, like Japanese, takes the object as-is.
+    static func koreanObject(_ intent: TaskIntent, fallback: String) -> String {
         intent.objectPhrase ?? intent.object ?? fallback
     }
 
